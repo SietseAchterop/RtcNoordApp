@@ -1,0 +1,39 @@
+
+Installing on linux (Ubuntu 19.10)
+=================================
+
+== already installed
+mpv
+libmpv-dev
+python3-numpy
+
+== install (with apt-get,  aptitude)
+git
+python3
+  matplotlib
+  scipy
+  pyqt5
+  pyqt5.quick
+  pip3
+  qt5-default
+  qtdeclarative5-dev
+  qml-module-qtquick-layout
+                    -dialogs
+		    -controls2
+	(nu versie 2.12)
+  qml-module-qt-labs-settings
+  qml-module-qt-labs-folderlistmodel
+
+Version 2.12 of qtquick will be installed, should be 2.13
+That can be installed using pip3 or the import statements in the qml files could be patched.
+that will also work.
+
+=== python-mpv   https://github.com/jaseg/python-mpv
+  via pip3
+
+== hack matplotlib met diff_matplotlib
+  Change the 3 lines in the file described in the patch-file.
+  
+
+
+

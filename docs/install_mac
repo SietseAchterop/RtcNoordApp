@@ -1,0 +1,122 @@
+
+Installatie rtcapp op een Mac
+=============================
+
+- install python3 from
+    https://www.python.org/downloads/mac-osx/
+
+- starten python
+     - via Idle of commandline
+    
+- pip moet kennelijk via de command line
+    - kijk wat er via pip aanwezig is:
+       pip list
+
+- Benodigde extra python modules
+    - matplotlib, PyYAML, pyqt5, scipy
+    - install using pip command
+    
+- installeer hack in matplotlib met diff_matplotlib
+    de 3 nieuwe regels schelen wat warningen/fouten
+    
+- test plotten en grafische bibliotheek (pyqt5) in python
+  - matplotlib testen met volgende commando's in python:
+     import matplotlib.pyplot as plt
+     plt.plot([1, 2, 3, 4])
+     plt.ylabel('some numbers')
+     plt.show()
+
+  - pyqt5 met QtQuick
+      Twee benodigde files, main.py en main.qml
+      starten met:
+         python main.py
+      
+    main.py
+=============================================    
+from PyQt5.QtQml import QQmlApplicationEngine
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QIcon
+import sys
+
+def runQML():
+    app =QApplication(sys.argv)
+    engine = QQmlApplicationEngine()
+    app.setWindowIcon(QIcon("icon.png"))
+    engine.load('main.qml')
+
+    if not engine.rootObjects():
+        return -1
+    return app.exec_()
+
+if __name__ == "__main__":
+    sys.exit(runQML())
+=============================================
+
+    main.qml
+=============================================
+import QtQuick.Window 2.13
+import QtQuick 2.13
+
+Window {
+
+visible:true
+width:600
+height:400
+color:"yellow"
+title: "PyQt5 QML Window"
+}
+=============================================
+
+
+- De RtcNoordApp is te vinden op
+    https://github.com/SietseAchterop/RtcNoordApp.git
+    zip downloaden of clone met git, zie onder.
+    
+- starten via python
+  -ga naar Meten/RtcNoordApp/App
+     python main.py
+        en het zou moeten werken
+- start via python Idle IDE
+   ook hier zie je de eventuele foutmeldingen
+
+- start via desktop
+    hoe maak je die op een mac?
+
+
+Using video (optional)
+======================
+
+- voor de Mac is dit nog onduidelijk
+
+- mpv en libmpv  (https://mpv.io/)
+    https://sourceforge.net/projects/mpv-player-windows/files/
+    recente uit 64bit en uit libmpv dir's
+    zet in ~/Software
+    install mpv
+
+- mympv.y uit de app is een recente versie uit python-mpv
+    In (begin van) mympv.py het absolute pad naar mpv-1.dll zetten:
+      if os.name == 'nt':
+          dll = ctypes.util.find_library('/Users/rtc/Software/libmpv/mpv-1.dll')
+
+Using Git (optional)
+====================
+
+- install Git
+     https://git-scm.com/download/win
+     inclusief bash en veel utilities!
+
+- haal de app uit github
+    git clone https://github.com/SietseAchterop/RtcNoordApp.git
+    Bijvoorbeeld in homedir
+    
+    Scripts directory in path zetten van GITbash
+       bijv. voor pip
+
+Als python er al op staat, bijv via anaconda
+============================================
+- evt met pip de modules installeren
+- de app downloaden 
+
+
+

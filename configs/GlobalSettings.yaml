@@ -1,0 +1,29 @@
+# Global settings
+#
+
+# Parameters
+Parameters:
+  {
+  inboardScull    : 0.885,
+  outboardScull   : 2.005,
+  inboardSweep    : 1.14,
+  outboardSweep   : 2.60,
+  threshCatchScull : 20,         # kgf
+  threshFinScull   : 10,
+  threshCatchSweep : 30,
+  threshFinSweep   : 15,
+  shoulder        : 0.4,         # shoulder width in m
+  shoulderOffset  : 0.2,         # distance shoulder before seat in m
+  span            : 0.795,       # mid-center boat to pin in m
+  THcatch         : 3
+  }
+
+# BoatData
+Boats:
+  {
+  namen :  [ standaard, Tempo, Type,  Gewicht, Netto aandrijftijd, Hoek inzet, Hoek uitzet, Slip inzet, Slip uitzet, Bankje verplaatsing, Piekkracht op % lengte, 70% Max kracht omhoog, 70% Max kracht omlaag, Vermogen],
+  H1x   :  [ '6:34.0'  , 36,    Boord, 95.0,    0.70,               -66.0 ,     44.0,        6.0,        12.0,        60.0,                38,                     12,                    32,                    540],
+  H2-   :  [ '6:12.0'  , 36,    Boord, 95.0,    0.70,               -54.0 ,     36.0,        9.0,        9.0,         60.0,                35,                     10,                    26,                    540],
+
+  }
+

@@ -1,0 +1,13 @@
+# Initial RtcApp config file
+# Where all user data is to be found relative the users homedir
+BaseDir: RtcNoord
+
+# directory in BaseDir to use as default in selections
+SubDir: ''
+
+# Name of last session, None if none  (None will be a string!)
+Session: None
+
+# Name of secondary session of None if none
+Session2:  None
+

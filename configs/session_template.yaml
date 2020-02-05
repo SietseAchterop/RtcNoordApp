@@ -1,0 +1,69 @@
+# YAML file for
+
+# State of this session
+#   initial
+#   completely filled from traces data
+State: initial
+
+# Info, shown in the message
+CrewInfo:
+   The Crew
+
+# Only use the first RowerCnt values
+RowerNames:
+  - R 1
+  - R 2
+  - R 3
+  - R 4
+  - R 5
+  - R 6
+  - R 7
+  - R 8
+
+# number of rowers (generated)
+RowerCnt: 1
+   
+Misc:
+   Free format info
+   wat je wil
+
+# Timestamp of last update of this file
+Timestamp: 2001-12-14 21:59:43.10 -5
+
+# Powerline data set (also for index file)
+Powerline: powerline data set file
+
+# Powerline trace export
+Traces: row004107-000001D_traces
+
+# Speed and distance calibration
+Calibration: 1.0
+
+# First 2 header rows from the csv-file
+Header  : []
+Header2 : []
+uniqHeader: []
+
+# Boat type (scull or sweep, generated)
+BoatType: no
+
+# Generated list with for each stroke the time and rating,  derived from GateAngle?
+#    tijd tussen twee opgaande nuldoorgangen, eerste als de tijd
+# stilliggen (<10) als NaN?
+Tempi :
+  - [1000, 10]
+  - [1300, 10]
+  - [1680, 13]
+  
+
+# Marked pieces: name, start, length, average rating (generated)
+Pieces: []
+
+# file met video
+# index in data en index in video
+# name of piece
+Video:
+  - None
+  - 0
+  - 0
+  - video

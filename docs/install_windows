@@ -1,0 +1,127 @@
+
+Installatie rtcapp uitgaande van een nieuwe windows 10 install
+==============================================================
+
+- install python3 from
+    https://www.python.org/downloads/windows/
+
+- To test, start a simple main.py program via Idle: main.py, Run
+
+- via the commandline:
+    - extend the Path so that python en pip can be found directly
+       AppData/Local/Programs/Python/Python38-32
+       AppData/Local/Programs/Python/Python38-32/Scripts
+
+- pip via the command line:
+     the basic commands
+       pip list
+       pip show pyqt5
+       pip install a_module
+
+- pip install
+    matplotlib, PyYAML, pyqt5, scipy
+
+- hack matplotlib met diff_matplotlib
+    Change 3 lines in the matplotlib sources
+    
+- Basic testing
+  - matplotlib using the python shell:
+     import matplotlib.pyplot as plt
+     plt.plot([1, 2, 3, 4])
+     plt.ylabel('some numbers')
+     plt.show()
+
+  - pyqt5 with QtQuick
+      Use the next two files.
+      
+    main.py
+=============================================    
+from PyQt5.QtQml import QQmlApplicationEngine
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QIcon
+import sys
+
+def runQML():
+    app =QApplication(sys.argv)
+    engine = QQmlApplicationEngine()
+    app.setWindowIcon(QIcon("icon.png"))
+    engine.load('main.qml')
+
+    if not engine.rootObjects():
+        return -1
+    return app.exec_()
+
+if __name__ == "__main__":
+    sys.exit(runQML())
+=============================================
+
+    main.qml
+=============================================
+import QtQuick.Window 2.13
+import QtQuick 2.13
+
+Window {
+
+visible:true
+width:600
+height:400
+color:"yellow"
+title: "PyQt5 QML Window"
+}
+=============================================
+
+- This App can be found at:
+    https://github.com/SietseAchterop/RtcNoordApp.git
+    Downloaden zip or clone with git, see below.
+    
+- start via python
+  - ga to Meten/RtcNoordApp/App
+      python main.py
+    We can see the errors in the terminal
+- start via python Idle IDE
+    
+
+- start via desktop
+    Create a symbolic link on the Desktop from the file main.pyw
+
+
+Using video (optional)
+======================
+
+- mpv en libmpv  (https://mpv.io/)
+    https://sourceforge.net/projects/mpv-player-windows/files/
+      mpv-x86_64-2020....
+      mpv-dev-i686-2020...
+         (the mpv-dev-x86_64 does not work)
+    zet in ~/Software
+    install mpv
+
+- mympv.y uit de app is een recente versie uit python-mpv
+    In (begin van) mympv.py het absolute pad naar mpv-1.dll zetten:
+      if os.name == 'nt':
+          dll = ctypes.util.find_library('/Users/rtc/Software/libmpv/mpv-1.dll')
+
+Using Git (optional)
+====================
+
+- install Git
+     https://git-scm.com/download/win
+     inclusief bash en veel utilities!
+
+- haal de app uit github
+    git clone https://github.com/SietseAchterop/RtcNoordApp.git
+    Bijvoorbeeld in homedir
+    
+    Scripts directory in path zetten van GITbash
+       bijv. voor pip
+
+Als python er al op staat, bijv via anaconda
+============================================
+- evt met pip de modules installeren
+- de app downloaden 
+
+
+
+
+
+

@@ -1,0 +1,19 @@
+# List of Rowers 
+#    name, length weight, year of birth, category
+
+Rowers:
+  {
+  # dummy names
+  P1: [185, 88, 2002, H],
+  P2: [185, 88, 2002, H],
+  P3: [185, 88, 2002, H],
+  P4: [185, 88, 2002, H],
+  P5: [185, 88, 2002, H],
+  P6: [185, 88, 2002, H],
+  P7: [185, 88, 2002, H],
+  P8: [185, 88, 2002, H],
+  #
+  Jan Boterletter: [185, 88, 2002, H],
+  }
+
+
