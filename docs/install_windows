@@ -23,54 +23,15 @@ Installatie rtcapp uitgaande van een nieuwe windows 10 install
 
 - hack matplotlib met diff_matplotlib
     Change 3 lines in the matplotlib sources
+    Removes unneeded errors/warnings on exiting.
     
 - Basic testing
-  - matplotlib using the python shell:
-     import matplotlib.pyplot as plt
-     plt.plot([1, 2, 3, 4])
-     plt.ylabel('some numbers')
-     plt.show()
-
-  - pyqt5 with QtQuick
-      Use the next two files.
-      
-    main.py
-=============================================    
-from PyQt5.QtQml import QQmlApplicationEngine
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QIcon
-import sys
-
-def runQML():
-    app =QApplication(sys.argv)
-    engine = QQmlApplicationEngine()
-    app.setWindowIcon(QIcon("icon.png"))
-    engine.load('main.qml')
-
-    if not engine.rootObjects():
-        return -1
-    return app.exec_()
-
-if __name__ == "__main__":
-    sys.exit(runQML())
-=============================================
-
-    main.qml
-=============================================
-import QtQuick.Window 2.13
-import QtQuick 2.13
-
-Window {
-
-visible:true
-width:600
-height:400
-color:"yellow"
-title: "PyQt5 QML Window"
-}
-=============================================
-
-- This App can be found at:
+    - Command:  python tstqtquick.py
+       - yields a yellow window
+    - Command:  pythong tstmatplotlib.py
+       - a simple plot
+    
+- The RtcNoordApp can be found at:
     https://github.com/SietseAchterop/RtcNoordApp.git
     Downloaden zip or clone with git, see below.
     

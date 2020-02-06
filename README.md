@@ -28,7 +28,7 @@ It basically works on linux, windows and mac. See the docs directory for a short
 	  
 ## Status
 
-   - This is a basic version, most screens a (partly) working.
+   - This is a basic version, most screens are (partly) working.
 
 ## Screenshots
 

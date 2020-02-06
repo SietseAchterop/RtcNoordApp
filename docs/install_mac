@@ -19,54 +19,12 @@ Installatie rtcapp op een Mac
 - installeer hack in matplotlib met diff_matplotlib
     de 3 nieuwe regels schelen wat warningen/fouten
     
-- test plotten en grafische bibliotheek (pyqt5) in python
-  - matplotlib testen met volgende commando's in python:
-     import matplotlib.pyplot as plt
-     plt.plot([1, 2, 3, 4])
-     plt.ylabel('some numbers')
-     plt.show()
-
-  - pyqt5 met QtQuick
-      Twee benodigde files, main.py en main.qml
-      starten met:
-         python main.py
-      
-    main.py
-=============================================    
-from PyQt5.QtQml import QQmlApplicationEngine
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QIcon
-import sys
-
-def runQML():
-    app =QApplication(sys.argv)
-    engine = QQmlApplicationEngine()
-    app.setWindowIcon(QIcon("icon.png"))
-    engine.load('main.qml')
-
-    if not engine.rootObjects():
-        return -1
-    return app.exec_()
-
-if __name__ == "__main__":
-    sys.exit(runQML())
-=============================================
-
-    main.qml
-=============================================
-import QtQuick.Window 2.13
-import QtQuick 2.13
-
-Window {
-
-visible:true
-width:600
-height:400
-color:"yellow"
-title: "PyQt5 QML Window"
-}
-=============================================
-
+- Basic testing
+    - Command:  python tstqtquick.py
+       - yields a yellow window
+    - Command:  pythong tstmatplotlib.py
+       - a simple plot
+    
 
 - De RtcNoordApp is te vinden op
     https://github.com/SietseAchterop/RtcNoordApp.git

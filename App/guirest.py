@@ -608,6 +608,7 @@ class BoatForm(QObject):
     def figure(self, fig):
         self._figure = fig
         self._figure.set_facecolor('white')
+        fig.subplots_adjust(hspace=0.3)
         gs = self._figure.add_gridspec(2, 2)
         self.ax1 = self._figure.add_subplot(gs[0, 0])
         self.ax2 = self._figure.add_subplot(gs[0, 1])
@@ -744,6 +745,7 @@ class CrewForm(QObject):
     def figure(self, fig):
         self._figure = fig
         self._figure.set_facecolor('white')
+        fig.subplots_adjust(hspace=0.4)
         gs = self._figure.add_gridspec(2, 2)
         self.ax1 = self._figure.add_subplot(gs[0, 0])
         self.ax2 = self._figure.add_subplot(gs[0, 1])
@@ -883,6 +885,7 @@ class RowerForm(QObject):
     def figure(self, fig):
         self._figure = fig
         self._figure.set_facecolor('white')
+        fig.subplots_adjust(hspace=0.3)
         gs = self._figure.add_gridspec(2, 2)
         self.ax1 = self._figure.add_subplot(gs[0, 0])
         self.ax2 = self._figure.add_subplot(gs[0, 1])
@@ -927,7 +930,7 @@ class RowerForm(QObject):
         self.ax2.set_title('Versnelling')
         self.ax3.clear()
         self.ax3.grid(True)
-        self.ax3.set_title('Pitch')
+        self.ax3.set_title('GateForce - GateAngle')
         self.ax4.clear()
         self.ax4.grid(True)
         self.ax4.set_title('Power')
@@ -937,17 +940,21 @@ class RowerForm(QObject):
         if gd.profile_available:
             sensors = gd.sessionInfo['Header']
             rsens = rowersensors(self.rower)
-            # ad hoc angle x 10. Beter via (max-min). Schaal is goed, nl force
+            # ad hoc angle x 10. Beter via (max-min). Schaal is voor force
             if gd.sessionInfo['BoatType'] == 'sweep':
                 # print(f'Maak rowerplot voor {self.rower}')
                 self.een = self.ax1.plot(gd.norm_arrays[self.show, :, rsens['GateAngle']]*10, linewidth=0.6, label='GateAngle')
                 self.twee = self.ax1.plot(gd.norm_arrays[self.show, :, rsens['GateForceX']], linewidth=0.6, label='GateForceX')
+                self.vier = self.ax3.plot(gd.norm_arrays[self.show, :, sensors.index('GateAngle')],
+                                          gd.norm_arrays[self.show, :, sensors.index('GateForceX')], linewidth=0.6, label='Pitch')
             else:
                 self.een = self.ax1.plot(gd.norm_arrays[self.show, :, rsens['P GateAngle']]*10, linewidth=0.6, label='GateAngle')
                 self.twee = self.ax1.plot(gd.norm_arrays[self.show, :, rsens['P GateForceX']], linewidth=0.6, label='GateForceX')
+                self.vier = self.ax3.plot(gd.norm_arrays[self.show, :, sensors.index('P GateAngle')],
+                                          gd.norm_arrays[self.show, :, sensors.index('P GateForceX')], linewidth=0.6, label='Pitch')
             # waarom werkt de legend hier niet?
             self.drie = self.ax2.plot(gd.norm_arrays[self.show, :, sensors.index('Accel')], linewidth=0.6, label='Accel')
-            self.vier = self.ax3.plot(gd.norm_arrays[self.show, :, sensors.index('Pitch Angle')], linewidth=0.6, label='Pitch')
+
             d, a = gd.out[self.show]
             self.vijf = self.ax4.plot( a[0+self.rower], linewidth=0.6, label='Power')
 
