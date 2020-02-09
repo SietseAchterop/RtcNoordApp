@@ -13,12 +13,7 @@ from matplotlib.backends.backend_qt5 import TimerQT
 
 import six
 
-try:
-    from PySide2 import QtCore, QtGui, QtQuick, QtWidgets
-except ModuleNotFoundError:
-    from PyQt5 import QtCore, QtGui, QtQuick, QtWidgets
-
-# added qmlgetfigure function to get function across from qml to python again
+from PySide2 import QtCore, QtGui, QtQuick, QtWidgets
 
 DEBUG = False
 
@@ -477,10 +472,6 @@ class FigureQtQuickAggToolbar(FigureCanvasQtQuickAgg):
             self._defaults[attr] = val
             setattr(self, attr, val)
     
-    @QtCore.pyqtProperty(list)
-    def qmlGetFigure(self):
-        return [self.getFigure]
-
     @QtCore.Property('QString', notify=messageChanged)
     def message(self):
         return self._message
@@ -609,8 +600,7 @@ class FigureQtQuickAggToolbar(FigureCanvasQtQuickAgg):
             except (ValueError, OverflowError):
                 pass
             else:
-                # use private mouseover_set for the moment
-                artists = [a for a in event.inaxes._mouseover_set
+                artists = [a for a in event.inaxes.mouseover_set
                            if a.contains(event)]
                 # mouseover_set deprecation warning.
                 # How to use the artists mousover?

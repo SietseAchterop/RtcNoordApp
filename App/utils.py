@@ -315,7 +315,7 @@ def tempi(gateAngle, gateForce):
                 state = 3
         elif state == 3:
             #
-            if gateAngle[i] < -10:
+            if gateAngle[i] < -3:
                 state = 4
         elif state == 4:
             # nuldoorgang naar boven

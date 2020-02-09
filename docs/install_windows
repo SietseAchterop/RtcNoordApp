@@ -4,6 +4,7 @@ Installatie rtcapp uitgaande van een nieuwe windows 10 install
 
 - install python3 from
     https://www.python.org/downloads/windows/
+  For anaconda, see below
 
 - To test, start a simple main.py program via Idle: main.py, Run
 
@@ -76,10 +77,13 @@ Using Git (optional)
     Scripts directory in path zetten van GITbash
        bijv. voor pip
 
-Als python er al op staat, bijv via anaconda
+Installing with ananconda already installed
 ============================================
-- evt met pip de modules installeren
-- de app downloaden 
+- install pyqt5: pip install pyqt5
+- on Windows this has to be done from the Anaconda prompt
+- Spyder does not yet(?) support latest pyqt5
+   - downgrade pyqt5 to 5.12.3
+      - pip install pyqt5==5.12.3
 
 
 

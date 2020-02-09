@@ -6,6 +6,7 @@ orgdomain = 'RTC'
 appname = 'RtcApp'
 
 # the host operating system
+# Note: a None is actually the string 'None'!
 os = None
 configfile = None
 config = None

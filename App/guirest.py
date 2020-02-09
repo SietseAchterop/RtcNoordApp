@@ -1,6 +1,6 @@
 """The Gui related classes for the RTCnoord app."""
 
-import os, sys, re, yaml, time, math
+import sys, re, yaml, time, math
 from stat import S_IREAD, S_IRGRP, S_IROTH
 from pathlib import Path
 
@@ -488,6 +488,8 @@ class FormView(QObject):
         gd.data_model5.del_all()
 
         # update sessionInfo2
+        if gd.os == 'win32':
+            session_file = re.sub('^/', '', session_file)   # hack voor windows, slash komt normaal op linux  niet voor
         session_file = Path(session_file)
         try:
             fd = Path.open(session_file, 'r')
@@ -501,6 +503,8 @@ class FormView(QObject):
         gd.cal_value2 = gd.sessionInfo2['Calibration']
 
         # update dataObject (should be there)
+        if gd.os == 'win32':
+            cache_file = re.sub('^/', '', cache_file)   # hack voor windows, slash komt normaal op linux  niet voor
         cache_file = Path(cache_file)
         try:
             fd = Path.open(cache_file, 'r')
@@ -844,7 +848,7 @@ class CrewForm(QObject):
     def newsesinfo(self, sinfo):
         s = sinfo.toVariant()
         gd.sessionInfo['CrewInfo'] = s[0]
-        gd.sessionInfo['Calibration'] = int(s[1])
+        gd.sessionInfo['Calibration'] = float(s[1])
         gd.sessionInfo['Misc'] = s[2]
         saveSessionInfo(gd.sessionInfo)
 

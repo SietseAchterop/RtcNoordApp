@@ -1,0 +1,8 @@
+
+currently using qtquick2 backend from
+   https://github.com/jmitrevs/matplotlib_qtquick_playground
+
+-  works both on PyQt5 and PySide2
+-  use private _mouseover_set function to avoid warnings
+-  added qmlGetFigure property to get the Figure over from qml back to python
+-  downgraded the qml examples to 2.12 to match what we do in the app
