@@ -408,11 +408,11 @@ class RowerTableModel(QAbstractTableModel):
         self._data.append(
             DataSerie(2, ['Gate force under 70% at'] + [''] + [''] + ['', '', '', '', '', '', '' , '' ]) )
         self._data.append(
-            DataSerie(2, ['Work per stroke'] + ['', '', '', '', '', '', '' , '' ]) )
-        self._data.append(
             DataSerie(2, ['', '', '', '', '', '', '' , '' , '' ]) )
         self._data.append(
             DataSerie(2, ['Power max (W)'] + [''] + [''] + [ f'{r["PMax"]:.0f}' for r in ri]) )
+        self._data.append(
+            DataSerie(2, ['Work (J)'] + [''] + [''] + [ f'{r["Work"]:.0f}' for r in ri]) )
         self._data.append(
             DataSerie(2, ['Power (W)'] + [''] + [''] + [ f'{r["PMean"]:.0f}' for r in ri]) )
         self._data.append(

@@ -804,6 +804,7 @@ class CrewForm(QObject):
         if gd.profile_available:
 
             rcnt = gd.sessionInfo['RowerCnt']
+            d, a = gd.out[self.show]
             for r in range(rcnt):
                 sns = rowersensors(r)
                 # print(sns)
@@ -823,6 +824,10 @@ class CrewForm(QObject):
                 self.een  = self.ax1.plot(gd.norm_arrays[self.show, :, i], linewidth=0.6, label=f'R {r+1}')
                 self.twee = self.ax2.plot(gd.norm_arrays[self.show, :, j], linewidth=0.6, label=f'R {r+1}')
                 # self.drie = self.ax3.plot(gd.norm_arrays[self.show, :, k], linewidth=0.6, label=prof_pcs[r])
+
+                self.vier = self.ax4.plot( a[0+r], linewidth=0.6, label='Power')
+
+
 
         if self.legend:
             self.ax1.legend()

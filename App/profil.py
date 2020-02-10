@@ -337,8 +337,11 @@ def pieceCalculations(nm, sp, a):
                 print(f'profil: posmax {posmax}!')
                 posmax = 2
 
-            rowerstats['PMax']  = np.max(power[: posmax])
-            rowerstats['PMean'] = np.mean(power[: posmax])
+            # a single stroke
+            rowerstats['PMax']  = np.max(power[:sp[1]-sp[0]])
+            work = np.trapz(power[:sp[1]-sp[0]], dx=1/Hz)
+            rowerstats['Work'] = work
+            rowerstats['PMean'] = Hz*work/(sp[1]-sp[0])
             
             # catch/finish angles
             rowerstats['CatchA'] = np.min(gate_a)
@@ -405,8 +408,10 @@ def pieceCalculations(nm, sp, a):
             gateAngleVel = np.gradient(math.pi*g_a/180, 1/Hz)                           # moet gate_a worden
             power = moment * gateAngleVel
             prof_data[rwr]   = power
-            rowerstats['PMax']  = np.max(power[: posmax])
-            rowerstats['PMean'] = np.mean(power[: posmax])
+            rowerstats['PMax']  = np.max(power[:sp[1]-sp[0]])
+            work = np.trapz(power[:sp[1]-sp[0]], dx=1/Hz)
+            rowerstats['Work'] = Hz*work/(sp[1]-sp[0])
+            rowerstats['PMean'] = Hz*work/(sp[1]-sp[0])
             
             # catch/finish angles
             rowerstats['CatchA'] = np.min(gate_a)
