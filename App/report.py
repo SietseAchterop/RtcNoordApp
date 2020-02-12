@@ -225,7 +225,7 @@ def make_pdf_report():
             
             tmpfig = tmpdir / (gd.config['Session'] + f'_{rwr}')
             plt.savefig(tmpfig)
-            doc.append(NoEscape(r'\includegraphics[width=1.0\textwidth]{' + f'{tmpfig}'  + r'}'))
+            doc.append(NoEscape(r'\includegraphics[width=0.9\textwidth]{' + f'{tmpfig}'  + r'}'))
 
             if rwr != rwrcnt - 1: 
                 doc.append(NewPage())
