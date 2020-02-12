@@ -47,9 +47,14 @@ aantal = 0
 boattablemodel = []
 boatPlots = None
 
+# Crew piece used in report
+crewPiece = 0
+
 # Rowers: models and plots, up to eight
 rowertablemodel = [None, None, None, None, None, None, None, None]
 rowerPlots =  [None, None, None, None, None, None, None, None]
+rowerPiece = [0, 0, 0, 0, 0, 0, 0, 0]
+
 
 #
 mainPieces = None

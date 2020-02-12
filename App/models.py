@@ -11,6 +11,7 @@ import globalData as gd
 
 from utils import *
 from profil import profile
+from report import make_pdf_report
 
 class DataSerie(object):
     """Class to contain a data item for the datamodels"""
@@ -297,8 +298,9 @@ class BoatTableModel(QAbstractTableModel):
     def make_report(self):
         self.prepareData()
 
-        # maak een pdf versie van het profile rapport
-    
+        if gd.profile_available:
+            # maak een pdf versie van het profile rapport
+            make_pdf_report()
 
 class RowerTableModel(QAbstractTableModel):
 
@@ -373,7 +375,7 @@ class RowerTableModel(QAbstractTableModel):
 
         # the rest
         self._data.append(
-            DataSerie(2, ['Stroke rate'] + ["<font color=\"#0000FF\">Blue</font>"] + [''] + [ f'{r:.0f}' for c, r in gd.sessionInfo['PieceCntRating']]) )
+            DataSerie(2, ['Stroke rate'] + [''] + [''] + [ f'{r:.0f}' for c, r in gd.sessionInfo['PieceCntRating']]) )
         self._data.append(
             DataSerie(2, ['Drive time'] + ['', '', '', '', '', '', '' , '' , '' ]) )
         # rhythm moet naar boat profile

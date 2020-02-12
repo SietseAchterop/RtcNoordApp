@@ -85,6 +85,7 @@ Session2:  None
         (base_dir / 'session_data').mkdir()
         (base_dir / 'caches').mkdir()
         (base_dir / 'videos').mkdir()
+        (base_dir / 'reports').mkdir()
         # fill configs
         appDir = Path(sys.argv[0]).parent.absolute().parent
         copyfile(appDir / 'configs' / 'GlobalSettings.yaml', base_dir / 'configs' / 'GlobalSettings.yaml')
@@ -134,6 +135,13 @@ def sessionsDir():
 def cachesDir():
     """Return the path to the caches dir."""
     path = Path.home() / gd.config['BaseDir'] / 'caches'
+    if gd.config['SubDir'] != '':
+        path = path / gd.config['SubDir']
+    return path
+
+def reportsDir():
+    """Return the path to the reports dir."""
+    path = Path.home() / gd.config['BaseDir'] / 'reports'
     if gd.config['SubDir'] != '':
         path = path / gd.config['SubDir']
     return path

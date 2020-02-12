@@ -104,7 +104,7 @@ For example the profile can be created using the first stroke of each piece or u
 Clicking the checkbox will select that. A second or so later the new profile will appear.
 The data can also be filtered using the other checkbox.
 The profile consists of this screen and the Crew and Rowerscreens, zo creating a new profile will also affect those screens.
-The "Create report" will create a pdf version of the profile, but is not implemented yet.
+The "Create report" will create a pdf version of the profile, see the docs directory for an [example](docs/example_profile.pdf)
 
 The plots show the selected (averaged/filtered) stroke that is used in profiling.
 Using the tumble wheel below the create profile button all pieces or individual pieces can be selected.

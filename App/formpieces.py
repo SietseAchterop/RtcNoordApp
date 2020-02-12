@@ -381,7 +381,7 @@ class FormPieces(QObject):
 
     def update_the_models(self, session):
         self._data.load_sessionInfo(gd.sessionInfo['uniqHeader'])
-        self.statusText = "Current session:  " + session
+        self.statusText = "Current session:  " + gd.config['SubDir'] + session
 
         self._traces = gd.dataObject
         self._tempi = gd.sessionInfo['Tempi']
@@ -425,7 +425,7 @@ class FormPieces(QObject):
         session_file = sessionsDir() / (session + '.yaml')
         cache_file = cachesDir() / (session + '.npy')
         
-        # create subdirs in session and cache
+        # create subdirs in session, caches and reports
         if subdir != '':
             try:
                 Path.mkdir(sessionsDir())
@@ -433,6 +433,10 @@ class FormPieces(QObject):
                 pass
             try:
                 Path.mkdir(cachesDir())
+            except FileExistsError:
+                pass
+            try:
+                Path.mkdir(reportsDir())
             except FileExistsError:
                 pass
             
@@ -506,7 +510,6 @@ class FormPieces(QObject):
             # ignore
             return
 
-        # subdir could have changed!
         # Update and use SubDir
         tail = re.sub(sessionbase, '', session_file)
         tail = re.sub('^/', '', tail)   # hack voor windows, slash komt normaal op linux  niet voor

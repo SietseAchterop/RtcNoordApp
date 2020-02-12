@@ -33,6 +33,8 @@ from guirest import *
 from utils import *
 from profil import *
 
+from report import make_pdf_report
+
 def interactive(session=None):
     """For interactive use in python.
 

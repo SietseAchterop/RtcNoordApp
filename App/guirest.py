@@ -676,8 +676,6 @@ class BoatForm(QObject):
                 self.ax1.plot(gd.norm_arrays[i, :, sensors.index('Speed')], linewidth=0.6, label=prof_pcs[i])
                 self.ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label=prof_pcs[i])
                 self.ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.6, label=prof_pcs[i])
-                    
-
 
             pa = []
             for i in range(len(prof_pcs)):
@@ -691,7 +689,7 @@ class BoatForm(QObject):
             self.ax4.scatter(list(range(6)), pa[1], marker='H', color='blue')
 
         if self.legend:
-            self.ax1.legend()
+            self.ax1.legend(loc='lower right')
 
         self.stateChanged.emit()
 
@@ -844,6 +842,7 @@ class CrewForm(QObject):
     @pyqtSlot(int)
     def showPiece(self, s):
         self.show = s
+        gd.crewPiece = s
         self.update_figure()
 
     # session Info tab
@@ -954,14 +953,13 @@ class RowerForm(QObject):
                 # print(f'Maak rowerplot voor {self.rower}')
                 self.een = self.ax1.plot(gd.norm_arrays[self.show, :, rsens['GateAngle']]*10, linewidth=0.6, label='GateAngle')
                 self.twee = self.ax1.plot(gd.norm_arrays[self.show, :, rsens['GateForceX']], linewidth=0.6, label='GateForceX')
-                self.vier = self.ax3.plot(gd.norm_arrays[self.show, :, sensors.index('GateAngle')],
-                                          gd.norm_arrays[self.show, :, sensors.index('GateForceX')], linewidth=0.6, label='Pitch')
+                self.vier = self.ax3.plot(gd.norm_arrays[self.show, :, rsens['GateAngle']],
+                                          gd.norm_arrays[self.show, :, rsens['GateForceX']], linewidth=0.6)
             else:
                 self.een = self.ax1.plot(gd.norm_arrays[self.show, :, rsens['P GateAngle']]*10, linewidth=0.6, label='GateAngle')
                 self.twee = self.ax1.plot(gd.norm_arrays[self.show, :, rsens['P GateForceX']], linewidth=0.6, label='GateForceX')
-                self.vier = self.ax3.plot(gd.norm_arrays[self.show, :, sensors.index('P GateAngle')],
-                                          gd.norm_arrays[self.show, :, sensors.index('P GateForceX')], linewidth=0.6, label='Pitch')
-            # waarom werkt de legend hier niet?
+                self.vier = self.ax3.plot(gd.norm_arrays[self.show, :, rsens['P GateAngle']],
+                                          gd.norm_arrays[self.show, :, rsens['P GateForceX']], linewidth=0.6)
             self.drie = self.ax2.plot(gd.norm_arrays[self.show, :, sensors.index('Accel')], linewidth=0.6, label='Accel')
 
             d, a = gd.out[self.show]
@@ -983,5 +981,5 @@ class RowerForm(QObject):
     @pyqtSlot(int)
     def showPiece(self, s):
         self.show = s
+        gd.rowerPiece[self.rower] = s
         self.update_figure()
-

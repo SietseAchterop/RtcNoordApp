@@ -48,31 +48,13 @@ ApplicationWindow {
     }
 
     Action {
-        id: copyAction
-        text: qsTr("&Copy")
+        id: changeAction
+        text: qsTr("Change BaseDir in config")
         shortcut: StandardKey.Copy
 
 	//iconName: "edit-copy"
-        enabled: (!!activeFocusItem && !!activeFocusItem["copy"])
+        enabled: (!!activeFocusItem && !!activeFocusItem["change"])
         onTriggered: activeFocusItem.copy()
-    }
-
-    Action {
-        id: cutAction
-        text: qsTr("Cu&t")
-        shortcut: StandardKey.Cut
-        //iconName: "edit-cut"
-        enabled: (!!activeFocusItem && !!activeFocusItem["cut"])
-        onTriggered: activeFocusItem.cut()
-    }
-
-    Action {
-        id: pasteAction
-        text: qsTr("&Paste")
-        shortcut: StandardKey.Paste
-        //iconName: "edit-paste"
-        enabled: (!!activeFocusItem && !!activeFocusItem["paste"])
-        onTriggered: activeFocusItem.paste()
     }
 
     menuBar: MenuBar {
@@ -95,13 +77,7 @@ ApplicationWindow {
         Menu {
             title: qsTr("&Config")
             MenuItem {
-                action: cutAction
-            }
-            MenuItem {
-                action: copyAction
-            }
-            MenuItem {
-                action: pasteAction
+                action: changeAction
             }
         }
         Menu {
