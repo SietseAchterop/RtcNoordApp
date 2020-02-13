@@ -20,7 +20,7 @@ Installatie rtcapp uitgaande van een nieuwe windows 10 install
        pip install a_module
 
 - pip install
-    matplotlib, PyYAML, pyqt5, scipy
+    matplotlib, PyYAML, pyqt5, scipy, pylatex
 
 - hack matplotlib met diff_matplotlib
     Change 3 lines in the matplotlib sources
@@ -46,6 +46,19 @@ Installatie rtcapp uitgaande van een nieuwe windows 10 install
 - start via desktop
     Create a symbolic link on the Desktop from the file main.pyw
 
+
+For creating a report
+=====================
+  Install latex, see https://www.latex-project.org/get
+  This is a document preparation system that is used for scientific publications,
+  especially in the beta sciences.
+  It is optionally in the sense that the program works without it, only the report
+  is not created.
+
+== Install perl
+  Needed for report generation by MikTex
+  Install from
+    http://strawberryperl.com/
 
 Using video (optional)
 ======================

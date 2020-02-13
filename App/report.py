@@ -1,5 +1,5 @@
 
-import sys, os, math, time, csv, yaml
+import sys, os, math, time, csv, yaml, re
 import numpy as np
 
 from PyQt5.QtCore import QAbstractTableModel
@@ -105,6 +105,7 @@ def make_pdf_report():
 
         tmpfig = tmpdir / gd.config['Session']
         plt.savefig(tmpfig)
+        tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows, backslash komt op linux normaal niet voor.
         doc.append(NoEscape(r'\includegraphics[width=1.0\textwidth]{' + f'{tmpfig}'  + r'}'))
 
     ##   Second page
@@ -152,6 +153,7 @@ def make_pdf_report():
         # we keep using the same name
         tmpfig = tmpdir / gd.config['Session']
         plt.savefig(tmpfig)
+        tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows, backslash komt op linux normaal niet voor.
         doc.append(NoEscape(r'\includegraphics[width=1.0\textwidth]{' + f'{tmpfig}'  + r'}'))
 
         
@@ -225,6 +227,7 @@ def make_pdf_report():
             
             tmpfig = tmpdir / (gd.config['Session'] + f'_{rwr}')
             plt.savefig(tmpfig)
+            tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows, backslash komt op linux normaal niet voor.
             doc.append(NoEscape(r'\includegraphics[width=0.9\textwidth]{' + f'{tmpfig}'  + r'}'))
 
             if rwr != rwrcnt - 1: 

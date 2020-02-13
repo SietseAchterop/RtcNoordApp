@@ -13,7 +13,7 @@ Installatie rtcapp op een Mac
        pip list
 
 - Benodigde extra python modules
-    - matplotlib, PyYAML, pyqt5, scipy
+    - matplotlib, PyYAML, pyqt5, scipy, pylatex
     - install using pip command
     
 - installeer hack in matplotlib met diff_matplotlib
@@ -40,6 +40,14 @@ Installatie rtcapp op een Mac
 - start via desktop
     hoe maak je die op een mac?
 
+
+For creating a report
+=====================
+  Install latex, see https://www.latex-project.org/get
+  This is a document preparation system that is used for scientific publications,
+  especially in the beta sciences.
+  It is optionally in the sense that the program works without it, only the report
+  is not created.
 
 Using video (optional)
 ======================

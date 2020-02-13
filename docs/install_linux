@@ -24,6 +24,15 @@ python3
   qml-module-qt-labs-settings
   qml-module-qt-labs-folderlistmodel
 
+== with pip3
+  pylatex
+
+== optionally (via apt-get) to make reports in pdf
+texlive
+texlive-latex-extra
+  evt. zie https://www.latex-project.org/get
+  
+== optionally for video
 python-mpv
    - from: https://github.com/jaseg/python-mpv
    - install via pip3
