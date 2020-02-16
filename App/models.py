@@ -230,37 +230,47 @@ class BoatTableModel(QAbstractTableModel):
         gd.filter = not checked
         self.make_profile()
 
+    @pyqtSlot(bool)
+    def set_custom(self, checked):
+        gd.custom_report = not checked
+        self.make_profile()
+
     def fillBoatTable(self, out):
         self._data.clear()
 
         # First header line
         n = 1
         line = prof_pcs
-        series = DataSerie(n, [''] + line)
+        series = DataSerie(n, [''] +['Average'] + line)
         self.beginInsertRows(QModelIndex(), self.rowCount(), self.rowCount())
         self._data.append(series)
 
         # the rest
+        # calculate averages
         self._data.append(
-            DataSerie(2, ['Aantal halen'] + [ c for c, r in gd.sessionInfo['PieceCntRating']]) )
+            DataSerie(2, ['Aantal halen'] + [''] + [ c for c, r in gd.sessionInfo['PieceCntRating']]) )
         self._data.append(
-            DataSerie(2, ['Tempo'] + [ f'{r:.0f}' for c, r in gd.sessionInfo['PieceCntRating']]) )
+            DataSerie(2, ['Tempo'] + [''] + [ f'{r:.0f}' for c, r in gd.sessionInfo['PieceCntRating']]) )
         # print(f' model split {[ d["Split"] for d, e in out]}')
+        split = sum([d['Split'] for d, e in out])/len(prof_pcs)
         self._data.append(
-            DataSerie(2, ['500m split'] + [ f'{int(d["Split"]/60)}:{d["Split"]%60:.1f}' for d, e in out]) )
+            DataSerie(2, ['500m split'] + [f'{int(split/60)}:{split%60:.1f}'] + [ f'{int(d["Split"]/60)}:{d["Split"]%60:.1f}' for d, e in out]) )
+        speed = sum([d['Speedimp'] for d, e in out])/len(prof_pcs)
         self._data.append(
-            DataSerie(2, ['Boot snelheid (m/s)'] + [ f'{d["Speedimp"]:.2f}' for d, e in out]) )
-
+            DataSerie(2, ['Boot snelheid (m/s)'] + [f'{speed:.1f}'] + [ f'{d["Speedimp"]:.1f}' for d, e in out]) )
         self._data.append(
-            DataSerie(2, ['Afstand per haal'] + [ f'{d["DistancePerStroke"]:.2f}' for d, e in out]) )
+            DataSerie(2, ['Speed power loss(%)'] + [f'fout'] + [ f'{d["PowerLoss"]:.1f}' for d, e in out]) )
+        dist = sum([ d["DistancePerStroke"] for d, e in out])/len(prof_pcs)
         self._data.append(
-            DataSerie(2, ['Max at % cycle'] + [ f'{d["MaxAtP"]:.1f}' for d, e in out]) )
+            DataSerie(2, ['Afstand per haal'] + [f'{dist:.2f}'] + [ f'{d["DistancePerStroke"]:.2f}' for d, e in out]) )
         self._data.append(
-            DataSerie(2, ['Min at % cycle'] + [ f'{d["MinAtP"]:.1f}' for d, e in out]) )
+            DataSerie(2, ['Max at % cycle'] + [''] + [ f'{d["MaxAtP"]:.1f}' for d, e in out]) )
         self._data.append(
-            DataSerie(2, ['Maximum Yaw (\u00b0)'] + [ f'{d["YawMax"]:.1f}' for d, e in out]) )
+            DataSerie(2, ['Min at % cycle'] + [''] + [ f'{d["MinAtP"]:.1f}' for d, e in out]) )
         self._data.append(
-            DataSerie(2, ['Maximum Roll (\u00b0)'] + [ f'{d["RollMax"]:.1f}' for d, e in out]) )
+            DataSerie(2, ['Maximum Yaw (\u00b0)'] + [''] + [ f'{d["YawMax"]:.1f}' for d, e in out]) )
+        self._data.append(
+            DataSerie(2, ['Maximum Roll (\u00b0)'] + [''] + [ f'{d["RollMax"]:.1f}' for d, e in out]) )
         
         self.endInsertRows()
         self._column = len(self._data[0].data())
@@ -352,7 +362,7 @@ class RowerTableModel(QAbstractTableModel):
 
         # First header line
         n = 1
-        line = [ 'Target (t28)', 'Average', 'start', 't20', 't24', 't28', 't32', 'max' ]
+        line = [ 'Target', 'Average', 'start', 't20', 't24', 't28', 't32', 'max' ]
         series = DataSerie(n, [''] + line)
         self.beginInsertRows(QModelIndex(), self.rowCount(), self.rowCount())
         self._data.append(series)
@@ -362,22 +372,14 @@ class RowerTableModel(QAbstractTableModel):
         # outboat[piece][rower]
         ri = [a[self.rower] for a in outboat]    # rower info per piece
         sp = [a['Split'] for a in outboat]       # split per piece
-        """
-        for i in range(6):
-            print(ri[i]['Wash'])
-            print(ri[i]['Slip'])
-            print(f'dat was Wash van rower {self.rower} van piece {i}')
-            print(sp[i])
-            print(f'dat was Split van piece {i}')            
-        print()
-        print()
-        """
 
         # the rest
         self._data.append(
             DataSerie(2, ['Stroke rate'] + [''] + [''] + [ f'{r:.0f}' for c, r in gd.sessionInfo['PieceCntRating']]) )
+        """
         self._data.append(
             DataSerie(2, ['Drive time'] + ['', '', '', '', '', '', '' , '' , '' ]) )
+        """
         # rhythm moet naar boat profile
         self._data.append(
             DataSerie(2, ['Rhythm (% Cycle time)'] + [''] + [''] + [ f'{r["Rhythm"]:.0f}' for r in ri]) )
@@ -388,35 +390,42 @@ class RowerTableModel(QAbstractTableModel):
         self._data.append(
             DataSerie(2, ['Finish angle (\u00b0)'] + [''] + [''] + [ f'{r["FinA"]:.0f}' for r in ri]) )
         self._data.append(
-            DataSerie(2, ['Catch slip (\u00b0)'] + [''] + [''] + [ f'{r["Slip"]:.0f}' for r in ri]) )
+            DataSerie(2, ['Total angle (\u00b0)'] + [''] + [''] + [ f'{(r["FinA"]-r["CatchA"]):.0f}' for r in ri]) )
         self._data.append(
-            DataSerie(2, ['Finish wash (\u00b0)'] + [''] + [''] + [ f'{r["Wash"]:.0f}' for r in ri]) )
+            DataSerie(2, ['Catch slip (\u00b0)  (50%)'] + [''] + [''] + [ f'{r["Slip"]:.0f}' for r in ri]) )
         self._data.append(
-            DataSerie(2, ['Effective angle (\u00b0)'] + ['', '', '', '', '', '', '' , '' ]) )
+            DataSerie(2, ['Finish wash (\u00b0)  (50%)'] + [''] + [''] + [ f'{r["Wash"]:.0f}' for r in ri]) )
+        self._data.append(
+            DataSerie(2, ['Effective angle (\u00b0)'] + [''] + [''] + [ f'{r["EffAngle"]:.0f}' for r in ri]) )
+        """
         self._data.append(
             DataSerie(2, ['Effective angle (%)'] + ['', '', '', '', '', '', '' , '' ]) )
+        """
         self._data.append(
             DataSerie(2, ['', '', '', '', '', '', '' , '' , '' ]) )
         self._data.append(
             DataSerie(2, ['Gate force average'] + [''] + [''] + [ f'{r["GFEff"]:.0f}' for r in ri]) )
         self._data.append(
             DataSerie(2, ['Gate force max'] + [''] + [''] + [ f'{r["GFMax"]:.0f}' for r in ri]) )
+        """
         self._data.append(
             DataSerie(2, ['Ratio avg/max Gate force'] + [''] + [''] + ['', '', '', '', '', '', '' , '' ]) )
+
         self._data.append(
             DataSerie(2, ['Gate force max at'] + [''] + [''] + ['', '', '', '', '', '', '' , '' ]) )
         self._data.append(
-            DataSerie(2, ['Gate force up to 70% at'] + [''] + [''] + ['', '', '', '', '', '', '' , '' ]) )
+            DataSerie(2, ['Gate force up to 70% at (\u00b0)'] + [''] + [''] + [ f'{r["UpAt70"]:.0f}' for r in ri]) )
         self._data.append(
-            DataSerie(2, ['Gate force under 70% at'] + [''] + [''] + ['', '', '', '', '', '', '' , '' ]) )
+            DataSerie(2, ['Gate force under 70% at (\u00b0)'] + [''] + [''] + [ f'{r["DownAt70"]:.0f}' for r in ri]) )
+        """
         self._data.append(
             DataSerie(2, ['', '', '', '', '', '', '' , '' , '' ]) )
         self._data.append(
-            DataSerie(2, ['Power max (W)'] + [''] + [''] + [ f'{r["PMax"]:.0f}' for r in ri]) )
-        self._data.append(
             DataSerie(2, ['Work (J)'] + [''] + [''] + [ f'{r["Work"]:.0f}' for r in ri]) )
         self._data.append(
-            DataSerie(2, ['Power (W)'] + [''] + [''] + [ f'{r["PMean"]:.0f}' for r in ri]) )
+            DataSerie(2, ['Power max (W)'] + [''] + [''] + [ f'{r["PMax"]:.0f}' for r in ri]) )
+        self._data.append(
+            DataSerie(2, ['Power average (W)'] + [''] + [''] + [ f'{r["PMean"]:.0f}' for r in ri]) )
         self._data.append(
             DataSerie(2, ['Power/weight'] + [''] + [''] + ['', '', '', '', '', '', '' , '' ]) )
         self._data.append(

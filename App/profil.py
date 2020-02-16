@@ -239,7 +239,9 @@ def pieceCalculations(nm, sp, a):
     # speed fluctuation
     #    max - min
     # speed fluctuation power loss
-    #    wat doen we daar mee?
+    i = sensors.index('Speed')
+    out['PowerLoss'] = 1 - speedimp**3/np.mean(a[:, i]**3)
+    #    fout!!
 
     """
     Crewreport:
@@ -279,7 +281,6 @@ def pieceCalculations(nm, sp, a):
         rowerstats = {}
 
         if boattype == 'sweep':
-
             inboard = gd.globals['Parameters']['inboardSweep']
             outboard = gd.globals['Parameters']['outboardSweep']
             IOratio = inboard*outboard/(inboard+outboard)
@@ -302,22 +303,31 @@ def pieceCalculations(nm, sp, a):
             posmax = np.argmax(gate_a)
             fmax   = np.argmax(gate_fx)
 
+            rowerstats['GFMax'] = np.amax(gate_fx)   # fy er bij betrekken? die is toch klein dan
+            # mean van alleen de haal
+            rowerstats['GFEff'] = np.mean(gate_fx[: posmax])
+
+            """
+            # gate force up/down at 70% at
+            threshold = 0.7*rowerstats['GFMax']
+            upat70 = np.argmax(gate_fx > threshold)
+            downat70 = fmax + np.argmax(gate_fx[fmax: ] < threshold)
+            rowerstats['UpAt70'] = gate_a[upat70] - gate_a[posmin]
+            rowerstats['DownAt70'] = gate_a[posmax] - gate_a[downat70]
+            """
             # slip: number of degrees after the turning point in the angle the force is above the threshold
-            threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
+            # threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
+            threshold = 0.7*rowerstats['GFMax']
             slippos = np.argmax(gate_fx > threshold)
-            threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
+            # threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
             # start looking at posmax/2
             washpos = fmax + np.argmax(gate_fx[fmax: ] < threshold)
 
-            # graden tov begin en eind van de haal
+            # graden tov begin van de haal
             rowerstats['Slip'] = gate_a[slippos] - gate_a[posmin]
             # graden tov eind van de haal
             rowerstats['Wash'] = gate_a[posmax] - gate_a[washpos]
-
-            rowerstats['GFMax'] = np.amax(gate_fx)   # fy er bij betrekken? die is toch klein dan
-            # mean van alleen de haal
-            gfmax = np.copy(gate_fx[: posmax])
-            rowerstats['GFEff'] = np.mean(gfmax)
+            rowerstats['EffAngle'] = gate_a[washpos] - gate_a[slippos]
 
             # power
             ga_rad          = math.pi * a[:, ind_ga] / 180
@@ -362,17 +372,15 @@ def pieceCalculations(nm, sp, a):
             outboard = gd.globals['Parameters']['outboardScull']
             IOratio = inboard*outboard/(inboard+outboard)
 
+            # we already added P and S together in P
             ind_gap = rsens["P GateAngle"]
-            ind_gas = rsens["S GateAngle"]
             ind_fxp = rsens["P GateForceX"]
-            ind_fxs = rsens["S GateForceX"]
             ind_fyp = rsens["P GateForceY"]
-            ind_fys = rsens["S GateForceY"]
 
             # only look in the first stroke
-            g_fx = signal.filtfilt(B, A, a[:, ind_fxp] + a[:, ind_fxs])
+            g_fx = signal.filtfilt(B, A, a[:, ind_fxp])
             gate_fx = g_fx[:sp[1]-sp[0]]
-            g_a = signal.filtfilt(B, A, (a[:, ind_gap]+a[:, ind_gas])/2)
+            g_a = signal.filtfilt(B, A, a[:, ind_gap])
             gate_a = g_a[:sp[1]-sp[0]]
             if gd.filter:
                 # gate force and angle of all rowers
@@ -383,10 +391,23 @@ def pieceCalculations(nm, sp, a):
             posmax = np.argmax(gate_a)
             fmax   = np.argmax(gate_fx)
 
+            rowerstats['GFMax'] = np.amax(gate_fx)
+            # mean van alleen de haal
+            rowerstats['GFEff'] = np.mean(gate_fx[: posmax])
+
+            """
+            # gate force up/down at 70% at
+            threshold = 0.7*rowerstats['GFMax']
+            upat70 = np.argmax(gate_fx > threshold)
+            downat70 = fmax + np.argmax(gate_fx[fmax: ] < threshold)
+            rowerstats['UpAt70'] = gate_a[upat70] - gate_a[posmin]
+            rowerstats['DownAt70'] = gate_a[posmax] - gate_a[downat70]
+            """
             # slip: number of degrees after the turning point in the angle the force is above the threshold
-            threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
+            # threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
+            threshold = 0.5*rowerstats['GFMax']
             slippos = np.argmax(gate_fx > threshold)
-            threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
+            # threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
             # start looking at posmax/2
             washpos = fmax + np.argmax(gate_fx[fmax: ] < threshold)
 
@@ -394,16 +415,13 @@ def pieceCalculations(nm, sp, a):
             rowerstats['Slip'] = gate_a[slippos] - gate_a[posmin]
             # graden tov eind van de haal
             rowerstats['Wash'] = gate_a[posmax] - gate_a[washpos]
-
-            rowerstats['GFMax'] = np.amax(gate_fx)
-            # mean van alleen de haal
-            rowerstats['GFEff'] = np.mean(gate_fx[: posmax])
+            rowerstats['EffAngle'] = gate_a[washpos] - gate_a[slippos]
 
             # power (both oars merged)
-            gate_a       = signal.filtfilt(B, A, (a[:, ind_gap]+a[:, ind_gas])/2)
-            ga_rad          = math.pi * (a[:, ind_gap]+a[:, ind_gas]) / 180
-            pinForceTS   = (np.multiply(a[:, ind_fxp]+a[:, ind_fxs], np.cos(ga_rad)) -
-                            np.multiply(a[:, ind_fyp]+a[:, ind_fys], np.sin(ga_rad)))
+            gate_a       = signal.filtfilt(B, A, a[:, ind_gap])
+            ga_rad          = math.pi * (a[:, ind_gap]) / 180
+            pinForceTS   = (np.multiply(a[:, ind_fxp], np.cos(ga_rad)) -
+                            np.multiply(a[:, ind_fyp], np.sin(ga_rad)))
             moment       = IOratio * pinForceTS
             gateAngleVel = np.gradient(math.pi*g_a/180, 1/Hz)                           # moet gate_a worden
             power = moment * gateAngleVel

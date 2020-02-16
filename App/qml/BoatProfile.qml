@@ -22,7 +22,11 @@ Item {
     
 	    TableView {
 		id: boatTableView
-		columnWidthProvider: function (column) { return column == 0 ? 150 : 50; }
+		columnWidthProvider: function (column) { if (column == 0)
+                                                           return 150;
+                                                         else if (column == 1)
+                                                                return 100;
+                                                             else return 50; }
 		rowHeightProvider: function (column) { return 20; }
 		model: boatTableModel
 		height: 200
@@ -51,36 +55,50 @@ Item {
 			}
 		    }
 
-		    CheckBox {
-			checked: false
-			text: qsTr("Averaged")
-			onPressed: {
-			    boatTableModel.set_averaging(checked);
-			    boatTableView.forceLayout();
+		    Column {
+			CheckBox {
+			    checked: true
+			    text: qsTr("Averaged")
+			    onPressed: {
+				boatTableModel.set_averaging(checked);
+				boatTableView.forceLayout();
+			    }
+			}
+
+			CheckBox {
+			    checked: false
+			    text: qsTr("Filtered")
+			    onPressed: {
+				boatTableModel.set_filter(checked);
+				boatTableView.forceLayout();
+			    }
 			}
 		    }
 
-		    CheckBox {
-			checked: false
-			text: qsTr("Filtered")
-			onPressed: {
-			    boatTableModel.set_filter(checked);
-			    boatTableView.forceLayout();
+		    Column {
+			Button {
+			    text: 'Create report'
+			    onPressed: {
+				boatTableModel.make_report();
+			    }
 			}
-		    }
-
-		    Button {
-			text: 'Create report'
-			onPressed: {
-			    boatTableModel.make_report();
+			/*
+			CheckBox {
+			    checked: false
+			    text: qsTr("Custom")
+			    onPressed: {
+				boatTableModel.set_custom(checked);
+				boatTableView.forceLayout();
+			    }
 			}
+			*/
 		    }
 		}
 		Tumbler {
 		    id: tumbler
 		    
 		    height: 80
-		    model: ['all', 'start', 't20', 't24', 't28', 't32', 'max']
+		    model: ['all', 'start', 't20', 't24', 't28', 't32', 'max', 'average']
 		    visibleItemCount: 3
     
 		    onCurrentIndexChanged: {

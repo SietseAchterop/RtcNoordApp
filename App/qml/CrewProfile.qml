@@ -18,9 +18,11 @@ Item {
 	        id: crewtumbler
 		    
 	        height: 40
-	        model: ['start', 't20', 't24', 't28', 't32', 'max']
+	        width: 40
+	        model: ['start', 't20', 't24', 't28', 't32', 'max', 'average']
 	        visibleItemCount: 3
     
+		Component.onCompleted: { crewtumbler.currentIndex = 6 }
 	        onCurrentIndexChanged: {
 		        crew_mpl.showPiece(crewtumbler.currentIndex);
 	    }
@@ -46,7 +48,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
                 
-            Layout.minimumWidth: 1200
+            Layout.minimumWidth: 1000
             Layout.minimumHeight: 800
         }
         

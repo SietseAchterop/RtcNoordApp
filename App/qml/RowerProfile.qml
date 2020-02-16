@@ -40,11 +40,11 @@ Item {
 	    TableView {
 		id: rowerTableView
 		columnWidthProvider: function (column) { if (column == 0)
-							   return 170;
+							   return 180;
 							 else if (column == 1)
-							         return 80;
+							         return 70;
    							 else if (column == 2)
-							         return 60;
+							         return 80;
    						              else
 							         return 50;}
 		rowHeightProvider: function (column) { return 20; }
@@ -76,9 +76,10 @@ Item {
 		    id: rowertumbler
 		    
 		    height: 80
-		    model: ['start', 't20', 't24', 't28', 't32', 'max']
+		    model: ['all', 'start', 't20', 't24', 't28', 't32', 'max', 'average']
 		    visibleItemCount: 3
     
+		    Component.onCompleted: { rowertumbler.currentIndex = 7 }
 		    onCurrentIndexChanged: {
 			// ugly
 			switch (roweritem.rindex) {

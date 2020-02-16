@@ -86,6 +86,7 @@ Session2:  None
         (base_dir / 'caches').mkdir()
         (base_dir / 'videos').mkdir()
         (base_dir / 'reports').mkdir()
+        (base_dir / 'peach').mkdir()
         # fill configs
         appDir = Path(sys.argv[0]).parent.absolute().parent
         copyfile(appDir / 'configs' / 'GlobalSettings.yaml', base_dir / 'configs' / 'GlobalSettings.yaml')
@@ -416,7 +417,7 @@ def prof_pieces(pieces):
 
 
 def rowersensors(rower):
-    # returns dictionary with sensorname and columnnumber in dataObject
+    """ returns dictionary with sensorname and columnnumber in dataObject """
     #  only once per session
     h1 = gd.sessionInfo['Header']
     h2 = gd.sessionInfo['Header2']
@@ -432,6 +433,8 @@ def rowersensors(rower):
         if i-1 == rower:  # internally we start at 0
             # pas op met foute nummers in csv (vanaf 2 beginnend)
             sindex[s] = j
+    if sindex == {}:
+        print('Empty rowersensors(rower), error in csv-header?')
     return sindex
 
 # Video processing

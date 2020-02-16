@@ -46,14 +46,15 @@ aantal = 0
 # Boat
 boattablemodel = []
 boatPlots = None
+boatPiece = 0
 
 # Crew piece used in report
-crewPiece = 0
+crewPiece = 6
 
 # Rowers: models and plots, up to eight
 rowertablemodel = [None, None, None, None, None, None, None, None]
 rowerPlots =  [None, None, None, None, None, None, None, None]
-rowerPiece = [0, 0, 0, 0, 0, 0, 0, 0]
+rowerPiece = [7, 7, 7, 7, 7, 7, 7, 7]
 
 
 #
@@ -67,8 +68,9 @@ cal_value2 = None
 # profile available?
 profile_available = False
 # averaging or not
-averaging = False
+averaging = True
 filter = False
+custom_report = False
 
 # the averaged data and normalized data (pieces, length, sensors)
 norm_arrays = None

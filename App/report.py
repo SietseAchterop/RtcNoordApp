@@ -40,7 +40,14 @@ def make_pdf_report():
     ##   First page
     with doc.create(Section('Boat report', numbering=False)):
         doc.append(f'Roeiers, info, ..\n')
-
+        av = ''
+        filt = ''
+        if gd.averaging:
+            av = 'averaging'
+        if gd.filter:
+            filt = 'filtered'
+        doc.append(f'Piece {prof_pcs[gd.boatPiece]} used: {av} {filt}\n')
+        # average filter vermelden
         # get table from boat report
         rows = gd.boattablemodel.rowCount()
         columns = gd.boattablemodel.columnCount()
@@ -84,7 +91,25 @@ def make_pdf_report():
         ax4.set_title('Versnelling-Tempo per Piece')
         ax4.grid(True)
 
-        for i in range(len(prof_pcs)):
+        piece = gd.boatPiece
+        if piece == 0:
+            for i in range(len(prof_pcs)):
+                ax1.plot(gd.norm_arrays[i, :, sensors.index('Speed')], linewidth=0.5, label=prof_pcs[i])
+                ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.5, label=prof_pcs[i])
+                ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.5, label=prof_pcs[i])
+        elif piece == 7:
+            speed = np.zeros(gd.norm_arrays[0, :, 1].shape)
+            accel = np.zeros(gd.norm_arrays[0, :, 1].shape)
+            pitch = np.zeros(gd.norm_arrays[0, :, 1].shape)
+            for i in range(len(prof_pcs)):
+                speed += gd.norm_arrays[i, :, sensors.index('Speed')]
+                accel += gd.norm_arrays[i, :, sensors.index('Accel')]
+                pitch += gd.norm_arrays[i, :, sensors.index('Pitch Angle')]
+            ax1.plot(speed/6, linewidth=0.5, label=prof_pcs[i])
+            ax2.plot(accel/6, linewidth=0.5, label=prof_pcs[i])
+            ax3.plot(pitch/6, linewidth=0.5, label=prof_pcs[i])
+        else:
+            i = piece - 1
             ax1.plot(gd.norm_arrays[i, :, sensors.index('Speed')], linewidth=0.5, label=prof_pcs[i])
             ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.5, label=prof_pcs[i])
             ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.5, label=prof_pcs[i])
@@ -111,10 +136,10 @@ def make_pdf_report():
     ##   Second page
     doc.append(NewPage())
     with doc.create(Section('Crew report', numbering=False)):
-        doc.append(f'Piece {prof_pcs[gd.crewPiece]} used.\n')
-        # nog af laten hangen van stand in
+        pcs = prof_pcs + ['average']
+        doc.append(f'Piece {pcs[gd.crewPiece]} used.\n')
 
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
+        crewfig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(nrows=3, ncols=2)
         ax1.set_title('Gate Angle')
         ax1.grid(True)
         ax2.set_title('Gate Force')
@@ -123,40 +148,79 @@ def make_pdf_report():
         ax3.grid(True)
         ax4.set_title('Power')
         ax4.grid(True)
+        ax5.set_title('Power Leg')
+        ax5.grid(True)
+        ax6.set_title('Power Arm/Trunk')
+        ax6.grid(True)
 
         rcnt = gd.sessionInfo['RowerCnt']
         piece = gd.crewPiece
-        d, a = gd.out[piece]
-        for r in range(rcnt):
-            sns = rowersensors(r)
-            # print(sns)
-            # print(f'Maak crewplot voor {r}')
-            if gd.sessionInfo['BoatType'] == 'sweep':
-                i = sns['GateAngle']
-                j = sns['GateForceX']
-            else:
-                i = sns['P GateAngle']
-                j = sns['P GateForceX']
-            # stretchers is er niet altijd!
-            # k = sns['Stretcher Z']
+        if piece < 6:
+            d, a = gd.out[piece]
+            for r in range(rcnt):
+                sns = rowersensors(r)
+                # print(f'Maak crewplot voor {r}')
+                if gd.sessionInfo['BoatType'] == 'sweep':
+                    i = sns['GateAngle']
+                    j = sns['GateForceX']
+                else:
+                    i = sns['P GateAngle']
+                    j = sns['P GateForceX']
+                # stretchers is er niet altijd!
+                # k = sns['Stretcher Z']
                     
-            een  = ax1.plot(gd.norm_arrays[piece, :, i], linewidth=0.6, label=f'R {r+1}')
-            twee = ax2.plot(gd.norm_arrays[piece, :, j], linewidth=0.6, label=f'R {r+1}')
-            # drie = ax3.plot(gd.norm_arrays[piece, :, k], linewidth=0.6, label=prof_pcs[r])
+                een  = ax1.plot(gd.norm_arrays[piece, :, i], linewidth=0.5, label=f'R {r+1}')
+                twee = ax2.plot(gd.norm_arrays[piece, :, j], linewidth=0.5, label=f'R {r+1}')
+                # drie = ax3.plot(gd.norm_arrays[piece, :, k], linewidth=0.5, label=prof_pcs[r])
 
-            vier = ax4.plot( a[0+r], linewidth=0.6, label='Power')
+                vier = ax4.plot( a[0+r], linewidth=0.5, label='Power')
+        else:
+            # average
+            for r in range(rcnt):
+                sns = rowersensors(r)
+                # print(f'Maak crewplot voor {r}')
+                if gd.sessionInfo['BoatType'] == 'sweep':
+                    i = sns['GateAngle']
+                    j = sns['GateForceX']
+                else:
+                    i = sns['P GateAngle']
+                    j = sns['P GateForceX']
+                # stretchers is er niet altijd!
+                # k = sns['Stretcher Z']
+                # nog schakelaar voor maken om stretche en seatposition wel/niet mee te laten doen
+                #  niet als ze er niet zijn
+                #  optioneel als ze er (gedeeltelijk zijn)
+                    
+                # average
+                nmbrpieces = len(prof_pcs)
+                angle = np.zeros((100,))
+                force = np.zeros((100,))
+                power = np.zeros((100,))
+                for p in range(nmbrpieces):
+                    angle  += gd.norm_arrays[p, :, i]
+                    force  += gd.norm_arrays[p, :, j]
+                    # stretcherZ = gd.norm_arrays[p, :, k]
+                    d, a = gd.out[p]
+                    power  += a[0+r]
 
+                # plot
+                ax1.plot(angle/nmbrpieces, linewidth=0.5, label=f'R {r+1}')
+                ax2.plot(force/nmbrpieces, linewidth=0.5, label=f'R {r+1}')
+                # self.ax3.plot(stetcherZ/nmbrpieces:, k], linewidth=0.5, label=prof_pcs[r])
+
+                ax4.plot(power/nmbrpieces, linewidth=0.5, label='Power')
 
         ax1.legend(loc='lower right')
         plt.tight_layout()
 
         # we keep using the same name
-        tmpfig = tmpdir / gd.config['Session']
+        tmpfig = tmpdir / (gd.config['Session'] + '_crew')
         plt.savefig(tmpfig)
         tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows, backslash komt op linux normaal niet voor.
         doc.append(NoEscape(r'\includegraphics[width=1.0\textwidth]{' + f'{tmpfig}'  + r'}'))
 
         
+    # Rower pages
     doc.append(NewPage())
 
     rwrcnt = gd.sessionInfo['RowerCnt']
@@ -167,7 +231,8 @@ def make_pdf_report():
     rax4  = [ None for i in range(rwrcnt)]
 
     for rwr in range(rwrcnt):
-        with doc.create(Section(f'Rower {rwr+1}, using piece {prof_pcs[gd.rowerPiece[rwr]]}', numbering=False)):
+        pcs = ['all'] + prof_pcs + ['average']
+        with doc.create(Section(f'Rower {rwr+1}, using piece {pcs[gd.rowerPiece[rwr]]}', numbering=False)):
 
             rows = gd.rowertablemodel[rwr].rowCount()
             columns = gd.rowertablemodel[rwr].columnCount()
@@ -204,21 +269,74 @@ def make_pdf_report():
 
             rsens = rowersensors(rwr)
             piece = gd.rowerPiece[rwr]
-            if gd.sessionInfo['BoatType'] == 'sweep':
-                een = rax1[rwr].plot(gd.norm_arrays[piece, :, rsens['GateAngle']]*10, linewidth=0.6, label='GateAngle')
-                twee = rax1[rwr].plot(gd.norm_arrays[piece, :, rsens['GateForceX']], linewidth=0.6, label='GateForceX')
-                vier = rax3[rwr].plot(gd.norm_arrays[piece, :, rsens['GateAngle']],
-                                      gd.norm_arrays[piece, :, rsens['GateForceX']], linewidth=0.6, label='Pitch')
-            else:
-                een = rax1[rwr].plot(gd.norm_arrays[piece, :, rsens['P GateAngle']]*10, linewidth=0.6, label='GateAngle')
-                twee = rax1[rwr].plot(gd.norm_arrays[piece, :, rsens['P GateForceX']], linewidth=0.6, label='GateForceX')
-                vier = rax3[rwr].plot(gd.norm_arrays[piece, :, rsens['P GateAngle']],
-                                      gd.norm_arrays[piece, :, rsens['P GateForceX']], linewidth=0.6)
-            # waarom werkt de legend hier niet?
-            drie = rax2[rwr].plot(gd.norm_arrays[piece, :, sensors.index('Accel')], linewidth=0.6, label='Accel')
 
-            d, a = gd.out[piece]
-            vijf = rax4[rwr].plot( a[0+rwr], linewidth=0.6, label='Power')
+            if gd.rowerPiece[rwr] == 0:
+                # all
+                for i in range(len(prof_pcs)):
+                    if gd.sessionInfo['BoatType'] == 'sweep':
+                        # print(f'Maak rowerplot voor {self.rower}')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*10, linewidth=0.5, label='GateAngle')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label='GateForceX')
+                        rax3[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
+                                       gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5)
+                    else:
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*10, linewidth=0.5, label='GateAngle')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label='GateForceX')
+                        rax3[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
+                                       gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5)
+                    d, a = gd.out[piece]
+                    rax4[rwr].plot( a[0+rwr], linewidth=0.5, label='Power')
+                rax2[rwr].plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.5, label='Accel')
+            elif gd.rowerPiece[rwr] == 7:
+                # average
+                angle = np.zeros((100,))
+                forceX = np.zeros((100,))
+                accel = np.zeros((100,))
+                power = np.zeros((100,))
+                if gd.sessionInfo['BoatType'] == 'sweep':
+                    for i in range(len(prof_pcs)):
+                        angle += gd.norm_arrays[i, :, rsens['GateAngle']]
+                        forceX += gd.norm_arrays[i, :, rsens['GateForceX']]
+                        accel += gd.norm_arrays[i, :, sensors.index('Accel')]
+                        d, a = gd.out[i]
+                        power += a[0+rwr]
+                    rax1[rwr].plot(angle/6, linewidth=0.5, label='GateAngle')
+                    rax1[rwr].plot(forceX/6, linewidth=0.5, label='GateForceX')
+                    rax2[rwr].plot(accel/6, linewidth=0.5, label='Accel')
+                    rax3[rwr].plot(angle/6, forceX/6, linewidth=0.5)
+                    rax4[rwr].plot(power/6, linewidth=0.5, label='Power')
+                else:
+                    for i in range(len(prof_pcs)):
+                        angle += gd.norm_arrays[i, :, rsens['P GateAngle']]
+                        forceX += gd.norm_arrays[i, :, rsens['P GateForceX']]
+                        accel += gd.norm_arrays[i, :, sensors.index('Accel')]
+                        d, a = gd.out[i]
+                        power += a[0+rwr]
+                    rax1[rwr].plot(angle/6, linewidth=0.5, label='P GateAngle')
+                    rax1[rwr].plot(forceX/6, linewidth=0.5, label='P GateForceX')
+                    rax2[rwr].plot(accel/6, linewidth=0.5, label='Accel')
+                    rax3[rwr].plot(angle/6, forceX/6, linewidth=0.5)
+                    rax4[rwr].plot(power/6, linewidth=0.5, label='Power')
+
+            else:
+                i = gd.rowerPiece[rwr] - 1
+
+                # ad hoc angle x 10. Beter via (max-min). Schaal is voor force
+                if gd.sessionInfo['BoatType'] == 'sweep':
+                    # print(f'Maak rowerplot voor {self.rower}')
+                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*10, linewidth=0.5, label='GateAngle')
+                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label='GateForceX')
+                    rax3[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
+                                   gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5)
+                else:
+                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*10, linewidth=0.5, label='GateAngle')
+                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label='GateForceX')
+                    rax3[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
+                                   gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5)
+                rax2[rwr].plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.5, label='Accel')
+
+                d, a = gd.out[i]
+                rax4[rwr].plot( a[0+rwr], linewidth=0.5, label='Power')
 
             rax1[rwr].legend(loc='lower right')
             rax2[rwr].legend(loc='lower right')
