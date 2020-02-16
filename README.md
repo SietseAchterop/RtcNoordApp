@@ -31,11 +31,12 @@ It basically works on linux, windows and mac. See the docs directory for a short
 	  
 ## Status
 
-   - This is a basic version, most screens are (partly) working.
+   - A more of less functionally complete version, maybe a 1.0-beta version.
+     Most screens are working, as is video and the creation of a report.
 
 ## Screenshots
 
-Here a few screenshots to give an idea.
+Here a number screenshots to give an idea.
 For the moment this part is also the rudimentary user guide.
 Sessions can be created or selected from the menu at the top.
 Below all tabs are described.
@@ -102,27 +103,30 @@ The image shows a first version of this tab.
 
 ![Eerste](docs/BoatProfile.png)
 
-A profile is created using the button, but that is normally not needed, it will be done automatically when needed.
-For example the profile can be created using the first stroke of each piece or using the average over each piece.
-Clicking the checkbox will select that. A second or so later the new profile will appear.
+A profile is created using the button, but that is normally not needed, it will be done automatically when it is possible to do so.
+A profile can be created using the first stroke of each piece or using the average over each piece.
+Clicking the checkbox will select that.
 The data can also be filtered using the other checkbox.
-The profile consists of this screen and the Crew and Rowerscreens, zo creating a new profile will also affect those screens.
-The "Create report" will create a pdf version of the profile, see the docs directory for an [example report](docs/example_report.pdf)
+The profile consists of this screen and the Crew- and Rower- screens, so creating a new profile will also affect those screens.
+The "Create report" creates a pdf version of the profile, see the docs directory for an [example report](docs/example_report.pdf)
+
+The report used the selected settings of checkboxes and tumble wheels.
+When the program is started the settings are set to average.
 
 The plots show the selected (averaged/filtered) stroke that is used in profiling.
-Using the tumble wheel below the create profile button all pieces or individual pieces can be selected.
+Using the tumble wheel below the create profile button all pieces, the individual pieces or the average of them can be selected.
 
 ### Crew Profile
 
 A number of plots to compare rowers in a crew.
-The tumble wheel can be used to select the piece to look at
+The tumble wheel can be used to select the piece to look at, of the average can be used
 
 ![Eerste](docs/CrewProfile.png)
 
 ### Rower Profiles
 
 Each rower has its own profile part.
-Again the tumble wheel can be used to select the piece.
+Again the tumble wheel can be used to select a single piece or the average.
 
 ![Eerste](docs/Rowerview.png)
 
