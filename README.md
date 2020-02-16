@@ -11,7 +11,7 @@ It basically works on linux, windows and mac. See the docs directory for a short
 ## Usage
 
   - Start the program from the App directory with: "python main.py", or create an Icon on the desktop.
-  - The very first time it is started a system dependant configurateion file RtcApp will be created where the "BaseDir" is set for all rowing data.
+  - The very first time the program is started a system dependant configuration-file RtcApp will be created where the "BaseDir" for all rowing data is set.
     It that directory doesn't exist, it and a number of subdirectories will be created.
     With an upgrade of the software it probably is best to remove these files before starting the new version.
   - Create a csv-file from the interesting part of a session using the Powerline software, creating a single piece and
