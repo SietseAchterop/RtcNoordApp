@@ -46,7 +46,8 @@ def make_pdf_report():
             av = 'averaging'
         if gd.filter:
             filt = 'filtered'
-        doc.append(f'Piece {prof_pcs[gd.boatPiece]} used: {av} {filt}\n')
+        pcs = ['all'] + prof_pcs + ['average']
+        doc.append(f'Piece {pcs[gd.boatPiece]} used: {av} {filt}\n')
         # average filter vermelden
         # get table from boat report
         rows = gd.boattablemodel.rowCount()
@@ -270,17 +271,18 @@ def make_pdf_report():
             rsens = rowersensors(rwr)
             piece = gd.rowerPiece[rwr]
 
+            scaleAngle = 10
             if gd.rowerPiece[rwr] == 0:
                 # all
                 for i in range(len(prof_pcs)):
                     if gd.sessionInfo['BoatType'] == 'sweep':
                         # print(f'Maak rowerplot voor {self.rower}')
-                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*10, linewidth=0.5, label='GateAngle')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
                         rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label='GateForceX')
                         rax3[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
                                        gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5)
                     else:
-                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*10, linewidth=0.5, label='GateAngle')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
                         rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label='GateForceX')
                         rax3[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
                                        gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5)
@@ -300,7 +302,7 @@ def make_pdf_report():
                         accel += gd.norm_arrays[i, :, sensors.index('Accel')]
                         d, a = gd.out[i]
                         power += a[0+rwr]
-                    rax1[rwr].plot(angle/6, linewidth=0.5, label='GateAngle')
+                    rax1[rwr].plot(scaleAngle*angle/6, linewidth=0.5, label='GateAngle')
                     rax1[rwr].plot(forceX/6, linewidth=0.5, label='GateForceX')
                     rax2[rwr].plot(accel/6, linewidth=0.5, label='Accel')
                     rax3[rwr].plot(angle/6, forceX/6, linewidth=0.5)
@@ -312,7 +314,7 @@ def make_pdf_report():
                         accel += gd.norm_arrays[i, :, sensors.index('Accel')]
                         d, a = gd.out[i]
                         power += a[0+rwr]
-                    rax1[rwr].plot(angle/6, linewidth=0.5, label='P GateAngle')
+                    rax1[rwr].plot(scaleAngle*angle/6, linewidth=0.5, label='P GateAngle')
                     rax1[rwr].plot(forceX/6, linewidth=0.5, label='P GateForceX')
                     rax2[rwr].plot(accel/6, linewidth=0.5, label='Accel')
                     rax3[rwr].plot(angle/6, forceX/6, linewidth=0.5)
@@ -324,12 +326,12 @@ def make_pdf_report():
                 # ad hoc angle x 10. Beter via (max-min). Schaal is voor force
                 if gd.sessionInfo['BoatType'] == 'sweep':
                     # print(f'Maak rowerplot voor {self.rower}')
-                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*10, linewidth=0.5, label='GateAngle')
+                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
                     rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label='GateForceX')
                     rax3[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
                                    gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5)
                 else:
-                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*10, linewidth=0.5, label='GateAngle')
+                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
                     rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label='GateForceX')
                     rax3[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
                                    gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5)
@@ -353,4 +355,4 @@ def make_pdf_report():
 
 
     # generate the report
-    doc.generate_pdf(reportfile, clean_tex=False)
+    doc.generate_pdf(reportfile, clean_tex=True)

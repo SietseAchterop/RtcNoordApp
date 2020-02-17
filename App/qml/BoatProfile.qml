@@ -29,7 +29,7 @@ Item {
                                                              else return 50; }
 		rowHeightProvider: function (column) { return 20; }
 		model: boatTableModel
-		height: 200
+		height: 260
 		width: 500  // dit moet anders...
 		delegate: Rectangle {
 		    // implicitWidth: 100

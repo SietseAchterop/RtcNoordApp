@@ -273,6 +273,7 @@ def pieceCalculations(nm, sp, a):
     boattype = gd.sessionInfo['BoatType']
     
     # allocate data for profile data: power, handleVel, handleVDSSeat (3)
+    #   beter een 3-de dimensie van maken!
     length = a.shape[0]
     prof_data = np.zeros((3*rwcnt, length))
 
@@ -283,7 +284,8 @@ def pieceCalculations(nm, sp, a):
         if boattype == 'sweep':
             inboard = gd.globals['Parameters']['inboardSweep']
             outboard = gd.globals['Parameters']['outboardSweep']
-            IOratio = inboard*outboard/(inboard+outboard)
+            # slecht gekozen naam
+            IOratio = inboard * outboard/(inboard+outboard)
 
             ind_ga = rsens['GateAngle']
             ind_fx = rsens['GateForceX']
@@ -317,7 +319,7 @@ def pieceCalculations(nm, sp, a):
             """
             # slip: number of degrees after the turning point in the angle the force is above the threshold
             # threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
-            threshold = 0.7*rowerstats['GFMax']
+            threshold = 0.4*rowerstats['GFMax']
             slippos = np.argmax(gate_fx > threshold)
             # threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
             # start looking at posmax/2
@@ -325,27 +327,23 @@ def pieceCalculations(nm, sp, a):
 
             # graden tov begin van de haal
             rowerstats['Slip'] = gate_a[slippos] - gate_a[posmin]
+            if slippos < posmin:
+                rowerstats['Slip'] = -rowerstats['Slip']
             # graden tov eind van de haal
             rowerstats['Wash'] = gate_a[posmax] - gate_a[washpos]
             rowerstats['EffAngle'] = gate_a[washpos] - gate_a[slippos]
 
             # power
             ga_rad          = math.pi * a[:, ind_ga] / 180
-            # force in forward direction
+            # force in forward direction:
             pinForceTS      = (np.multiply(a[:, ind_fx], np.cos(ga_rad)) -
                                       np.multiply(a[:, ind_fy], np.sin(ga_rad)))
             moment          = IOratio * pinForceTS
-            
+            # speed in radians per second:
             gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)               # moet nog gate_a worden!
             power = moment * gateAngleVel
             prof_data[0+rwr]   = power
             # 0 being the first, add rwcnt and 2*rwcnt to the index for the next
-
-            # print(f' power {power.shape}   {posmax}')
-            #  HACK!
-            if posmax <2:
-                print(f'profil: posmax {posmax}!')
-                posmax = 2
 
             # a single stroke
             rowerstats['PMax']  = np.max(power[:sp[1]-sp[0]])
@@ -361,16 +359,16 @@ def pieceCalculations(nm, sp, a):
             # rhythm: stroketime/cycletime in %
             rowerstats['Rhythm'] = 100*float(posmax-posmin)/(sp[1]-sp[0])
 
-            # effective angle
-            
             # TODO: PowerLegs, PowerTruncArms
 
             # TODO: HandleVel, HandleVDSSeat
+            #        gebruikt gateAngleVel. uit data of berekenen? (peachCalc doet beiden!
 
         else:   # scull
             inboard = gd.globals['Parameters']['inboardScull']
             outboard = gd.globals['Parameters']['outboardScull']
-            IOratio = inboard*outboard/(inboard+outboard)
+            # andere naam?
+            IOratio = inboard * outboard/(inboard+outboard)
 
             # we already added P and S together in P
             ind_gap = rsens["P GateAngle"]
@@ -405,14 +403,16 @@ def pieceCalculations(nm, sp, a):
             """
             # slip: number of degrees after the turning point in the angle the force is above the threshold
             # threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
-            threshold = 0.5*rowerstats['GFMax']
+            threshold = 0.4*rowerstats['GFMax']
             slippos = np.argmax(gate_fx > threshold)
             # threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
             # start looking at posmax/2
             washpos = fmax + np.argmax(gate_fx[fmax: ] < threshold)
 
-            # graden tov begin en eind van de haal
+            # graden tov begin van de haal
             rowerstats['Slip'] = gate_a[slippos] - gate_a[posmin]
+            if slippos < posmin:
+                rowerstats['Slip'] = -rowerstats['Slip']
             # graden tov eind van de haal
             rowerstats['Wash'] = gate_a[posmax] - gate_a[washpos]
             rowerstats['EffAngle'] = gate_a[washpos] - gate_a[slippos]
@@ -425,7 +425,7 @@ def pieceCalculations(nm, sp, a):
             moment       = IOratio * pinForceTS
             gateAngleVel = np.gradient(math.pi*g_a/180, 1/Hz)                           # moet gate_a worden
             power = moment * gateAngleVel
-            prof_data[rwr]   = power
+            prof_data[0+rwr]   = power
             rowerstats['PMax']  = np.max(power[:sp[1]-sp[0]])
             work = np.trapz(power[:sp[1]-sp[0]], dx=1/Hz)
             rowerstats['Work'] = Hz*work/(sp[1]-sp[0])

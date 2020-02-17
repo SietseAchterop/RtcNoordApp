@@ -27,20 +27,6 @@ Load the config file to find the data and session to use.
 
     Create a config file in the appropriate location, if it does not exist.
     """
-    
-    rtcnoordconfig = """# Initial RtcApp config file
-# Where all user data is to be found relative the users homedir
-BaseDir: RtcNoord
-
-# directory in BaseDir to use as default in selections
-SubDir: ''
-
-# Name of last session, None if none
-Session: None
-
-# Name of secondary session of None if none
-Session2:  None
-"""
 
     # determine OS
     gd.os = sys.platform
@@ -59,6 +45,8 @@ Session2:  None
     elif gd.os == 'darwin':
         gd.configfile = Path.home() / 'Library' / 'Application Support' / gd.appname
     
+    appDir = Path(sys.argv[0]).parent.absolute().parent
+
     # read or create configfile
     #  and AppAuthor dir on win32 if needed
     try:
@@ -72,8 +60,9 @@ Session2:  None
                 localSettingsDir.mkdir()
             if not appConfDir.is_dir():
                 appConfDir.mkdir()
-        fd = Path.open(gd.configfile, 'w')
-        fd.write(rtcnoordconfig)
+        copyfile(appDir / 'App' / 'RtcApp', gd.configfile)
+        fd = Path.open(gd.configfile, 'r')
+        rtcnoordconfig = fd.read()
         config = yaml.load(rtcnoordconfig, Loader=yaml.UnsafeLoader)
 
     # we now have a configfile
@@ -88,7 +77,6 @@ Session2:  None
         (base_dir / 'reports').mkdir()
         (base_dir / 'peach').mkdir()
         # fill configs
-        appDir = Path(sys.argv[0]).parent.absolute().parent
         copyfile(appDir / 'configs' / 'GlobalSettings.yaml', base_dir / 'configs' / 'GlobalSettings.yaml')
         copyfile(appDir / 'configs' / 'session_template.yaml', base_dir / 'configs' / 'session_template.yaml')
         copyfile(appDir / 'configs' / 'RowerData.yaml', base_dir / 'configs' / 'RowerData.yaml')

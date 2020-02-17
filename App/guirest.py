@@ -1005,6 +1005,7 @@ class RowerForm(QObject):
 
         # do the plotting
         # bootsnelheid, accel, pitch
+        scaleAngle = 10
         if gd.profile_available:
             sensors = gd.sessionInfo['Header']
             rsens = rowersensors(self.rower)
@@ -1013,12 +1014,12 @@ class RowerForm(QObject):
                 for i in range(len(prof_pcs)):
                     if gd.sessionInfo['BoatType'] == 'sweep':
                         # print(f'Maak rowerplot voor {self.rower}')
-                        self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*10, linewidth=0.6, label='GateAngle')
+                        self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
                         self.ax1.plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label='GateForceX')
                         self.ax3.plot(gd.norm_arrays[i, :, rsens['GateAngle']],
                                       gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6)
                     else:
-                        self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*10, linewidth=0.6, label='GateAngle')
+                        self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
                         self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label='GateForceX')
                         self.ax3.plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
                                       gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6)
@@ -1038,7 +1039,7 @@ class RowerForm(QObject):
                         accel += gd.norm_arrays[i, :, sensors.index('Accel')]
                         d, a = gd.out[i]
                         power += a[0+self.rower]
-                    self.ax1.plot(angle/6, linewidth=0.6, label='GateAngle')
+                    self.ax1.plot(scaleAngle*angle/6, linewidth=0.6, label='GateAngle')
                     self.ax1.plot(forceX/6, linewidth=0.6, label='GateForceX')
                     self.ax2.plot(accel/6, linewidth=0.6, label='Accel')
                     self.ax3.plot(angle/6, forceX/6, linewidth=0.6)
@@ -1050,7 +1051,7 @@ class RowerForm(QObject):
                         accel += gd.norm_arrays[i, :, sensors.index('Accel')]
                         d, a = gd.out[i]
                         power += a[0+self.rower]
-                    self.ax1.plot(angle/6, linewidth=0.6, label='P GateAngle')
+                    self.ax1.plot(scaleAngle*angle/6, linewidth=0.6, label='P GateAngle')
                     self.ax1.plot(forceX/6, linewidth=0.6, label='P GateForceX')
                     self.ax2.plot(accel/6, linewidth=0.6, label='Accel')
                     self.ax3.plot(angle/6, forceX/6, linewidth=0.6)
@@ -1062,12 +1063,12 @@ class RowerForm(QObject):
                 # ad hoc angle x 10. Beter via (max-min). Schaal is voor force
                 if gd.sessionInfo['BoatType'] == 'sweep':
                     # print(f'Maak rowerplot voor {self.rower}')
-                    self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*10, linewidth=0.6, label='GateAngle')
+                    self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
                     self.ax1.plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label='GateForceX')
                     self.ax3.plot(gd.norm_arrays[i, :, rsens['GateAngle']],
                                   gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6)
                 else:
-                    self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*10, linewidth=0.6, label='GateAngle')
+                    self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
                     self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label='GateForceX')
                     self.ax3.plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
                                   gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6)

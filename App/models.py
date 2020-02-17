@@ -55,8 +55,9 @@ class DataSensorsModel(QAbstractListModel):
     #  we lezen de session file. 
     def load_sessionInfo(self, sInfo=None):
         self._data_series.clear()
-        # fill data from sessionInfo, remove first and last column
-        for i, name in enumerate(sInfo[1:-1]):
+        # fill data from sessionInfo, remove Time and Normalized time columns
+        n = sInfo.index('Normalized Time')
+        for i, name in enumerate(sInfo[1:n]):
             series = DataSerie(name, i)
             self.add_data(series)
 
@@ -392,9 +393,9 @@ class RowerTableModel(QAbstractTableModel):
         self._data.append(
             DataSerie(2, ['Total angle (\u00b0)'] + [''] + [''] + [ f'{(r["FinA"]-r["CatchA"]):.0f}' for r in ri]) )
         self._data.append(
-            DataSerie(2, ['Catch slip (\u00b0)  (50%)'] + [''] + [''] + [ f'{r["Slip"]:.0f}' for r in ri]) )
+            DataSerie(2, ['Catch slip (\u00b0)  (40%)'] + [''] + [''] + [ f'{r["Slip"]:.0f}' for r in ri]) )
         self._data.append(
-            DataSerie(2, ['Finish wash (\u00b0)  (50%)'] + [''] + [''] + [ f'{r["Wash"]:.0f}' for r in ri]) )
+            DataSerie(2, ['Finish wash (\u00b0)  (40%)'] + [''] + [''] + [ f'{r["Wash"]:.0f}' for r in ri]) )
         self._data.append(
             DataSerie(2, ['Effective angle (\u00b0)'] + [''] + [''] + [ f'{r["EffAngle"]:.0f}' for r in ri]) )
         """
@@ -434,7 +435,6 @@ class RowerTableModel(QAbstractTableModel):
         self.endInsertRows()
         self._column = len(self._data[0].data())
         self._row = len(self._data)
-
         #print('rowertable')
         #for i in self._data:
         #    print(i.data())

@@ -7,7 +7,7 @@ ApplicationWindow {
     id: applicationWindow
     visible: true
     width: 900
-    height: 600
+    height: 700
     title: qsTr("RTCNoord")
 
     // Component.onCompleted: console.log("Completed Running!")
