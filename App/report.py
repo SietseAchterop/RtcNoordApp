@@ -83,13 +83,13 @@ def make_pdf_report():
         sensors = gd.sessionInfo['Header']
             
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
-        ax1.set_title('Snelheid')
+        ax1.set_title('Speed')
         ax1.grid(True)
-        ax2.set_title('Versnelling')
+        ax2.set_title('Acceleration')
         ax2.grid(True)
         ax3.set_title('Pitch')
         ax3.grid(True)
-        ax4.set_title('Versnelling-Tempo per Piece')
+        ax4.set_title('Accel-Tempo per Piece')
         ax4.grid(True)
 
         piece = gd.boatPiece
@@ -143,7 +143,7 @@ def make_pdf_report():
         crewfig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(nrows=3, ncols=2)
         ax1.set_title('Gate Angle')
         ax1.grid(True)
-        ax2.set_title('Gate Force')
+        ax2.set_title('Gate ForceX')
         ax2.grid(True)
         ax3.set_title('Stretcher Force')
         ax3.grid(True)
@@ -259,11 +259,11 @@ def make_pdf_report():
             doc.append(f'\n')
             
             rfig[rwr], ((rax1[rwr], rax2[rwr]), (rax3[rwr], rax4[rwr])) = plt.subplots(nrows=2, ncols=2)
-            rax1[rwr].set_title('GateForce/GateAngle')
+            rax1[rwr].set_title('GateForceX/GateAngle')
             rax1[rwr].grid(True)
-            rax2[rwr].set_title('Versnelling')
+            rax2[rwr].set_title('Accelleration')
             rax2[rwr].grid(True)
-            rax3[rwr].set_title('GateForce - GateAngle')
+            rax3[rwr].set_title('GateForceX - GateAngle')
             rax3[rwr].grid(True)
             rax4[rwr].set_title('Power')
             rax4[rwr].grid(True)

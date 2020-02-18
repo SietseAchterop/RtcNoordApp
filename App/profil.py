@@ -122,14 +122,14 @@ def profile(pindex):
                 av_arrays[:, :, i] =  av_arrays[:, :, i] + av_arrays[:, :, i+1]
 
     # test nan
-    #  Stretcher RL en TB will always have nan values!
     for i in range(len(prof_pcs)):
         for j in range(len(sensors)-2):
-            for k, c in enumerate(av_arrays[i, :, j]):
-                if math.isnan(c):
-                    # what to do?
-                    #print(f'NaN in piece {i} and sensor {j} at pos {k}')
-                    pass
+            #  Stretcher RL en TB will always have nan values!
+            #  we will ignore them for the moment
+            if 'Stretcher' not in sensors[j]:
+                for k, c in enumerate(av_arrays[i, :, j]):
+                    if math.isnan(c):
+                        print(f'NaN in piece {i} in {sensors[j]} sensor at pos {k}')
 
 
     # now the real computations

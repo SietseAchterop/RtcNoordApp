@@ -218,7 +218,8 @@ def readCsvData(config, csvdata):
     #    kunnen we verderop iets anders zetten, mn. de originelen van verbeterde kolommen
 
     for line, row in enumerate(reader):
-        row[0] = float(row[0])  # we don't use it anyway
+        if row[0] != '':
+            row[0] = float(row[0])  # we don't use it anyway.
         for i in range(lenheader):
             if row[i] == '':
                 row[i] = float('NaN')
