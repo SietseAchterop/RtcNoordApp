@@ -2,6 +2,8 @@
 Installatie rtcapp uitgaande van een nieuwe windows 10 install
 ==============================================================
 
+- Until everything works, test everything from a command shell.
+
 - install python3 from
     https://www.python.org/downloads/windows/
   For anaconda, see below
@@ -22,7 +24,7 @@ Installatie rtcapp uitgaande van een nieuwe windows 10 install
 - pip install
     matplotlib, PyYAML, pyqt5, scipy, pylatex
 
-- hack matplotlib met diff_matplotlib
+- apply matplotlib with diff_matplotlib
     Change 3 lines in the matplotlib sources
     Removes unneeded errors/warnings on exiting.
     
@@ -47,11 +49,14 @@ Installatie rtcapp uitgaande van een nieuwe windows 10 install
     Create a symbolic link on the Desktop from the file main.pyw
 
 
-For creating a report
-=====================
+To create a report
+==================
   Install latex, see https://www.latex-project.org/get
   This is a document preparation system that is used for scientific publications,
   especially in the beta sciences.
+  Test using tstlatex.tex
+      pdflatex tstlatex.tex
+
   It is optionally in the sense that the program works without it, only the report
   is not created.
 
@@ -59,6 +64,7 @@ For creating a report
   Needed for report generation by MikTex
   Install from
     http://strawberryperl.com/
+  Test with tstlatex.tex
 
 Using video (optional)
 ======================

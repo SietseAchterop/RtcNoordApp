@@ -28,10 +28,12 @@ python3
   pylatex
 
 == optionally (via apt-get) to make reports in pdf
-texlive
-texlive-latex-extra
-  evt. zie https://www.latex-project.org/get
-  
+  texlive
+  texlive-latex-extra
+    evt. zie https://www.latex-project.org/get
+  test with tstlatex.tex
+
+
 == optionally for video
 python-mpv
    - from: https://github.com/jaseg/python-mpv
@@ -44,7 +46,7 @@ python-mpv
     - Command:  pythong tstmatplotlib.py
        - a simple plot
 
-== hack matplotlib met diff_matplotlib
+== apply patch for matplotlib with diff_matplotlib
   Change the 3 lines in the file described in the patch-file.
   Without this there are a lot of (harmless) errors on exiting the program.  
 

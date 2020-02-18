@@ -2,6 +2,8 @@
 Installatie rtcapp op een Mac
 =============================
 
+- Until everything works, test using the terminal.
+
 - install python3 from
     https://www.python.org/downloads/mac-osx/
 
@@ -16,8 +18,8 @@ Installatie rtcapp op een Mac
     - matplotlib, PyYAML, pyqt5, scipy, pylatex
     - install using pip command
     
-- installeer hack in matplotlib met diff_matplotlib
-    de 3 nieuwe regels schelen wat warningen/fouten
+- apply patch matplotlib with diff_matplotlib
+     Removes errors/warnings when exiting the program
     
 - Basic testing
     - Command:  python tstqtquick.py
@@ -41,11 +43,14 @@ Installatie rtcapp op een Mac
     hoe maak je die op een mac?
 
 
-For creating a report
+To create a report
 =====================
   Install latex, see https://www.latex-project.org/get
   This is a document preparation system that is used for scientific publications,
   especially in the beta sciences.
+  Test using tstlatex.tex
+      pdflatex tstlatex.tex
+      
   It is optionally in the sense that the program works without it, only the report
   is not created.
 
