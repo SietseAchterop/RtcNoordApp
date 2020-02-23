@@ -125,6 +125,7 @@ def profile(pindex):
     for i in range(len(prof_pcs)):
         for j in range(len(sensors)-2):
             #  Stretcher RL en TB will always have nan values!
+            #  Speed Pos (Vel) is soms ook rot
             #  we will ignore them for the moment
             if 'Stretcher' not in sensors[j]:
                 for k, c in enumerate(av_arrays[i, :, j]):
@@ -240,7 +241,7 @@ def pieceCalculations(nm, sp, a):
     #    max - min
     # speed fluctuation power loss
     i = sensors.index('Speed')
-    out['PowerLoss'] = 1 - speedimp**3/np.mean(a[:, i]**3)
+    out['PowerLoss'] = 100*(1 - speedimp**3/np.mean(a[:, i]**3))
     #    fout!!
 
     """
@@ -350,6 +351,7 @@ def pieceCalculations(nm, sp, a):
             work = np.trapz(power[:sp[1]-sp[0]], dx=1/Hz)
             rowerstats['Work'] = work
             rowerstats['PMean'] = Hz*work/(sp[1]-sp[0])
+            rowerstats['PperKg'] = rowerstats['PMean']/gd.sessionInfo['Rowers'][rwr][3]
             
             # catch/finish angles
             rowerstats['CatchA'] = np.min(gate_a)
@@ -430,6 +432,7 @@ def pieceCalculations(nm, sp, a):
             work = np.trapz(power[:sp[1]-sp[0]], dx=1/Hz)
             rowerstats['Work'] = Hz*work/(sp[1]-sp[0])
             rowerstats['PMean'] = Hz*work/(sp[1]-sp[0])
+            rowerstats['PperKg'] = rowerstats['PMean']/gd.sessionInfo['Rowers'][rwr][3]
             
             # catch/finish angles
             rowerstats['CatchA'] = np.min(gate_a)

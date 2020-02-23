@@ -12,34 +12,37 @@ It basically works on linux, windows and mac. See the docs directory for a short
 
   - Start the program from the App directory with: "python main.py", or create an Icon on the desktop.
   - The very first time the program is started a system dependant configuration-file RtcApp will be created where the "BaseDir" for all rowing data is set.
+    The default value of BaseDir is RtcNoord in your home-directory.
     It that directory doesn't exist, it and a number of subdirectories will be created.
     With an upgrade of the software it probably is best to remove these files before starting the new version.
-  - Create a csv-file from the interesting part of a session using the Powerline software, creating a single piece and
-    export the traces. Then paste that in, e.g, notepad. Finally put the result with a csv file extention in the csv-data directory, or a subdirectory thereof.
+  - Create a csv-file from the interesting part of a session using the Powerline software, creating a single piece and export the traces.
+    Then paste that in, e.g, notepad. Finally put the result with a csv file extention in the csv-data directory, or a subdirectory thereof.
   - A few csv-files are already included.
   - Start the app and select the csv-file from the menu.
     Now data is preprocessed and saved in a sessionInfo-file and a dataObject-file.
     The csv-file is not used anymore.
-  - Csv- and session-files not in the csv or session directory will be ignored.
-  - There is a basic backup mechanism if a session is created a second time. The previous session file wil be (read-only) saved in a directory 'old'.
-    This mainly to save info like crewname, and calibration value.
+  - You can only use files that are in the csv- and session-data- directories.
+  - You can create subdirectories in the csv-data to organize your data according to years e.g.
+    There subdirectories will automatically be replicated in the session-data directory
+  - There is a very basic backup mechanism if a session is created a second time. The previous session file wil be saved in a directory 'old'.
   - The program consists of several tabs that can be selected at the bottom of the screen.
       - Setup pieces: the interesting parts can be selected for further study.
       - View pieces: study the sensordata in detail, comparing with other session, ...
       - Profile tabs: if the proper pieces are selected a profile of the crew and individual rowers can be created.
           - Boat, Crew, and rower tabs.
+      - Session info: configure the session, name the rowers, set calibration value
 	  
 ## Status
 
-   - A more of less functionally complete version, maybe a 1.0-beta version.
-     Most screens are working, as is video and the creation of a report.
+   - This is a basic working version.
+     The layout of the graphical elements has not been done properly, so it is sometimes difficult to see some parts of a window. This is work in progress.
 
 ## Screenshots
 
 Here a number screenshots to give an idea.
 For the moment this part is also the rudimentary user guide.
 Sessions can be created or selected from the menu at the top.
-Below all tabs are described.
+Below a description of the tabs.
 
 ### Setup Pieces
 
@@ -52,11 +55,11 @@ The currently selected pieces are shown in the right part of the screen.
 
 ![Eerste](docs/SetupPieces.png)
 
-The plot below gives an overview of the entire rowing session, it shows the rating.
-With it, the different part of the sessions can be easily found.
+The plot in the bottom part gives an overview of the entire rowing session, it shows the rating.
+With it, the different parts of the session can be easily found.
 
 To select pieces click on the interesting part in the lower plot.
-That part is shown above magified, and sensordata can be shown there.
+That part is now shown above magnified, and sensordata can be shown there.
 A piece is created as follows: type the name of the piece, say "t20" in the field next to the "New piece" button.
 Then click that button; it will turn red.
 The next two clicks in the large plot define the beginning and end of the piece respectivily.
@@ -72,24 +75,28 @@ There is some panning and zooming possible with the mouse-wheel and right button
 
 In the View Piece tab we can study the traces in more detail.
 The same panning and zooming is possible here.
-In this example two different sessions are selected to compare traces from these sessions.
-Using the "Secondary" button another session can be selected
-Here data from a 4- and an 8+ are compared.
-
-The plots are "normalized" in that they overlap even if the tempe's are different, this to better compare the strokes.
+The next screenshot shows a number of sensors, where they are scaled in such a way that the individual graphs are more or less the same size.
 
 ![Eerste](docs/ViewPiece.png)
 
+Using the "Secondary" button another session can be selected
+In this way it is possible to view 2 different sessions next to each other to compare traces from these sessions.
+
+Below two parts of the same session are shown one, with a stroke rate of 24 and the other with a rate of 30
+The plots are "normalized" in that they overlap even if the rates are different, this to better compare the strokes.
+
+![Eerste](docs/ViewPiece2.png)
+
 ### Using video
 
-The view piece screen can also be used to connect a video to the data.
+The view piece screen can also be used to connect a video session to the data.
 After selecting a video via the button the video appears.
-The video can be controlled with the video control butten, apart from the middle one.
-Also clicking in the plot positions the video.
+The video can be controlled with the video control button, apart from the middle one.
+Clicking in the plot also positions the video.
 
 The middle video control button is used the synchronise the video with the data as follows.
 First position the video to a point where the data can be found that matches that point.
-E.g. the first turning point of the oars a the intake after a start.
+E.g. the first turning point of the oars at the intake after a start.
 Then click the button, it will turn red; the video time is set.
 Next click on the plot on the correct point in the data.
 Finally click the button again. Synchronisation is complete.
@@ -98,8 +105,8 @@ Finally click the button again. Synchronisation is complete.
 
 ### Boat Profile
 
-When the correct pieces are selected a profile is created to aid in the interpretation of the data.
-The image shows a first version of this tab.
+When the correct 6 pieces are selected a profile is created to aid in the interpretation of the data.
+The image shows this boat profile tab.
 
 ![Eerste](docs/BoatProfile.png)
 
@@ -107,19 +114,20 @@ A profile is created using the button, but that is normally not needed, it will 
 A profile can be created using the first stroke of each piece or using the average over each piece.
 Clicking the checkbox will select that.
 The data can also be filtered using the other checkbox.
+
+The plots show the selected (averaged/filtered) stroke that is used in profiling.
+Using the tumble wheel below the create profile button we can select which pieces are shown in the plots.
+All pieces, the individual pieces or the average of them can be selected.
+
 The profile consists of this screen and the Crew- and Rower- screens, so creating a new profile will also affect those screens.
 The "Create report" creates a pdf version of the profile, see the docs directory for an [example report](docs/example_report.pdf)
 
-The report used the selected settings of checkboxes and tumble wheels.
-When the program is started the settings are set to average.
-
-The plots show the selected (averaged/filtered) stroke that is used in profiling.
-Using the tumble wheel below the create profile button all pieces, the individual pieces or the average of them can be selected.
+The report uses the selected settings of checkboxes and tumble wheels.
 
 ### Crew Profile
 
 A number of plots to compare rowers in a crew.
-The tumble wheel can be used to select the piece to look at, of the average can be used
+The tumble wheel can be used to select the piece to look at, or the average can be used
 
 ![Eerste](docs/CrewProfile.png)
 
@@ -128,12 +136,14 @@ The tumble wheel can be used to select the piece to look at, of the average can 
 Each rower has its own profile part.
 Again the tumble wheel can be used to select a single piece or the average.
 
-![Eerste](docs/Rowerview.png)
+![Eerste](docs/RowerView.png)
 
 ### Session Info
 
 In this tab some parts of the session can be configured: Crew name, calibration value, venue, ..
-Not implemented.
+
+![Eerste](docs/SessionInfo.png)
+
 
 ### Addition tabs
 

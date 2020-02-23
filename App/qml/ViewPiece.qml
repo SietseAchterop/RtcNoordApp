@@ -155,7 +155,33 @@ Item {
 		Text {
 		    width: 20
 		    Layout.minimumHeight: 50
+		    text: ''
+		}
+
+		CheckBox {
+		    checked: false
+		    text: qsTr("Scaled")
+		    onPressed: {
+			piece_mpl.set_scaling(checked);
+		    }
+		}
+
+		Text {
+		    width: 20
+		    Layout.minimumHeight: 50
+		    text: ''
+		}
+
+		Text {
+		    width: 20
+		    Layout.minimumHeight: 50
 		    text: 'Video control'
+		}
+
+		Text {
+		    width: 20
+		    Layout.minimumHeight: 50
+		    text: ''
 		}
 
 		Row {

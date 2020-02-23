@@ -376,9 +376,6 @@ class FormPieces(QObject):
         gd.boatPlots.del_all()
         gd.crewPlots.del_all()
 
-        # Delete Rower tables and plots
-        print(f'cleanup global   kom ik hier langs?')
-
     def update_the_models(self, session):
         self._data.load_sessionInfo(gd.sessionInfo['uniqHeader'])
         self.statusText = "Current session:  " + gd.config['SubDir'] + session
@@ -443,8 +440,12 @@ class FormPieces(QObject):
         # move session in old subdir and remove cache file if they exist
         # TODO: do not remove files in old, only after offering to copy relevant
         #       info to new session file is accepted.
+        oldInfo = None
         try:
             fd = Path.open(session_file, 'r')
+            inhoud = fd.read()
+            oldInfo = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
+            # get old sessionInfo
             fd.close()
             try:
                 Path.mkdir(sessionsDir() / 'old')
@@ -475,6 +476,12 @@ class FormPieces(QObject):
         # create sessionfile
         copyfile(configsDir() / 'session_template.yaml', session_file)
         gd.sessionInfo = selectSession()
+        if oldInfo is not None:
+            gd.sessionInfo['CrewInfo'] = oldInfo['CrewInfo']
+            gd.sessionInfo['Calibration'] = oldInfo['Calibration']
+            gd.sessionInfo['Misc'] = oldInfo['Misc']
+            gd.sessionInfo['Video'] = oldInfo['Video']
+
         gd.cal_value = gd.sessionInfo['Calibration']
 
         # read numpy data
@@ -544,12 +551,14 @@ class FormPieces(QObject):
         gd.sessionInfo = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
         gd.cal_value = gd.sessionInfo['Calibration']
 
-        # list met data voor de session Info tab
+        # list met data voor de session Info tab (placeholdertext)
         sinfo = [
             gd.sessionInfo['CrewInfo'],
             gd.cal_value,
             gd.sessionInfo['Misc'],
-            'De rest'
+            gd.sessionInfo['Rowers'],
+            gd.sessionInfo['Video'],
+            '...'
             ]
         
         gd.crewPlots.sessionsig.emit(sinfo)

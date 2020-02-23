@@ -1,31 +1,31 @@
-# YAML file for
+# session info YAML file
 
 # State of this session
 #   initial
 #   completely filled from traces data
 State: initial
 
-# Info, shown in the message
+# Name or description of the crew
 CrewInfo:
    The Crew
 
-# Only use the first RowerCnt values
-RowerNames:
-  - R 1
-  - R 2
-  - R 3
-  - R 4
-  - R 5
-  - R 6
-  - R 7
-  - R 8
+# Only the first RowerCnt values will be used
+#  name, year, length, weight
+Rowers:
+  - [R 1, 2000, 180, 90]
+  - [R 2, 2000, 180, 90]
+  - [R 3, 2000, 180, 90]
+  - [R 4, 2000, 180, 90]
+  - [R 5, 2000, 180, 90]
+  - [R 6, 2000, 180, 90]
+  - [R 7, 2000, 180, 90]
+  - [R 8, 2000, 180, 90]
 
 # number of rowers (generated)
 RowerCnt: 1
    
 Misc:
-   Free format info
-   wat je wil
+   Extra info about the session
 
 # Timestamp of last update of this file
 Timestamp: 2001-12-14 21:59:43.10 -5

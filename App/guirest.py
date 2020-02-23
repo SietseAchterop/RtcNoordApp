@@ -63,9 +63,8 @@ class FormView(QObject):
         self.pandistance = 0
         self.panbase = self.traceCentre
 
-        self.dd = None
-        self.ee = None
-
+        # scaling of the plots
+        self.scaling = False
         # with legends it becomes slow
         self._legend = True
 
@@ -198,14 +197,13 @@ class FormView(QObject):
 
         has_series = False
 
-        # always use 120 seconds of data, 30 seconds before the start of the piece and 90 after
-        #    this to (almost) always be able to have a secondary session to show
-        #  when no piece selected use the first 120 seconds
-        #  the secondary session is mapped onto this
-        #  evt. mapping aanpassen: strokes voor en achteruit via de gui
+        #  when no piece selected use the first 40 seconds
 
-        self.dd = self.ax1.scatter([self.xFrom], [0], marker='>', color='green')
-        self.ee = self.ax1.scatter([self.xTo], [0], marker='<', color='red')
+        #  self.scaling
+        factors = gd.sessionInfo['ScalingFactors']
+
+        self.ax1.scatter([self.xFrom], [0], marker='>', color='green')
+        self.ax1.scatter([self.xTo], [0], marker='<', color='red')
        
         for row in range(self._data.rowCount()):
             model_index = self._data.index(row, 0)
@@ -215,7 +213,11 @@ class FormView(QObject):
                 has_series = True
                 name = self._data.data(model_index, DataSensorsModel.NameRole)                
                 i = self._data.data(model_index, DataSensorsModel.DataRole) + 1
-                values = self._window_tr[:, i]
+                if self.scaling:
+                    scale = factors[i]
+                else:
+                    scale = 1
+                values = self._window_tr[:, i] * scale
                 self.ax1.plot(self.times, values, linewidth=0.6,  label=name)
 
         if gd.runningvideo:
@@ -223,17 +225,22 @@ class FormView(QObject):
             self.ax1.vlines(self.videoPos, 0, 20, transform=self.ax1.get_xaxis_transform(), colors='b')
 
         # secondary plots
-        for row in range(self._data2.rowCount()):
-            model_index = self._data2.index(row, 0)
-            checked = self._data2.data(model_index, DataSensorsModel.SelectedRole)
-            
+        if self.secondary:
+            factors = gd.sessionInfo2['ScalingFactors']
+            for row in range(self._data2.rowCount()):
+                model_index = self._data2.index(row, 0)
+                checked = self._data2.data(model_index, DataSensorsModel.SelectedRole)
 
-            if checked:
-                has_series = True
-                name = self._data2.data(model_index, DataSensorsModel.NameRole)                
-                i = self._data2.data(model_index, DataSensorsModel.DataRole) + 1
-                values = self._window_tr2[:, i]
-                self.ax1.plot(self.times, values, linewidth=0.7,  label=name, linestyle='--')
+                if checked:
+                    has_series = True
+                    name = self._data2.data(model_index, DataSensorsModel.NameRole)                
+                    i = self._data2.data(model_index, DataSensorsModel.DataRole) + 1
+                    if self.scaling:
+                        scale = factors[i]
+                    else:
+                        scale = 1
+                    values = self._window_tr2[:, i] * scale
+                    self.ax1.plot(self.times, values, linewidth=0.7,  label=name, linestyle='--')
 
         self.ax1.plot([self.traceCentre], [0], marker='D', color='b')                
         # what about pieceWidth?
@@ -367,6 +374,9 @@ class FormView(QObject):
             if v[0] == 'None':
                 return
             file = videoFile(v[0])
+            if not file.is_file():
+                print(f'{file} does not exist, ignored')
+                return
             self.videoStart = float(v[1])
             self.videoPos = float(v[2])
             print(f'started with {v[1]}  {v[2]}')
@@ -576,6 +586,12 @@ class FormView(QObject):
     def the_2nd_pieces(self):
         return [i.name() for i in gd.data_model5.alldata()]
 
+
+    # scaling
+    @pyqtSlot(bool)
+    def set_scaling(self, checked):
+        self.scaling = not checked
+        self.update_figure()
 
 # matplotlib plot in BoatProfile
 class BoatForm(QObject):
@@ -916,6 +932,8 @@ class CrewForm(QObject):
         gd.sessionInfo['CrewInfo'] = s[0]
         gd.sessionInfo['Calibration'] = float(s[1])
         gd.sessionInfo['Misc'] = s[2]
+        gd.sessionInfo['Rowers'] = s[3]
+        gd.sessionInfo['Video'] = s[4]
         saveSessionInfo(gd.sessionInfo)
 
 

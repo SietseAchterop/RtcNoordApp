@@ -38,7 +38,7 @@ def make_pdf_report():
     #doc.append(NoEscape(r'\maketitle'))
 
     ##   First page
-    with doc.create(Section('Boat report', numbering=False)):
+    with doc.create(Section(f'Boat report {gd.sessionInfo["CrewInfo"]}', numbering=False)):
         doc.append(f'Roeiers, info, ..\n')
         av = ''
         filt = ''

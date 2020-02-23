@@ -15,6 +15,7 @@ except OSError:
     print('nompv')
 
 import globalData as gd
+from catapult import catapult
 
 # sampling rate of the logger
 Hz = 50
@@ -205,6 +206,11 @@ def readCsvData(config, csvdata):
     # als we de logger direct kunnen gebruiken!
     # preheader:  rtcnoord, logger, filename, from, to
 
+    """
+    Eerste 10 kolummen lezen voor Info en plaats Normalized time bepalen?
+    Verder alleen t/m die kolom lezen
+    """
+
     header = next(reader)
     lenheader = len(header)
     header2 = next(reader)
@@ -216,6 +222,7 @@ def readCsvData(config, csvdata):
 
     # hier het aantal gebruikte kolommen bepreken tot "lengte" van header
     #    kunnen we verderop iets anders zetten, mn. de originelen van verbeterde kolommen
+    #   Info kolom
 
     for line, row in enumerate(reader):
         if row[0] != '':
@@ -236,12 +243,23 @@ def makecache(file):
 
     # forces to Newton
     for s in range(len(h1)):
-        if 'force' in h1[s].lower():
+        if 'Force' in h1[s]:
             gd.dataObject[:, s] = gd.dataObject[:, s] * 9.81
+
+    # shift seat positions, to get a better view in ViewPiece
+    for s in range(len(h1)):
+        if h1[s] == 'Seat Posn':
+            gd.dataObject[:, s] = gd.dataObject[:, s] + 700
+
+    # use catapult data if available
+    catapult()
+    
     np.save(file, gd.dataObject)
 
     gd.sessionInfo['Header']   = h1
     gd.sessionInfo['Header2']  = h2
+
+    gd.sessionInfo['ScalingFactors'] = factors()
 
     # correction for backwing rigging: no seat position 1 means backwing.
     #    laat voorlopig maar ....
@@ -445,3 +463,38 @@ def stopVideo():
     gd.player.terminate()
     del(gd.player)
     gd.runningvideo = False
+
+def factors():
+    """ return scaling factor for each sensor."""
+
+    # note Vel before without it, and the break!
+    f = {
+        'GateAngleVel': 3,
+        'GateAngle': 10,
+        'GateForce': 1,
+        'Seat Posn Vel': 0.5,
+        'Seat Posn': 1,
+        'StretcherForceX': 1,
+        'Stretcher': 8,
+        'Speed': 2,
+        'Accel': 40,
+        'Roll': 50,
+        'Pitch': 50,
+        'Yaw': 50
+        }
+
+    h = gd.sessionInfo['Header']
+    result = []
+    for s in h:
+        r = 1
+        found = False
+        for k in f:
+            if k in s:
+                # print(k, '->', f[k])
+                r = f[k]
+                result.append(r)
+                found = True
+                break
+        if not found:
+            result.append(r)
+    return result

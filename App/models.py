@@ -259,8 +259,9 @@ class BoatTableModel(QAbstractTableModel):
         speed = sum([d['Speedimp'] for d, e in out])/len(prof_pcs)
         self._data.append(
             DataSerie(2, ['Boot snelheid (m/s)'] + [f'{speed:.1f}'] + [ f'{d["Speedimp"]:.1f}' for d, e in out]) )
+        ploss = sum([d['PowerLoss'] for d, e in out])/len(prof_pcs)
         self._data.append(
-            DataSerie(2, ['Speed power loss(%)'] + [f'fout'] + [ f'{d["PowerLoss"]:.1f}' for d, e in out]) )
+            DataSerie(2, ['Speed power loss(%)'] + [f'{ploss:.1f}'] + [ f'{d["PowerLoss"]:.1f}' for d, e in out]) )
         dist = sum([ d["DistancePerStroke"] for d, e in out])/len(prof_pcs)
         self._data.append(
             DataSerie(2, ['Afstand per haal'] + [f'{dist:.2f}'] + [ f'{d["DistancePerStroke"]:.2f}' for d, e in out]) )
@@ -352,7 +353,7 @@ class RowerTableModel(QAbstractTableModel):
         self._column = 0
         self.endRemoveRows()
     
-    # averaging of filtering (gebruik bijn niet averaging)
+    # averaging over the entire piece (use shortest piece for length)
     @pyqtSlot(bool)
     def set_averaging(self, checked):
         gd.averaging = not checked
@@ -428,7 +429,7 @@ class RowerTableModel(QAbstractTableModel):
         self._data.append(
             DataSerie(2, ['Power average (W)'] + [''] + [''] + [ f'{r["PMean"]:.0f}' for r in ri]) )
         self._data.append(
-            DataSerie(2, ['Power/weight'] + [''] + [''] + ['', '', '', '', '', '', '' , '' ]) )
+            DataSerie(2, ['Power/weight'] + [''] + [''] + [ f'{r["PperKg"]:.2f}' for r in ri]) )
         self._data.append(
             DataSerie(2, ['Progn Power target rate'] + ['', '', '', '', '', '', '' , '' ]) )
         
