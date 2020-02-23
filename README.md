@@ -82,7 +82,7 @@ The next screenshot shows a number of sensors, where they are scaled in such a w
 Using the "Secondary" button another session can be selected
 In this way it is possible to view 2 different sessions next to each other to compare traces from these sessions.
 
-Below two parts of the same session are shown one, with a stroke rate of 24 and the other with a rate of 30
+Below two parts of the same session are shown one, with a stroke rate of 24 and the other with a rate of 30.
 The plots are "normalized" in that they overlap even if the rates are different, this to better compare the strokes.
 
 ![Eerste](docs/ViewPiece2.png)
@@ -116,6 +116,7 @@ Clicking the checkbox will select that.
 The data can also be filtered using the other checkbox.
 
 The plots show the selected (averaged/filtered) stroke that is used in profiling.
+The plot shows exactly one stroke starting at the point that the stroke rower has his/here oar(s) perpendicular to the boat in the recover.
 Using the tumble wheel below the create profile button we can select which pieces are shown in the plots.
 All pieces, the individual pieces or the average of them can be selected.
 
