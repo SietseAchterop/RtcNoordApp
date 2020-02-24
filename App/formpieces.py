@@ -547,7 +547,9 @@ class FormPieces(QObject):
             print(f'selectIt: cannot read Sessions file, should not happen  {session_file}')
             gd.config['Session'] = 'None'
             saveConfig(gd.config)
-            exit()
+            self.statusText = 'No sessions file found! Please select one.'
+            return
+
         gd.sessionInfo = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
         gd.cal_value = gd.sessionInfo['Calibration']
 

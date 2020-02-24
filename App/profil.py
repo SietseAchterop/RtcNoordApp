@@ -242,7 +242,6 @@ def pieceCalculations(nm, sp, a):
     # speed fluctuation power loss
     i = sensors.index('Speed')
     out['PowerLoss'] = 100*(1 - speedimp**3/np.mean(a[:, i]**3))
-    #    fout!!
 
     """
     Crewreport:
