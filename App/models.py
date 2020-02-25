@@ -287,7 +287,8 @@ class BoatTableModel(QAbstractTableModel):
         pcs = gd.sessionInfo['Pieces']
         p = prof_pieces(pcs)
         if p == []:
-            print(f'Error profiling, number of pieces {len(pcs)}')
+            p = [ a for a in pcs]
+            print(f'Error profiling, found pieces: {p}')
             gd.profile_available = False
             self.del_all()
             return False

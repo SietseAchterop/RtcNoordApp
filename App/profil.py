@@ -200,8 +200,8 @@ def pieceCalculations(nm, sp, a):
     speedimp =  (ee - bb)/(float(sp[-1] - sp[0])/50)
     out['Speedimp'] = speedimp
 
-    if ee == 0:
-        # we assume no distance info
+    if gd.sessionInfo['noDistance']:
+        # just for now
         out['Split'] = 0
     else:
         out['Split'] = 500/speedimp

@@ -256,13 +256,13 @@ def makecache(file):
             gd.dataObject[:, s] = gd.dataObject[:, s] + 700
 
     # impellor working?
-    noDistance = False
+    gd.sessionInfo['noDistance'] = False
     distsens = h1.index('Distance')
     if np.sum(gd.dataObject[100, distsens]) == 0:
-        noDistance = True
+        gd.sessionInfo['noDistance'] = True
 
     # use catapult data if available
-    catapult(noDistance)
+    catapult()
     
     np.save(file, gd.dataObject)
 

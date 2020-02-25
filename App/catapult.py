@@ -13,19 +13,19 @@ import utils
 import matplotlib.pyplot as plt
 
 
-def catapult(nodist):
+def catapult():
     """Look for catapult data and use it in the distance column."""
 
     # not needed
-    if not nodist:
+    if not gd.sessionInfo['noDistance']:
         return
     # no catapult file
     path = utils.csvsDir() / (gd.config['Session'] + '_cat.csv')
     if not path.is_file():
         return
-    print(f'create data from catapult file')
-    
+
     t = time.time()
+    print(f'create data from catapult file')
     
     # which dialect
     fd = Path.open(path, newline='')
@@ -77,8 +77,12 @@ def catapult(nodist):
     shift = np.argmax(corrarr)
     print(f'shift  {shift}, time  {(time.time() - t):.1f} seconds.')
 
+    # for now
     plt.plot(catacc50[shift: shift+plength])
     plt.plot(peachacc)
     plt.show()
+
+    # if correct, put values in distance column
+    # set gd.noDistance to True
 
     return
