@@ -2,7 +2,6 @@
 
 import os, sys, re, yaml, time, math
 from stat import S_IREAD, S_IRGRP, S_IROTH
-from pathlib import Path
 
 import traceback
 
@@ -578,5 +577,4 @@ class FormPieces(QObject):
         calibrate()
         self.update_the_models(session)
         gd.boattablemodel.make_profile()
-
 

@@ -239,6 +239,10 @@ def makecache(file):
     """Create and cache the data read from the csv-file in a .npy file """
     csvdata = []
     h1, h2 = readCsvData(gd.config, csvdata)
+    gd.sessionInfo['Header']   = h1
+    gd.sessionInfo['Header2']  = h2
+    gd.sessionInfo['ScalingFactors'] = factors()
+
     gd.dataObject = np.asarray(csvdata)
 
     # forces to Newton
@@ -251,15 +255,16 @@ def makecache(file):
         if h1[s] == 'Seat Posn':
             gd.dataObject[:, s] = gd.dataObject[:, s] + 700
 
+    # impellor working?
+    noDistance = False
+    distsens = h1.index('Distance')
+    if np.sum(gd.dataObject[100, distsens]) == 0:
+        noDistance = True
+
     # use catapult data if available
-    catapult()
+    catapult(noDistance)
     
     np.save(file, gd.dataObject)
-
-    gd.sessionInfo['Header']   = h1
-    gd.sessionInfo['Header2']  = h2
-
-    gd.sessionInfo['ScalingFactors'] = factors()
 
     # correction for backwing rigging: no seat position 1 means backwing.
     #    laat voorlopig maar ....
