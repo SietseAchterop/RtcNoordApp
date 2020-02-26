@@ -39,7 +39,7 @@ Item {
     Column {
 
 	Row {
-	    spacing:0
+	    spacing: 20
 	    objectName: 'rrow'
 	    TableView {
 		id: rowerTableView
@@ -54,7 +54,7 @@ Item {
 		rowHeightProvider: function (column) { return 20; }
 		model : modelname(rindex)  // this doesn't seem to work here:  'rowerTableModel' + roweritem.rindex
 		height: 460
-		width: 600  // dit moet anders...
+		width: 650  // dit moet anders...
 		delegate: Rectangle {
 		    // implicitWidth: 100
 		    height: 50
@@ -69,12 +69,10 @@ Item {
 	    }
 
 	    Column {
-		Row {
-		    Button {
-			text: 'Knopje'+rindex
-			onPressed: {
-			}
-		    }
+		spacing: 10
+		Text {
+		    text: ' '
+		    height: 280
 		}
 		Tumbler {
 		    id: rowertumbler
@@ -128,6 +126,15 @@ Item {
 			opacity: 1.0 - 2* (Math.abs(Tumbler.displacement))
 
 			// 0.4 + Math.max(0, 1 - Math.abs(Tumbler.displacement)) * 0.6
+		    }
+		    background: Item {
+			Rectangle {
+			    opacity: 0.3
+			    border.color: "black"
+			    color: "aquamarine"
+			    width: parent.width
+			    height: parent.height
+			}
 		    }
 		}
 

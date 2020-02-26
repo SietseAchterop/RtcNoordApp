@@ -122,6 +122,15 @@ Item {
 
 			// 0.4 + Math.max(0, 1 - Math.abs(Tumbler.displacement)) * 0.6
 		    }
+		    background: Item {
+			Rectangle {
+			    opacity: 0.3
+			    border.color: "black"
+			    color: "aquamarine"
+			    width: parent.width
+			    height: parent.height
+			}
+		    }
 		}
 	    }
 	}

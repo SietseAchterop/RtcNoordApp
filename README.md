@@ -122,6 +122,7 @@ Using the tumble wheel below the create profile button we can select which piece
 All pieces, the individual pieces or the average of them can be selected.
 
 The profile consists of this screen and the Crew- and Rower- screens, so creating a new profile will also affect those screens.
+They have scrollbars to get plots into view.
 The "Create report" creates a pdf version of the profile, see the docs directory for an [example report](docs/example_report.pdf)
 
 The report uses the selected settings of checkboxes and tumble wheels.
