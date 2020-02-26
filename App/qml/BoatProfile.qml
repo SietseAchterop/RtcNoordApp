@@ -12,7 +12,11 @@ Item {
 	return modeldata
     }
 
-    ColumnLayout {
+    ScrollView {
+	width: parent.width
+	height: parent.height
+
+    Column {
 
 	Text {
 	    text: ' '
@@ -34,7 +38,7 @@ Item {
 		delegate: Rectangle {
 		    // implicitWidth: 100
 		    height: 50
-		    color: {(index%boatTableView.rows)%2 ? 'gainsboro' : 'antiquewhite'}
+		    color: {(index%boatTableView.rows)%2 ? 'gainsboro' : 'aquamarine'}
 		    //  tableView rows en columns gebruiken: om en om andere kleuren
 		    Text {
 			text: display
@@ -127,11 +131,16 @@ Item {
             id: boatView
             objectName : "viewboat"
                             
+	    /*
             Layout.fillWidth: true
             Layout.fillHeight: true
                 
             Layout.minimumWidth: 1000
             Layout.minimumHeight: 600
+	    */
+	    width: 1000
+	    height: 600
         }
+    }
     }
 }

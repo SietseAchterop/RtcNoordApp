@@ -9,7 +9,7 @@ from utils import *
 
 import matplotlib.pyplot as plt
 
-from pylatex import Document, Section, Subsection, Command, Tabular, Figure, NewPage
+from pylatex import Document, Section, Subsection, Command, Tabular, Figure, NewPage, TextColor
 from pylatex.utils import italic, NoEscape
 
 
@@ -37,9 +37,13 @@ def make_pdf_report():
     doc.preamble.append(NoEscape(r'\usepackage{graphicx}'))
     #doc.append(NoEscape(r'\maketitle'))
 
+    # see https://doc.qt.io/qt-5/qml-color.html for colors
+    doc.append(NoEscape(r'\definecolor{aquamarine}{HTML}{7fffd4}'))
+    doc.append(NoEscape(r'\definecolor{gainsboro}{HTML}{dcdcdc}'))
+
     ##   First page
     with doc.create(Section(f'Boat report {gd.sessionInfo["CrewInfo"]}', numbering=False)):
-        doc.append(f'Roeiers, info, ..\n')
+        # doc.append(f'Roeiers, info, ..\n')
         av = ''
         filt = ''
         if gd.averaging:
@@ -47,7 +51,7 @@ def make_pdf_report():
         if gd.filter:
             filt = 'filtered'
         pcs = ['all'] + prof_pcs + ['average']
-        doc.append(f'Piece {pcs[gd.boatPiece]} used: {av} {filt}\n')
+        doc.append(f'Piece "{pcs[gd.boatPiece]}" used: {av} {filt}\n')
         # average filter vermelden
         # get table from boat report
         rows = gd.boattablemodel.rowCount()
@@ -59,9 +63,10 @@ def make_pdf_report():
             for j in range(columns):
                 index = QAbstractTableModel.index(gd.boattablemodel, 0, j)
                 row.append(str(gd.boattablemodel.data(index)))
-            table.add_row(row)
+            table.add_row(row, color='aquamarine')
             table.add_hline()
 
+            cnt = 0
             for i in range(rows):
                 row = []
                 if i == 0:
@@ -69,7 +74,11 @@ def make_pdf_report():
                 for j in range(columns):
                     index = QAbstractTableModel.index(gd.boattablemodel, i, j)
                     row.append(str(gd.boattablemodel.data(index)))
-                table.add_row(row)
+                if cnt%2 == 0:
+                    table.add_row(row, color='gainsboro')
+                else:
+                    table.add_row(row, color='aquamarine')
+                cnt += 1
             table.add_hline()
             
 
@@ -138,7 +147,7 @@ def make_pdf_report():
     doc.append(NewPage())
     with doc.create(Section('Crew report', numbering=False)):
         pcs = prof_pcs + ['average']
-        doc.append(f'Piece {pcs[gd.crewPiece]} used.\n')
+        doc.append(f'Piece "{pcs[gd.crewPiece]}" used.\n')
 
         crewfig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(nrows=3, ncols=2)
         ax1.set_title('Gate Angle')
@@ -233,7 +242,7 @@ def make_pdf_report():
 
     for rwr in range(rwrcnt):
         pcs = ['all'] + prof_pcs + ['average']
-        with doc.create(Section(f'Rower {rwr+1}, using piece {pcs[gd.rowerPiece[rwr]]}', numbering=False)):
+        with doc.create(Section(f'Rower {rwr+1}, using piece "{pcs[gd.rowerPiece[rwr]]}"', numbering=False)):
 
             rows = gd.rowertablemodel[rwr].rowCount()
             columns = gd.rowertablemodel[rwr].columnCount()
@@ -244,9 +253,10 @@ def make_pdf_report():
                 for j in range(columns):
                     index = QAbstractTableModel.index(gd.rowertablemodel[rwr], 0, j)
                     row.append(str(gd.rowertablemodel[rwr].data(index)))
-                table.add_row(row)
+                table.add_row(row, color='aquamarine')
                 table.add_hline()
 
+                cnt = 0
                 for i in range(rows):
                     row = []
                     if i == 0:
@@ -254,7 +264,11 @@ def make_pdf_report():
                     for j in range(columns):
                         index = QAbstractTableModel.index(gd.rowertablemodel[rwr], i, j)
                         row.append(str(gd.rowertablemodel[rwr].data(index)))
-                    table.add_row(row)
+                    if cnt%2 == 0:
+                        table.add_row(row, color='gainsboro')
+                    else:
+                        table.add_row(row, color='aquamarine')
+                    cnt += 1
                 table.add_hline()
             doc.append(f'\n')
             

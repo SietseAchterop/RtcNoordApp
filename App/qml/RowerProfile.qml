@@ -32,7 +32,11 @@ Item {
 	}
     }
 
-    ColumnLayout {
+    ScrollView {
+	width: parent.width
+	height: parent.height
+
+    Column {
 
 	Row {
 	    spacing:0
@@ -54,7 +58,7 @@ Item {
 		delegate: Rectangle {
 		    // implicitWidth: 100
 		    height: 50
-		    color: {(index%rowerTableView.rows)%2 ? 'gainsboro' : 'antiquewhite'}
+		    color: {(index%rowerTableView.rows)%2 ? 'gainsboro' : 'aquamarine'}
 		    //  tableView rows en columns gebruiken: om en om andere kleuren
 		    Text {
 			text: display
@@ -140,12 +144,16 @@ Item {
 		draw_mpl.rowerprofile(rowerView.qmlGetFigure, rindex)
 	    }
                             
+	    /*
             Layout.fillWidth: true
             Layout.fillHeight: true
                 
             Layout.minimumWidth: 1000
             Layout.minimumHeight: 600
+	    */
+	    width: 1000
+	    height: 600
         }
     }
-
+    }
 }

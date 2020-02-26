@@ -8,12 +8,16 @@ import Backend 1.0
 Item {
     id: prcrew
     
-    ColumnLayout {
+    ScrollView {
+	width: parent.width
+	height: parent.height
+
+    Column {
 	Text {
 	    text: 'Profile crew report'
 	}
 
-	RowLayout {
+	Row {
 	    Tumbler {
 	        id: crewtumbler
 		    
@@ -45,11 +49,15 @@ Item {
             id: crewView
             objectName : "viewcrew"
                             
+	    /*
             Layout.fillWidth: true
             Layout.fillHeight: true
                 
             Layout.minimumWidth: 1000
             Layout.minimumHeight: 800
+	    */
+	    width: 1000
+	    height: 800
         }
         
 	}	
@@ -58,6 +66,6 @@ Item {
 	    Text {
 	        text: ''
 	}
-	
+    }
     }
 }

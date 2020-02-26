@@ -10,7 +10,7 @@ Item {
 
 	ColumnLayout {
             Layout.fillWidth: true
-
+	    
             FigureToolbar {
                 id: mplPieces
                 objectName : "pieces"
@@ -21,8 +21,6 @@ Item {
                 Layout.minimumWidth: 10
                 Layout.minimumHeight: 10
             }
-            
-
 	}
 
       Connections {

@@ -6,7 +6,7 @@ import QtQuick.Dialogs 1.3
 ApplicationWindow {
     id: applicationWindow
     visible: true
-    width: 900
+    width: 1000
     height: 700
     title: qsTr("RTCNoord")
 
