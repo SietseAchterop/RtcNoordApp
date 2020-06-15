@@ -87,11 +87,11 @@ def interactive(session=None):
 
 
 def main():
-    """The main entry point when used as regular app
+    """The main entry point when used as a regular app
 
     It assumes a session is selected. When not, a dummy session None is used.
     A real session can be selected from the menu.
-    Either an existing session or  new one using a csv-file.
+      Either an existing session or a new one using a csv-file.
 
     """
 
@@ -106,7 +106,7 @@ def main():
     
     locale.setlocale(locale.LC_NUMERIC, "C");
 
-    # needed by filedialog  (bepaald waar configfile van Qt komt te staan)  Dit voor rtcnoordconfig gebruiken?
+    # needed for filedialog
     app.setOrganizationName(gd.orgname)
     app.setOrganizationDomain(gd.orgdomain)
     app.setApplicationName(gd.appname)
@@ -157,8 +157,6 @@ def main():
         gd.context.setContextProperty("rower_mpl"+str(i), gd.rowerPlots[i])
         # print(f'main: create the models  rower {i}      {gd.rowerPlots[i].update_figure}')            
 
-    # de foutmelding aan het einde: zie mijn melding op qt-forum qml/qtquick
-
     engine.load(str(app_Path / 'App' / 'qml' / 'main.qml'))
 
     gd.win = engine.rootObjects()[0]
@@ -169,16 +167,8 @@ def main():
     gd.boatPlots.figure = gd.win.findChild(QObject, "viewboat").getFigure()
     gd.crewPlots.figure = gd.win.findChild(QObject, "viewcrew").getFigure()
 
-    """
-    # als sessie None is, is sessionInfo er nog niet.
-    for i in range(gd.sessionInfo['RowerCnt']):
-        if gd.win.findChild(QObject, "viewrower"+str(i)) != None:
-            gd.rowerPlots[i].figure = gd.win.findChild(QObject, "viewrower"+str(i)).getFigure()
-    """
-    
     engine.quit.connect(app.quit)
     sys.exit(app.exec_())
-
 
 if __name__ == "__main__":
     main()

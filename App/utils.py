@@ -157,7 +157,7 @@ def selectSession():
         print(f'SelectSession: cannot read Sessions file, should not happen   {file}')
         gd.config['Session'] = 'None'
         saveConfig(gd.config)
-        # nog netter oplossen
+        # make cleaner solution
         exit()
 
     # new config set
@@ -203,26 +203,21 @@ def readCsvData(config, csvdata):
     fd.seek(0)
     reader = csv.reader(fd, dialect)    
 
-    # als we de logger direct kunnen gebruiken!
+    # if we could use the logger directly.
     # preheader:  rtcnoord, logger, filename, from, to
 
     """
-    Eerste 10 kolummen lezen voor Info en plaats Normalized time bepalen?
-    Verder alleen t/m die kolom lezen
+    Idea:
+    Read first 10 columns to determine number of relevant colums (untill Normalized time.
+    The further columns are then free for other use: meta data for the session.
+       of repair data
     """
 
     header = next(reader)
     lenheader = len(header)
     header2 = next(reader)
-    # print(header)
-    # welke sensors zijn er?
-    # print(header2)
-    # boottype uit eerste 2 rijen halen
-    #  backwings!
-
-    # hier het aantal gebruikte kolommen bepreken tot "lengte" van header
-    #    kunnen we verderop iets anders zetten, mn. de originelen van verbeterde kolommen
-    #   Info kolom
+    # aquire boat type from first 2 rows?
+    # cope with backwings and there "wrong" connection of the sensors?
 
     for line, row in enumerate(reader):
         if row[0] != '':
@@ -267,19 +262,19 @@ def makecache(file):
     np.save(file, gd.dataObject)
 
     # correction for backwing rigging: no seat position 1 means backwing.
-    #    laat voorlopig maar ....
+    #    not now
 
     # use stroke rower to determine start of stroke and rating
     try:
         h1.index('P GateAngle')
-        gd.sessionInfo['BoatType'] = 'scull'
+        gd.sessionInfo['ScullSweep'] = 'scull'
         indexes = [i for i, x in enumerate(h1) if x == "P GateAngle"]
         i = indexes[-1]
         indexes = [i for i, x in enumerate(h1) if x == "P GateForceX"]
         j = indexes[-1]
     except ValueError:
         h1.index('GateAngle')
-        gd.sessionInfo['BoatType'] = 'sweep'
+        gd.sessionInfo['ScullSweep'] = 'sweep'
         indexes = [i for i, x in enumerate(h1) if x == "GateAngle"]
         i = indexes[-1]
         indexes = [i for i, x in enumerate(h1) if x == "GateForceX"]
@@ -296,10 +291,33 @@ def makecache(file):
             h1[i] = h1[i] + ' ' + h2[i]
             h2[i] = int(h2[i])
     # number of rowers
-    #  moeten de junctionboxes wel goed zitten!
-    gd.sessionInfo['RowerCnt'] = int(max(n)) - int(min(n)) + 1
+    #  depend on correct connections (backwings)
+    rowercnt = gd.sessionInfo['RowerCnt'] = int(max(n)) - int(min(n)) + 1
+    gd.sessionInfo['RowerCnt'] = rowercnt
     if int(min(n)) != 1:
         print(f'WARNING: Rower numbering in header2 should start with 1!')
+
+    # Which boats/standards row to use?
+    #  set default, can be changed in SessionInfo tab
+    if gd.sessionInfo['ScullSweep'] == 'sweep':
+        if rowercnt == 2:
+            gd.sessionInfo['BoatType'] = 'H2-'
+        elif rowercnt == 4:
+            gd.sessionInfo['BoatType'] = 'H4-'
+        elif rowercnt == 8:
+            gd.sessionInfo['BoatType'] = 'H8+'
+        else:
+            print(f"should not happen: rowercnt = {rowercnt}")
+    else:
+        if rowercnt == 1:
+            gd.sessionInfo['BoatType'] = 'H1x'
+        elif rowercnt == 2:
+            gd.sessionInfo['BoatType'] = 'H2x'
+        elif rowercnt == 4:
+            gd.sessionInfo['BoatType'] = 'H4x'
+        else:
+            print(f"should not happen: rowercnt = {rowercnt}")
+
     gd.sessionInfo['uniqHeader']   = h1
     
     saveSessionInfo(gd.sessionInfo)
@@ -312,9 +330,9 @@ def tempi(gateAngle, gateForce):
        [(strokestart in seconds/Hz steps, rating)]
     """
 
-    # negatieve flanken van een gateangle is het begin van een cyclus
-    #     in de recover, riemen loodrecht op de boot
-    # tempo alleen tussen 10 en 60 proberen te herkennen
+    # negative edge of a gateangle is the beginning of a cycle?
+    #   or in the recover: oars perpendicular on the boat
+    # only recognize tempi between 10 en 60
     tempoList = []
     i = 0
     end = len(gateAngle)
@@ -325,11 +343,11 @@ def tempi(gateAngle, gateForce):
             state = 1
             continue
         if state == 1:
-            # voor een nuldoorgang naar beneden
+            # zero crossing to negative values
             if gateAngle[i] > 5:
                 state = 2
         elif state == 2:
-            # herken nuldoorgang
+            # zero crossing!
             if gateAngle[i] < 0:
                 strokestart = i
                 i += 2
@@ -339,7 +357,7 @@ def tempi(gateAngle, gateForce):
             if gateAngle[i] < -3:
                 state = 4
         elif state == 4:
-            # nuldoorgang naar boven
+            # zero crossing to higher values
             if gateAngle[i] > 0:
                 i += 2
                 state = 5
@@ -347,7 +365,7 @@ def tempi(gateAngle, gateForce):
             if gateAngle[i] > 5:
                 state = 6
         elif state == 6:
-            # einde haal cyclus
+            # end of cycle
             if gateAngle[i] < 0:
                 stroketime = (i - strokestart)
                 rating = 60*Hz/stroketime
@@ -443,7 +461,7 @@ def rowersensors(rower):
         except ValueError:
             continue
         if i-1 == rower:  # internally we start at 0
-            # pas op met foute nummers in csv (vanaf 2 beginnend)
+            # Need correct numbers in csv!! (starting from 2)
             sindex[s] = j
     if sindex == {}:
         print('Empty rowersensors(rower), error in csv-header?')

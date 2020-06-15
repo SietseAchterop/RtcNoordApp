@@ -40,7 +40,7 @@ def catapult():
     # the last one is the actual header
     lenheader = len(header)
 
-    # read Forward, Vel(100hz), Odometer uit catapult-csv file
+    # read Forward, Vel(100hz), Odometer from catapult-csv file
     catdata = []
     forward = []
     find = header.index(' Forward')

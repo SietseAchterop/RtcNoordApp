@@ -1,4 +1,4 @@
-"""The Gui related classes for the RTCnoord app."""
+"""The rest of the gui related classes for the RTCnoord app."""
 
 import sys, re, yaml, time, math
 from stat import S_IREAD, S_IRGRP, S_IROTH
@@ -119,8 +119,7 @@ class FormView(QObject):
     def onclick_u(self, event):
         try:
             if event.inaxes == self.ax1:
-                # button 3, maar gaat altijd goed
-                # panning stop
+                # button 3
                 self.panon = False
         except TypeError:
             pass
@@ -128,7 +127,7 @@ class FormView(QObject):
     def onscroll(self, event):
         try:
             if event.inaxes == self.ax1:
-                self.scale += event.step*0.05  # nog beter maken.
+                self.scale += event.step*0.05  # improve upon this
                 if self.scale < 0.05:
                     self.scale = 0.05
                 self.update_figure()
@@ -138,7 +137,7 @@ class FormView(QObject):
     def onnotify(self, event):
         try:
             if event.inaxes == self.ax1:
-                # button 3, maar gaat altijd goed
+                # button 3
                 if self.panon:
                     diff = (self.pandistance - event.x)
                     self.traceCentre = self.panbase + diff*0.1
@@ -323,7 +322,7 @@ class FormView(QObject):
                 strt, end = self.set_windows(piece=True, x=xFrom, y=xTo)
         self.update_figure()
 
-    # aangeroepen vanuit FromPieces (dan 2de sessie eruit) en lokaal bij nieuwe secondary
+    # called from FromPieces (then no 2nd session) and locally with new secondary
     def set_data_traces(self, local=False):
         self._data.load_sessionInfo(gd.sessionInfo['uniqHeader'])
         self._traces = gd.dataObject
@@ -357,19 +356,18 @@ class FormView(QObject):
                 #
                 end = strt + self._length
                 self._window_tr2 = np.copy(self._traces2[strt: end, :])
-            # normalise to compare better (alleen als we met pieces bezig zijn)
+            # normalise to compare better (only when doing pieces)
         self.update_figure()
 
 
     # Toggle video
-    #  steeds mpv starten/stoppen
+    #  start/stop mpv
     @pyqtSlot()
     def videoOpenClose(self):
         if gd.novideo:
             return
         
         if self.vid_state == 0:
-            # uit sesionInfo halen
             v = gd.sessionInfo['Video']
             if v[0] == 'None':
                 return
@@ -385,7 +383,7 @@ class FormView(QObject):
             gd.player.pause= True
             gd.hr_seek = 'yes'
             gd.player.loadfile(file.as_uri())
-            time.sleep(0.1)  # waarom nodig, en hoeveel (bij langzame computers)
+            time.sleep(0.1)  # why needed?
 
             gd.player.seek(self.videoStart)
             self.videoStart = self.videoPos  # now videostart marker ok
@@ -398,17 +396,17 @@ class FormView(QObject):
         self.update_figure()
 
     """
-    sync procedure, uitgaand van video op beginpositie, dus meteen na starten video
-       dan staat de video op waarde uit sessionInfo['Video'][1]
-       zet video op beoogd syncpositie
-       tel verplaatsing bij oude waarde op, dat is nu syncpositie in video  (a)
+    sync procedure, starting from video at starting position, directly after starting video
+       then sessionInfo['Video'][1] shows position
+       Set video on intended syncposiion using the qui.
+       Add displacement to old value (a).
 
-       klik middelste knopje, wordt rood
-       klik met muis precies op goede plaats in de data
-       nu weten we de plaats in de data (b)
+       Click middle button, with will turn red
+       Click exactly on intended position.
+       We now know the position in the data (b)
 
-       klik middelste knopje, wordt weer gewoon
-       zet a, b in sessionInfo['Video']
+       Click middle button, will return to normal
+       Put a and b in sessionInfo['Video']
 
     """
 
@@ -416,20 +414,20 @@ class FormView(QObject):
     def sync_mode(self, on):
         if gd.runningvideo:
             if on:
-                # fix startpunt in de video (a)
+                # fix start in video (a)
                 self.nieuw_vid = float(gd.sessionInfo['Video'][1]) + self.videoPos - self.videoStart
                 print(f'nv {self.nieuw_vid}')
                 
                 self.syncMode = True
-                # linker muisknop verplaatst nu rode lijn
+                # left button places red line
             else:
-                # fix data tov video startpunt (b)
+                # fix data wrt video start (b)
                 file = gd.sessionInfo['Video'][0]
                 gd.sessionInfo['Video'] = [ file,  str(self.nieuw_vid), str(self.videoNewStart) ]
                 # gd.sessionInfo['Video'][2] = self.videoNewStart
                 print(f'saved as {gd.sessionInfo["Video"]}')
                 saveSessionInfo(gd.sessionInfo)
-                # zet blauwe lijn op rode
+                # put blue line on red one.
                 self.videoPos = self.videoNewStart
                 self.syncMode = False
                 self.update_figure()
@@ -461,7 +459,7 @@ class FormView(QObject):
 
     # handling of second session
 
-    # een andere sessie kan een aander aantal sensoren hebben, hoe de mappen?
+    # what is that session has a different number of sensors, mapping?
 
     @pyqtProperty(str, notify=stateChanged)
     def sessionName(self):
@@ -492,14 +490,14 @@ class FormView(QObject):
         path = Path.home() / gd.config['BaseDir'] / 'caches'
         cache_file = cachesdir + session + '.npy'
     
-        # wat nodig?
+        # what to cleanup exactly?
         # self.cleanup_global_data()
         gd.data_model3.del_all()
         gd.data_model5.del_all()
 
         # update sessionInfo2
         if gd.os == 'win32':
-            session_file = re.sub('^/', '', session_file)   # hack voor windows, slash komt normaal op linux  niet voor
+            session_file = re.sub('^/', '', session_file)   # hack for windows
         session_file = Path(session_file)
         try:
             fd = Path.open(session_file, 'r')
@@ -514,7 +512,7 @@ class FormView(QObject):
 
         # update dataObject (should be there)
         if gd.os == 'win32':
-            cache_file = re.sub('^/', '', cache_file)   # hack voor windows, slash komt normaal op linux  niet voor
+            cache_file = re.sub('^/', '', cache_file)   # hack for windows
         cache_file = Path(cache_file)
         try:
             fd = Path.open(cache_file, 'r')
@@ -560,7 +558,7 @@ class FormView(QObject):
                         break
                 self.xFrom2, self.xTo2 = xFrom2/Hz, xTo2/Hz
 
-                # normalize to the current main piece
+                # normalize wrt current main piece
                 nmbr_sensors2 = self._traces2.shape[1]                
                 self._window_tr2 = np.zeros((self._length, nmbr_sensors2))
 
@@ -710,7 +708,7 @@ class BoatForm(QObject):
             if False:
                 #  we use start piece when showing all
                 rsens = rowersensors(int(gd.sessionInfo['RowerCnt']) - 1)
-                if gd.sessionInfo['BoatType'] == 'sweep':
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
                     ind_ga = rsens['GateAngle']
                     self.ax1.plot((gd.norm_arrays[i, :, ind_ga])/17+4, linewidth=0.6, label='Angle')
                 else:
@@ -719,12 +717,11 @@ class BoatForm(QObject):
             
             pa = []
             for i in range(len(prof_pcs)):
-                # versnelling en tempo per piece
-                #  bij de oude software was dit versnelling tegen tempo
+                # accel and tempo per piece
                 d, a = gd.out[i]
                 pa.append((d['Speed'], gd.sessionInfo['PieceCntRating'][i][1]))
             pa = list(zip(*pa))
-            p = [ 10*x for x in pa[0]]  # ad hoc schaling, snelheid decimeters/seconde
+            p = [ 10*x for x in pa[0]]  # ad hoc scaling, speed in decimeters/second
             self.ax4.scatter(list(range(6)), p, marker='H', color='green')
             self.ax4.scatter(list(range(6)), pa[1], marker='H', color='blue')
 
@@ -737,7 +734,7 @@ class BoatForm(QObject):
         if gd.profile_available:
             gd.profile_available = False
         self.update_figure()
-        """ deze kennelijk niet nodig
+        """ not needed
         self.twee.remove()
         self.drie.remove()
         """
@@ -749,10 +746,6 @@ class BoatForm(QObject):
 
 
 # matplotlib plot in Crew Profile
-# voorlopig kiezen we een piece en laten de data voor iedere roeiers zien
-# uiteindelijk het te gebruiken piece via de gui aangeven
-#
-#  here the properties of the sessionInfo tab
 class CrewForm(QObject):
 
     legendChanged = pyqtSignal()
@@ -843,8 +836,8 @@ class CrewForm(QObject):
         self.ax6.grid(True)
         self.ax6.set_title('Power Arm/Trunk')
 
-        # do the plotting of all rowers for the selected piece
-        # bootsnelheid, accel, pitch
+        # do plotting of all rowers for the selected piece
+        # speed, accel, pitch
         if gd.profile_available:
 
             rcnt = gd.sessionInfo['RowerCnt']
@@ -852,18 +845,16 @@ class CrewForm(QObject):
                 d, a = gd.out[gd.crewPiece]
                 for r in range(rcnt):
                     sns = rowersensors(r)
-                    # print(f'Maak crewplot voor {r}')
-                    if gd.sessionInfo['BoatType'] == 'sweep':
+                    # print(f'Create crewplot for {r}')
+                    if gd.sessionInfo['ScullSweep'] == 'sweep':
                         i = sns['GateAngle']
                         j = sns['GateForceX']
                     else:
                         i = sns['P GateAngle']
                         j = sns['P GateForceX']
-                    # stretchers is er niet altijd!
+                    # stretchers not always present!
                     # k = sns['Stretcher Z']
-                    # nog schakelaar voor maken om stretche en seatposition wel/niet mee te laten doen
-                    #  niet als ze er niet zijn
-                    #  optioneel als ze er (gedeeltelijk zijn)
+                    # todo: create switch to control working in this case
                     
                     self.een  = self.ax1.plot(gd.norm_arrays[gd.crewPiece, :, i], linewidth=0.6, label=f'R {r+1}')
                     self.twee = self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, j], linewidth=0.6, label=f'R {r+1}')
@@ -874,18 +865,16 @@ class CrewForm(QObject):
                 # average pieces
                 for r in range(rcnt):
                     sns = rowersensors(r)
-                    # print(f'Maak crewplot voor {r}')
-                    if gd.sessionInfo['BoatType'] == 'sweep':
+                    # print(f'Create crewplot for {r}')
+                    if gd.sessionInfo['ScullSweep'] == 'sweep':
                         i = sns['GateAngle']
                         j = sns['GateForceX']
                     else:
                         i = sns['P GateAngle']
                         j = sns['P GateForceX']
-                    # stretchers is er niet altijd!
+                    # stretchers not always present!
                     # k = sns['Stretcher Z']
-                    # nog schakelaar voor maken om stretche en seatposition wel/niet mee te laten doen
-                    #  niet als ze er niet zijn
-                    #  optioneel als ze er (gedeeltelijk zijn)
+                    # todo: create switch to control working in this case
                     
                     # average
                     nmbrpieces = len(prof_pcs)
@@ -1022,7 +1011,7 @@ class RowerForm(QObject):
         self.ax4.set_title('Power')
 
         # do the plotting
-        # bootsnelheid, accel, pitch
+        # speed, accel, pitch
         scaleAngle = 10
         if gd.profile_available:
             sensors = gd.sessionInfo['Header']
@@ -1030,8 +1019,8 @@ class RowerForm(QObject):
             if gd.rowerPiece[self.rower] == 0:
                 # all
                 for i in range(len(prof_pcs)):
-                    if gd.sessionInfo['BoatType'] == 'sweep':
-                        # print(f'Maak rowerplot voor {self.rower}')
+                    if gd.sessionInfo['ScullSweep'] == 'sweep':
+                        # print(f'Create rowerplot for {self.rower}')
                         self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
                         self.ax1.plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label='GateForceX')
                         self.ax3.plot(gd.norm_arrays[i, :, rsens['GateAngle']],
@@ -1050,7 +1039,7 @@ class RowerForm(QObject):
                 forceX = np.zeros((100,))
                 accel = np.zeros((100,))
                 power = np.zeros((100,))
-                if gd.sessionInfo['BoatType'] == 'sweep':
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
                     for i in range(len(prof_pcs)):
                         angle += gd.norm_arrays[i, :, rsens['GateAngle']]
                         forceX += gd.norm_arrays[i, :, rsens['GateForceX']]
@@ -1078,9 +1067,9 @@ class RowerForm(QObject):
             else:
                 i = gd.rowerPiece[self.rower] - 1
 
-                # ad hoc angle x 10. Beter via (max-min). Schaal is voor force
-                if gd.sessionInfo['BoatType'] == 'sweep':
-                    # print(f'Maak rowerplot voor {self.rower}')
+                # ad hoc angle x 10. Bettet via (max-min). Scale is for force
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
+                    # print(f'Create rowerplot for {self.rower}')
                     self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
                     self.ax1.plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label='GateForceX')
                     self.ax3.plot(gd.norm_arrays[i, :, rsens['GateAngle']],

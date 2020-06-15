@@ -1,17 +1,17 @@
 
 """
-   lees csv, naar numpy array, verbeter, weer terug naar csv, wegschrijven naar andere naam
-   als ik de verdere kolummen gebruik om de foute kolommen op de slaan, ZONDER de eerste rij, moet dat goed kunnen?
+   Repair csv files, e.g. when sensors are incorrectly connected or not calibrated.
+   Convert tot numpy and repair.
 
-   Direct in libreoffice
-       zet kolom apart, bijv in AD
-       in een AC cel met getallen
-           =ad3+3.5
-       sleep dat over de hele kolom
-       ac is nu 3.5 hoger dan ad
+   Alternative: use new colomns to store wrong colums. Not using the first row should distinguish them.
+
+   Directy in libreoffice
+       move wrong column far to the right, e.d. in AD
+       make AC cells:
+         e.g.   =ad3+3.5
+       copy over complete column.
        save as csv
-       verlaat libreoffice om formules te verwijderen
-       laad opnieuw en copy past naar goede plaats
-          
+       exit libreoffice to remove formulas
+       laad csv and copy ac to proper place
 
 """

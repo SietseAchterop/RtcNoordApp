@@ -47,7 +47,7 @@ class FormPieces(QObject):
         self.xTo = 1
         self._starttime = 0
 
-        self.traceCentre = 30  # halverwege de x-as
+        self.traceCentre = 30  # midway on the x-axis
         self.scale = 1
         self.scale_r = 1
         self.panon = False
@@ -58,7 +58,7 @@ class FormPieces(QObject):
         self._legend = False
 
         self._data = data
-        # tempi en traces komen nu later
+        # tempi and traces will come later
         self._tempi = tempi
         self._traces = None
         self.pieceWidth = 60
@@ -69,12 +69,12 @@ class FormPieces(QObject):
         self.markers_ax1 = None
         self.markers_ax2 = None
         
-        # the pieces are put in data_model2
+        # pieces are put in data_model2
         # markers to be set
         self.mbegin = 0
         self.mend = 0
 
-        # mode:   0:uit, 1:begin, 2:end,  3: creer gui entry en -> 1  (via qui -> 0)
+        # mode:   0:uit, 1:begin, 2:end,  3: create gui entry en -> 1  (via qui -> 0)
         self.pmode = 0
 
     def onclick_d(self, event):
@@ -86,7 +86,7 @@ class FormPieces(QObject):
             """
             if event.inaxes == self.ax1:
                 # ax1 processing
-                #   zetten pieces (button 1)
+                #   set pieces (button 1)
                 if event.button == 1:
                     if self.pmode == 1:
                         b = int(event.xdata*Hz)
@@ -120,7 +120,7 @@ class FormPieces(QObject):
                 
                 self.update_figure()
             else:
-                #  ook hier verschillende buttons verwerken
+                #  process other buttons
                 pass
             
         except TypeError:
@@ -134,8 +134,7 @@ class FormPieces(QObject):
     def onclick_u(self, event):
         try:
             if event.inaxes == self.ax1:
-                # button 3, maar gaat altijd goed
-                # panning stop
+                # button 3
                 self.panon = False
         except TypeError:
             pass
@@ -158,7 +157,7 @@ class FormPieces(QObject):
     def onnotify(self, event):
         try:
             if event.inaxes == self.ax1:
-                # button 3, maar gaat altijd goed
+                # button 3
                 if self.panon:
                     diff = (self.pandistance - event.x)
                     self.traceCentre = self.panbase + diff*0.2
@@ -235,7 +234,7 @@ class FormPieces(QObject):
             self.legendChanged.emit()
             print('lengend')
 
-    # twee functies voor de twee subplots?
+    # two functions for two subplots?
     @pyqtSlot()
     def update_tempo_figure(self):
         if self.figure is None:
@@ -401,14 +400,14 @@ class FormPieces(QObject):
 
         # Only accept files in csv_data dir
         csvbase =  str(Path.home() / gd.config['BaseDir'] / 'csv_data') + '/'
-        csvbase = re.sub('\\\\', '/', csvbase)   # for windows, backslash komt op linux normaal niet voor.
+        csvbase = re.sub('\\\\', '/', csvbase)   # for windows, no backslash on linux
         if csvbase not in csv_file:
             # ignore
             return
 
         # Update and use SubDir
         tail = re.sub(csvbase, '', csv_file)
-        tail = re.sub('^/', '', tail)   # hack voor windows, slash komt normaal op linux  niet voor
+        tail = re.sub('^/', '', tail)   # hack voor windows, no slash here on linux
         b = os.path.basename(tail)
         subdir = re.sub(b, '', tail)
         if subdir != gd.config['SubDir']:
@@ -511,14 +510,14 @@ class FormPieces(QObject):
 
         # only accept files in session_data dir
         sessionbase =  str(Path.home() / gd.config['BaseDir'] / 'session_data') + '/'
-        sessionbase = re.sub('\\\\', '/', sessionbase)   # for windows, backslash komt op linux normaal niet voor.
+        sessionbase = re.sub('\\\\', '/', sessionbase)   # for windows
         if sessionbase not in session_file:
             # ignore
             return
 
-        # Update and use SubDir
+        # update and use SubDir
         tail = re.sub(sessionbase, '', session_file)
-        tail = re.sub('^/', '', tail)   # hack voor windows, slash komt normaal op linux  niet voor
+        tail = re.sub('^/', '', tail)   # hack voor windows
         b = os.path.basename(tail)
         subdir = re.sub(b, '', tail)
         if subdir != gd.config['SubDir']:
@@ -552,7 +551,7 @@ class FormPieces(QObject):
         gd.sessionInfo = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
         gd.cal_value = gd.sessionInfo['Calibration']
 
-        # list met data voor de session Info tab (placeholdertext)
+        # list with data for the session Info tab (placeholdertext)
         sinfo = [
             gd.sessionInfo['CrewInfo'],
             gd.cal_value,
@@ -561,7 +560,7 @@ class FormPieces(QObject):
             gd.sessionInfo['Video'],
             '...'
             ]
-        
+
         gd.crewPlots.sessionsig.emit(sinfo)
 
         # update dataObject (should be there)
@@ -577,4 +576,3 @@ class FormPieces(QObject):
         calibrate()
         self.update_the_models(session)
         gd.boattablemodel.make_profile()
-

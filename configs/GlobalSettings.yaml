@@ -1,29 +1,55 @@
 # Global settings
 #
 
-# Parameters
-Parameters:
-  {
-  inboardScull    : 0.885,
-  outboardScull   : 2.005,
-  inboardSweep    : 1.14,
-  outboardSweep   : 2.60,
-  threshCatchScull : 20,         # kgf
-  threshFinScull   : 10,
-  threshCatchSweep : 30,
-  threshFinSweep   : 15,
-  shoulder        : 0.4,         # shoulder width in m
-  shoulderOffset  : 0.2,         # distance shoulder before seat in m
-  span            : 0.795,       # mid-center boat to pin in m
-  THcatch         : 3
-  }
-
-# BoatData
 Boats:
   {
-  namen :  [ standaard, Tempo, Type,  Gewicht, Netto aandrijftijd, Hoek inzet, Hoek uitzet, Slip inzet, Slip uitzet, Bankje verplaatsing, Piekkracht op % lengte, 70% Max kracht omhoog, 70% Max kracht omlaag, Vermogen],
-  H1x   :  [ '6:34.0'  , 36,    Boord, 95.0,    0.70,               -66.0 ,     44.0,        6.0,        12.0,        60.0,                38,                     12,                    32,                    540],
-  H2-   :  [ '6:12.0'  , 36,    Boord, 95.0,    0.70,               -54.0 ,     36.0,        9.0,        9.0,         60.0,                35,                     10,                    26,                    540],
+  H1x : { basetype : H1x, span : 1.6,  inboard : 0.88, outboard : 2.0 },
+  H2x : { basetype : H2x, span : 1.6,  inboard : 0.88, outboard : 2.0 },
+  H4x : { basetype : H4x, span : 1.6,  inboard : 0.88, outboard : 2.0 },
+  H2- : { basetype : H2-, span : 1.15, inboard : 0.85, outboard : 2.0 },
+  H4- : { basetype : H4-, span : 1.15, inboard : 0.85, outboard : 2.0 },
+  H8+ : { basetype : H8+, span : 1.15, inboard : 0.85, outboard : 2.0 },
 
+# variants
+  D1x :  { basetype : H1x, span : 1.6,  inboard : 0.88, outboard : 2.0 },
+  LH1x : { basetype : H1x, span : 1.6,  inboard : 0.88, outboard : 2.0 },
+  LD1x : { basetype : H1x, span : 1.6,  inboard : 0.88, outboard : 2.0 },
+  M1x :  { basetype : H1x, span : 1.6,  inboard : 0.88, outboard : 2.0 },
+  J1x :  { basetype : H1x, span : 1.6,  inboard : 0.88, outboard : 2.0 },
   }
 
+RowerModel:
+  {
+  shoulderWitdh   : 0.2,         # fraction of lenght
+  shoulderOffset  : 0.1,          # distance shoulder before seat in fraction of lenght
+  threshCatch     : 0.1,         # fraction of max force
+  threshFinish    : 0.1,         # fraction of max force
+  }
+
+
+Standards:
+  {
+  H1x  : { time : "06:34.0", tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
+  H2x  : { time : "06:04.0", tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
+  H4x  : { time : "05:34.0", tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
+  H2-  : { time : "06:12.0", tempo : 36,  type : sweep, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
+  H4-  : { time : "05:40.0", tempo : 36,  type : sweep, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
+  H8+  : { time : "05:20.0", tempo : 36,  type : sweep, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
+  D1x  : { time : "07:12.0", tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 350.0 },
+  LH1x : { time : "06:46.0", tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 460.0 },
+  LD1x : { time : "07:28.0", tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 350.0 },
+  M1x  : { time : "07:34.0", tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 350.0 },
+  J1x  : { time : "07:04.0", tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 400.0 },
+
+  }

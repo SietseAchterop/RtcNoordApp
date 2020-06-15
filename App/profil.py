@@ -29,7 +29,7 @@ def profile(pindex):
     ----------
     pindex: list of indices of the profile pieces in correct order
     """
-    # offset: later beginnen met het te gebruiken stuk
+    # offset: how much later to start
 
     # get correct pieces to use
     pieces = gd.sessionInfo['Pieces']
@@ -95,17 +95,17 @@ def profile(pindex):
     av_arrays = np.zeros((len(pd), length, len(sensors)))
 
     # average the data
-    #  als n == 1, dan niet altijd de eerste, een offset mogelijk maken?
-    #  als het tempo teveel varieert, zouden we moeten normeren...?
+    #  make offset possible when n == 1?
+    #  how to cope with too much variation in tempo?
     for i, st in enumerate(pos):
         for j in range(n):
             r = st[j] + length
             av_arrays[i, :, :] += gd.dataObject[st[j]:r, :]
     av_arrays = av_arrays/n
 
-    # filter some signals: snelheid, kracht, positie. Doch niet stretcher RL en TB
+    # filter some signals: speed, power, position. But not stretcher RL or TB
     [B, A] = signal.butter(4, 2*5/Hz)
-    #   voor of na het middelen?
+    #   before or after averaging?
     if gd.filter:
         # here the general signals
         i = sensors.index('Accel')
@@ -113,7 +113,7 @@ def profile(pindex):
 
     # scull: gate angle and force:  average and add
     #        Use port side
-    if gd.sessionInfo['BoatType'] == 'scull':
+    if gd.sessionInfo['ScullSweep'] == 'scull':
         for i, s in enumerate(sensors):
             # note: assume S site is at next position!
             if s.find('P GateAngle') >= 0:
@@ -125,7 +125,7 @@ def profile(pindex):
     for i in range(len(prof_pcs)):
         for j in range(len(sensors)-2):
             #  Stretcher RL en TB will always have nan values!
-            #  Speed Pos (Vel) is soms ook rot
+            #  Speed Pos (Vel) can alos miss values.
             #  we will ignore them for the moment
             if 'Stretcher' not in sensors[j]:
                 for k, c in enumerate(av_arrays[i, :, j]):
@@ -217,18 +217,16 @@ def pieceCalculations(nm, sp, a):
     out['Starting points'] = sp
 
     # maximum speed at %cycle
-    #  filter speed, zoek max, hoever in de haal
+    #  filter speed, find maximum in stroke.
     length = sp[1] - sp[0]
     f_speed = signal.filtfilt(B, A, a[0: length, i])
     mm = f_speed.argmax()
     mn = f_speed.argmin()
     out['MaxAtP'] = (mm/length)*100
     out['MinAtP'] = (mn/length)*100
-    # positive en negatiev acceleration at %cycle
-    #    zijn toch gewoon max en min?
+    # positive en negative acceleration at %cycle
 
-    # centreer yaw, pitch en angle ( averages in boat table) ?
-    # yaw en roll allen absmax
+    # center yaw, pitch and angle ( averages in boat table) ?
     i = sensors.index('Yaw Angle')
     yaw_abs = np.absolute(a[:, i])
     out['YawMax'] = yaw_abs.max()
@@ -259,7 +257,7 @@ def pieceCalculations(nm, sp, a):
 
     """
     Rower report, one for each rower
-      - table met targets erbij
+      - add table with targets
         - slip
         -
       - graphs
@@ -269,22 +267,22 @@ def pieceCalculations(nm, sp, a):
         - stretcher forces
 
     """
-    rwcnt = gd.sessionInfo['RowerCnt']
-    boattype = gd.sessionInfo['BoatType']
-    
     # allocate data for profile data: power, handleVel, handleVDSSeat (3)
-    #   beter een 3-de dimensie van maken!
+    #   or in a 3rd dimension?
+    rwcnt = gd.sessionInfo['RowerCnt']
     length = a.shape[0]
     prof_data = np.zeros((3*rwcnt, length))
 
+    scullsweep = gd.sessionInfo['ScullSweep']
+    boattype = gd.sessionInfo['BoatType']
+    inboard = gd.globals['Boats'][boattype]['inboard']
+    outboard = gd.globals['Boats'][boattype]['outboard']
+    
     for rwr in range(rwcnt):
         rsens = rowersensors(rwr)
         rowerstats = {}
-
-        if boattype == 'sweep':
-            inboard = gd.globals['Parameters']['inboardSweep']
-            outboard = gd.globals['Parameters']['outboardSweep']
-            # slecht gekozen naam
+        if scullsweep == 'sweep':
+            # rename IOratio?
             IOratio = inboard * outboard/(inboard+outboard)
 
             ind_ga = rsens['GateAngle']
@@ -305,8 +303,8 @@ def pieceCalculations(nm, sp, a):
             posmax = np.argmax(gate_a)
             fmax   = np.argmax(gate_fx)
 
-            rowerstats['GFMax'] = np.amax(gate_fx)   # fy er bij betrekken? die is toch klein dan
-            # mean van alleen de haal
+            rowerstats['GFMax'] = np.amax(gate_fx)   # also use fy?
+            # only use the stroke
             rowerstats['GFEff'] = np.mean(gate_fx[: posmax])
 
             """
@@ -325,11 +323,11 @@ def pieceCalculations(nm, sp, a):
             # start looking at posmax/2
             washpos = fmax + np.argmax(gate_fx[fmax: ] < threshold)
 
-            # graden tov begin van de haal
+            # degrees from beginning of stroke
             rowerstats['Slip'] = gate_a[slippos] - gate_a[posmin]
             if slippos < posmin:
                 rowerstats['Slip'] = -rowerstats['Slip']
-            # graden tov eind van de haal
+            # degrees wrt end of stroke
             rowerstats['Wash'] = gate_a[posmax] - gate_a[washpos]
             rowerstats['EffAngle'] = gate_a[washpos] - gate_a[slippos]
 
@@ -340,7 +338,7 @@ def pieceCalculations(nm, sp, a):
                                       np.multiply(a[:, ind_fy], np.sin(ga_rad)))
             moment          = IOratio * pinForceTS
             # speed in radians per second:
-            gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)               # moet nog gate_a worden!
+            gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)               # should be gate_a!
             power = moment * gateAngleVel
             prof_data[0+rwr]   = power
             # 0 being the first, add rwcnt and 2*rwcnt to the index for the next
@@ -363,12 +361,9 @@ def pieceCalculations(nm, sp, a):
             # TODO: PowerLegs, PowerTruncArms
 
             # TODO: HandleVel, HandleVDSSeat
-            #        gebruikt gateAngleVel. uit data of berekenen? (peachCalc doet beiden!
+            #        uses gateAngleVel. from data or calculate? (peachCalc does both!
 
         else:   # scull
-            inboard = gd.globals['Parameters']['inboardScull']
-            outboard = gd.globals['Parameters']['outboardScull']
-            # andere naam?
             IOratio = inboard * outboard/(inboard+outboard)
 
             # we already added P and S together in P
@@ -391,7 +386,6 @@ def pieceCalculations(nm, sp, a):
             fmax   = np.argmax(gate_fx)
 
             rowerstats['GFMax'] = np.amax(gate_fx)
-            # mean van alleen de haal
             rowerstats['GFEff'] = np.mean(gate_fx[: posmax])
 
             """
@@ -410,11 +404,9 @@ def pieceCalculations(nm, sp, a):
             # start looking at posmax/2
             washpos = fmax + np.argmax(gate_fx[fmax: ] < threshold)
 
-            # graden tov begin van de haal
             rowerstats['Slip'] = gate_a[slippos] - gate_a[posmin]
             if slippos < posmin:
                 rowerstats['Slip'] = -rowerstats['Slip']
-            # graden tov eind van de haal
             rowerstats['Wash'] = gate_a[posmax] - gate_a[washpos]
             rowerstats['EffAngle'] = gate_a[washpos] - gate_a[slippos]
 
@@ -424,7 +416,7 @@ def pieceCalculations(nm, sp, a):
             pinForceTS   = (np.multiply(a[:, ind_fxp], np.cos(ga_rad)) -
                             np.multiply(a[:, ind_fyp], np.sin(ga_rad)))
             moment       = IOratio * pinForceTS
-            gateAngleVel = np.gradient(math.pi*g_a/180, 1/Hz)                           # moet gate_a worden
+            gateAngleVel = np.gradient(math.pi*g_a/180, 1/Hz)                           # should be gate_a!
             power = moment * gateAngleVel
             prof_data[0+rwr]   = power
             rowerstats['PMax']  = np.max(power[:sp[1]-sp[0]])
@@ -453,9 +445,9 @@ def pieceCalculations(nm, sp, a):
 
     # normalize data for the averaged stroke in this piece
     for i in range(a.shape[1]):
-        l = sp[1]-sp[0]+2  # iets langer vanwege complete cyclus
+        l = sp[1]-sp[0]+2  # little bit longer to really complete te cycle
         x = np.arange(l)
-        # waarom fout als l = 105? fill_value helpt
+        # wry wrong when l = 105? fill_value helps
         g = interp1d(x, a[0:l, i], kind='cubic', fill_value="extrapolate")
         xnew = np.arange(100)*((l-1)/(100-1))
         # print(len(x), len(xnew), len(a[0:l, i]))
@@ -466,7 +458,7 @@ def pieceCalculations(nm, sp, a):
 
     # normalize profile_data
     profile_data = np.zeros((3*rwcnt, 100))
-    l = sp[1]-sp[0]+2  # iets langer vanwege complete cyclus
+    l = sp[1]-sp[0]+2
     x = np.arange(l)
     for i  in range(3*rwcnt):
         g = interp1d(x, prof_data[i, 0:l], kind='cubic', fill_value="extrapolate")

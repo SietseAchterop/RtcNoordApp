@@ -52,7 +52,6 @@ def make_pdf_report():
             filt = 'filtered'
         pcs = ['all'] + prof_pcs + ['average']
         doc.append(f'Piece "{pcs[gd.boatPiece]}" used: {av} {filt}\n')
-        # average filter vermelden
         # get table from boat report
         rows = gd.boattablemodel.rowCount()
         columns = gd.boattablemodel.columnCount()
@@ -126,12 +125,11 @@ def make_pdf_report():
 
         pa = []
         for i in range(len(prof_pcs)):
-            # versnelling en tempo per piece
-            #  bij de oude software was dit versnelling tegen tempo
+            # accel and tempo per piece
             d, a = gd.out[i]
             pa.append((d['Speed'], gd.sessionInfo['PieceCntRating'][i][1]))
         pa = list(zip(*pa))
-        p = [ 10*x for x in pa[0]]  # ad hoc schaling, snelheid decimeters/seconde
+        p = [ 10*x for x in pa[0]]  # ad hoc scaling
         ax4.scatter(list(range(6)), p, marker='H', color='green')
         ax4.scatter(list(range(6)), pa[1], marker='H', color='blue')
 
@@ -140,7 +138,7 @@ def make_pdf_report():
 
         tmpfig = tmpdir / gd.config['Session']
         plt.savefig(tmpfig)
-        tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows, backslash komt op linux normaal niet voor.
+        tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows
         doc.append(NoEscape(r'\includegraphics[width=1.0\textwidth]{' + f'{tmpfig}'  + r'}'))
 
     ##   Second page
@@ -169,14 +167,14 @@ def make_pdf_report():
             d, a = gd.out[piece]
             for r in range(rcnt):
                 sns = rowersensors(r)
-                # print(f'Maak crewplot voor {r}')
-                if gd.sessionInfo['BoatType'] == 'sweep':
+                # print(f'Make crewplot for {r}')
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
                     i = sns['GateAngle']
                     j = sns['GateForceX']
                 else:
                     i = sns['P GateAngle']
                     j = sns['P GateForceX']
-                # stretchers is er niet altijd!
+                # stretchers not always available!
                 # k = sns['Stretcher Z']
                     
                 een  = ax1.plot(gd.norm_arrays[piece, :, i], linewidth=0.5, label=f'R {r+1}')
@@ -188,18 +186,14 @@ def make_pdf_report():
             # average
             for r in range(rcnt):
                 sns = rowersensors(r)
-                # print(f'Maak crewplot voor {r}')
-                if gd.sessionInfo['BoatType'] == 'sweep':
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
                     i = sns['GateAngle']
                     j = sns['GateForceX']
                 else:
                     i = sns['P GateAngle']
                     j = sns['P GateForceX']
-                # stretchers is er niet altijd!
+                # stretchers not always available!
                 # k = sns['Stretcher Z']
-                # nog schakelaar voor maken om stretche en seatposition wel/niet mee te laten doen
-                #  niet als ze er niet zijn
-                #  optioneel als ze er (gedeeltelijk zijn)
                     
                 # average
                 nmbrpieces = len(prof_pcs)
@@ -226,7 +220,7 @@ def make_pdf_report():
         # we keep using the same name
         tmpfig = tmpdir / (gd.config['Session'] + '_crew')
         plt.savefig(tmpfig)
-        tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows, backslash komt op linux normaal niet voor.
+        tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows
         doc.append(NoEscape(r'\includegraphics[width=1.0\textwidth]{' + f'{tmpfig}'  + r'}'))
 
         
@@ -289,8 +283,8 @@ def make_pdf_report():
             if gd.rowerPiece[rwr] == 0:
                 # all
                 for i in range(len(prof_pcs)):
-                    if gd.sessionInfo['BoatType'] == 'sweep':
-                        # print(f'Maak rowerplot voor {self.rower}')
+                    if gd.sessionInfo['ScullSweep'] == 'sweep':
+                        # print(f'Make rowerplot for {self.rower}')
                         rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
                         rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label='GateForceX')
                         rax3[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
@@ -309,7 +303,7 @@ def make_pdf_report():
                 forceX = np.zeros((100,))
                 accel = np.zeros((100,))
                 power = np.zeros((100,))
-                if gd.sessionInfo['BoatType'] == 'sweep':
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
                     for i in range(len(prof_pcs)):
                         angle += gd.norm_arrays[i, :, rsens['GateAngle']]
                         forceX += gd.norm_arrays[i, :, rsens['GateForceX']]
@@ -337,9 +331,9 @@ def make_pdf_report():
             else:
                 i = gd.rowerPiece[rwr] - 1
 
-                # ad hoc angle x 10. Beter via (max-min). Schaal is voor force
-                if gd.sessionInfo['BoatType'] == 'sweep':
-                    # print(f'Maak rowerplot voor {self.rower}')
+                # ad hoc angle x 10. Better via (max-min).
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
+                    # print(f'Make rowerplot for {self.rower}')
                     rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
                     rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label='GateForceX')
                     rax3[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
@@ -361,12 +355,12 @@ def make_pdf_report():
             
             tmpfig = tmpdir / (gd.config['Session'] + f'_{rwr}')
             plt.savefig(tmpfig)
-            tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows, backslash komt op linux normaal niet voor.
+            tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows
             doc.append(NoEscape(r'\includegraphics[width=0.9\textwidth]{' + f'{tmpfig}'  + r'}'))
 
             if rwr != rwrcnt - 1: 
                 doc.append(NewPage())
 
 
-    # generate the report
+    # generate report
     doc.generate_pdf(reportfile, clean_tex=True)

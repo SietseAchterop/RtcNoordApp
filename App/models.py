@@ -51,8 +51,8 @@ class DataSensorsModel(QAbstractListModel):
         QAbstractListModel.__init__(self, parent)
         self._data_series = []
 
-    # dit gaat om het data model, dat komt uit gd.sessionInfo['uniqHeader']
-    #  we lezen de session file. 
+    # data model from gd.sessionInfo['uniqHeader']
+    #  we read the session file. 
     def load_sessionInfo(self, sInfo=None):
         self._data_series.clear()
         # fill data from sessionInfo, remove Time and Normalized time columns
@@ -185,7 +185,7 @@ class DataPiecesModel(QAbstractListModel):
 
 class BoatTableModel(QAbstractTableModel):
 
-    # info uit out en sessionInfo
+    # info from out and sessionInfo
     def __init__(self, out=None, parent=None):
         super().__init__(parent)
 
@@ -249,7 +249,7 @@ class BoatTableModel(QAbstractTableModel):
         # the rest
         # calculate averages
         self._data.append(
-            DataSerie(2, ['Aantal halen'] + [''] + [ c for c, r in gd.sessionInfo['PieceCntRating']]) )
+            DataSerie(2, ['Strokes'] + [''] + [ c for c, r in gd.sessionInfo['PieceCntRating']]) )
         self._data.append(
             DataSerie(2, ['Tempo'] + [''] + [ f'{r:.0f}' for c, r in gd.sessionInfo['PieceCntRating']]) )
         # print(f' model split {[ d["Split"] for d, e in out]}')
@@ -258,17 +258,17 @@ class BoatTableModel(QAbstractTableModel):
             DataSerie(2, ['500m split'] + [f'{int(split/60)}:{split%60:.1f}'] + [ f'{int(d["Split"]/60)}:{d["Split"]%60:.1f}' for d, e in out]) )
         speed = sum([d['Speedimp'] for d, e in out])/len(prof_pcs)
         self._data.append(
-            DataSerie(2, ['Boot snelheid (m/s)'] + [f'{speed:.1f}'] + [ f'{d["Speedimp"]:.1f}' for d, e in out]) )
+            DataSerie(2, ['Boat speed (m/s)'] + [f'{speed:.1f}'] + [ f'{d["Speedimp"]:.1f}' for d, e in out]) )
         ploss = sum([d['PowerLoss'] for d, e in out])/len(prof_pcs)
         self._data.append(
             DataSerie(2, ['Speed power loss(%)'] + [f'{ploss:.1f}'] + [ f'{d["PowerLoss"]:.1f}' for d, e in out]) )
         dist = sum([ d["DistancePerStroke"] for d, e in out])/len(prof_pcs)
         self._data.append(
-            DataSerie(2, ['Afstand per haal'] + [f'{dist:.2f}'] + [ f'{d["DistancePerStroke"]:.2f}' for d, e in out]) )
+            DataSerie(2, ['Distance/stroke'] + [f'{dist:.2f}'] + [ f'{d["DistancePerStroke"]:.2f}' for d, e in out]) )
         self._data.append(
-            DataSerie(2, ['Max at % cycle'] + [''] + [ f'{d["MaxAtP"]:.1f}' for d, e in out]) )
+            DataSerie(2, ['Max speed at % cycle'] + [''] + [ f'{d["MaxAtP"]:.1f}' for d, e in out]) )
         self._data.append(
-            DataSerie(2, ['Min at % cycle'] + [''] + [ f'{d["MinAtP"]:.1f}' for d, e in out]) )
+            DataSerie(2, ['Min speed at % cycle'] + [''] + [ f'{d["MinAtP"]:.1f}' for d, e in out]) )
         self._data.append(
             DataSerie(2, ['Maximum Yaw (\u00b0)'] + [''] + [ f'{d["YawMax"]:.1f}' for d, e in out]) )
         self._data.append(
@@ -281,8 +281,7 @@ class BoatTableModel(QAbstractTableModel):
         # for i in self._data:
         #     print(i.data())
 
-    # we create the complete profile here
-
+    # create complete profile here
     def prepareData(self):
         pcs = gd.sessionInfo['Pieces']
         p = prof_pieces(pcs)
@@ -312,12 +311,11 @@ class BoatTableModel(QAbstractTableModel):
         self.prepareData()
 
         if gd.profile_available:
-            # maak een pdf versie van het profile rapport
             make_pdf_report()
 
 class RowerTableModel(QAbstractTableModel):
 
-    # info uit out en sessionInfo
+    # info from out and sessionInfo
     def __init__(self, rower, out=None, parent=None):
         super().__init__(parent)
 
@@ -370,7 +368,7 @@ class RowerTableModel(QAbstractTableModel):
         self.beginInsertRows(QModelIndex(), self.rowCount(), self.rowCount())
         self._data.append(series)
 
-        # hoe van self.rower naar de data?
+        # how from self.rower to data?
         outboat = [ d for d, e in out]
         # outboat[piece][rower]
         ri = [a[self.rower] for a in outboat]    # rower info per piece

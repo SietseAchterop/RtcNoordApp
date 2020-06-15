@@ -44,7 +44,8 @@ Header  : []
 Header2 : []
 uniqHeader: []
 
-# Boat type (scull or sweep, generated)
+# Boat type (scull or sweep, boat type)
+ScullSweep: no
 BoatType: no
 
 # Generated list with for each stroke the time and rating,  derived from GateAngle?
