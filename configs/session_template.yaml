@@ -60,7 +60,7 @@ Tempi :
 # Marked pieces: name, start, length, average rating (generated)
 Pieces: []
 
-# file met video
+# filename in videos directory
 # index in data en index in video
 # name of piece
 Video:
