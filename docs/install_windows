@@ -101,6 +101,7 @@ Installing with ananconda
 
 - install anaconda3 via installer
 - start anaconda powershell (vanuit navigator)
+  (misschien beter allemaal in navigator/environment doen)
   - conda list
      voor overzicht 
   - conda create --name myenv
@@ -115,15 +116,20 @@ Installing with ananconda
      - pip install pylatex
      - pip install matplotlib==3.1.3
            (nieuwere versie werkt nog niet)
-	   
-- werkt alleen vanuit anaconda prompt en myenv!
-  - conda activate myenv
-  - cd <App-dir>
-  - python main.py
-  
+
+- installatie via navigator/enviroment
+  - kies environments en maak new environment myenv, en selecteer dat.
+  - voeg channel conda-forge toe aan channels
+  - update pyqt en de andere bovenstaande paketten.
+        matplotlib moet versie 3.1.3 worden.
+
+- als myenv geselecteerd is in anancondo:
+    - start via ananconda powershell prompt of via spider(myenv)
+    
 hoe als los programma te starten?
   wat is er allemaal speciaal in de anaconda prompts?
-
+  een complete app van maken is overkill/onhandig op dezelfde machine
+  
 
 
 
