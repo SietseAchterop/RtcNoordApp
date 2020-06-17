@@ -95,7 +95,7 @@ Using Git (optional)
     Scripts directory in path zetten van GITbash
        bijv. voor pip
 
-Installing with ananconda
+Installing with anaconda
 =========================
  Several attempts failed, so maybe first uninstall an existing anaconda
 
@@ -123,8 +123,8 @@ Installing with ananconda
   - update pyqt en de andere bovenstaande paketten.
         matplotlib moet versie 3.1.3 worden.
 
-- als myenv geselecteerd is in anancondo:
-    - start via ananconda powershell prompt of via spider(myenv)
+- als myenv geselecteerd is in anacondo:
+    - start via anaconda powershell prompt of via spider(myenv)
     
 hoe als los programma te starten?
   wat is er allemaal speciaal in de anaconda prompts?
