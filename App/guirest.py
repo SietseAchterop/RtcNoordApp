@@ -1200,8 +1200,6 @@ class StretcherForm(QObject):
                 # average DOEN WE NIET
                 pass
             else: 
-                print(f'stretch {self.rower}   {gd.rowerPiece[self.rower]}')
-            
                 # a piece (alleen dit)
                 i = gd.rowerPiece[self.rower] - 1
                 name, se, nr, sp = pieces[i]
