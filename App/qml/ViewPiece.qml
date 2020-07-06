@@ -97,17 +97,13 @@ Item {
 			}
                     }
 
-                    RowLayout {
-			id: rowLayout1
-			Layout.fillWidth: true
-		    
-			// items zijn piece namen
-			ComboBox {
-			    model: draw_mpl.the_pieces
-			    onActivated: piece_mpl.set_piece(currentText)
-			}
-                    }
-		}
+		    // items zijn piece namen
+		    ComboBox {
+			model: draw_mpl.the_pieces
+			onActivated: piece_mpl.set_piece(currentText)
+		    }
+                }
+
 
 		// The second session
 		ColumnLayout {
@@ -137,18 +133,11 @@ Item {
 			}
                     }
 
-                    RowLayout {
-			id: rowLayout2
-			Layout.fillWidth: true
-		    
-			ComboBox {
-			    model: piece_mpl.the_2nd_pieces
-			    onActivated: piece_mpl.set_2nd_piece(currentText)
-			}
-                    }
+		    ComboBox {
+			model: piece_mpl.the_2nd_pieces
+			onActivated: piece_mpl.set_2nd_piece(currentText)
+		    }
 		}
-
-
 	    }
 
 

@@ -105,6 +105,7 @@ class DataSensorsModel(QAbstractListModel):
         self.endRemoveRows()
     
 
+
 # dataModel for the makePiecesModel and viewPiecesModel
 class DataPiecesModel(QAbstractListModel):
 
@@ -172,7 +173,7 @@ class DataPiecesModel(QAbstractListModel):
         return self._data_series
 
     def set_all(self, pieces):
-        for (name, i) in pieces:
+        for (name, i, cr, tl) in pieces:
             self.beginInsertRows(QModelIndex(), self.rowCount(), self.rowCount())
             self._data_series.append(DataSerie(name, i))
             self.endInsertRows()
@@ -239,30 +240,32 @@ class BoatTableModel(QAbstractTableModel):
     def fillBoatTable(self, out):
         self._data.clear()
 
+        pieces = gd.sessionInfo['Pieces']
+        cntrating = [cr for nm, x, cr, tl  in pieces]
+
         # First header line
         n = 1
-        line = prof_pcs
-        series = DataSerie(n, [''] +['Average'] + line)
+        series = DataSerie(n, [''] + ['Average'] + gd.p_names)
         self.beginInsertRows(QModelIndex(), self.rowCount(), self.rowCount())
         self._data.append(series)
 
         # the rest
         # calculate averages
         self._data.append(
-            DataSerie(2, ['Strokes'] + [''] + [ c for c, r in gd.sessionInfo['PieceCntRating']]) )
+            DataSerie(2, ['Strokes'] + [''] + [ c for c, r in cntrating]) )
         self._data.append(
-            DataSerie(2, ['Tempo'] + [''] + [ f'{r:.0f}' for c, r in gd.sessionInfo['PieceCntRating']]) )
+            DataSerie(2, ['Tempo'] + [''] + [ f'{r:.0f}' for c, r in cntrating]) )
         # print(f' model split {[ d["Split"] for d, e in out]}')
-        split = sum([d['Split'] for d, e in out])/len(prof_pcs)
+        split = sum([d['Split'] for d, e in out])/len(gd.p_names)
         self._data.append(
             DataSerie(2, ['500m split'] + [f'{int(split/60)}:{split%60:.1f}'] + [ f'{int(d["Split"]/60)}:{d["Split"]%60:.1f}' for d, e in out]) )
-        speed = sum([d['Speedimp'] for d, e in out])/len(prof_pcs)
+        speed = sum([d['Speedimp'] for d, e in out])/len(gd.p_names)
         self._data.append(
             DataSerie(2, ['Boat speed (m/s)'] + [f'{speed:.1f}'] + [ f'{d["Speedimp"]:.1f}' for d, e in out]) )
-        ploss = sum([d['PowerLoss'] for d, e in out])/len(prof_pcs)
+        ploss = sum([d['PowerLoss'] for d, e in out])/len(gd.p_names)
         self._data.append(
             DataSerie(2, ['Speed power loss(%)'] + [f'{ploss:.1f}'] + [ f'{d["PowerLoss"]:.1f}' for d, e in out]) )
-        dist = sum([ d["DistancePerStroke"] for d, e in out])/len(prof_pcs)
+        dist = sum([ d["DistancePerStroke"] for d, e in out])/len(gd.p_names)
         self._data.append(
             DataSerie(2, ['Distance/stroke'] + [f'{dist:.2f}'] + [ f'{d["DistancePerStroke"]:.2f}' for d, e in out]) )
         self._data.append(
@@ -284,14 +287,12 @@ class BoatTableModel(QAbstractTableModel):
     # create complete profile here
     def prepareData(self):
         pcs = gd.sessionInfo['Pieces']
-        p = prof_pieces(pcs)
-        if p == []:
-            p = [ a for a in pcs]
-            print(f'Error profiling, found pieces: {p}')
+        if pcs == []:
             gd.profile_available = False
-            self.del_all()
+            self.del_all()   # nodig?
             return False
-        gd.out = profile(p)
+        gd.p_names = [ nm for nm, be, cr, tl in gd.sessionInfo['Pieces']]
+        gd.out = profile()
 
         self.fillBoatTable(gd.out)
         for i in range(gd.sessionInfo['RowerCnt']):
@@ -304,11 +305,12 @@ class BoatTableModel(QAbstractTableModel):
         gd.crewPlots.update_figure()        
         for i in range(gd.sessionInfo['RowerCnt']):
             gd.rowerPlots[i].update_figure()
+            gd.stretcherPlots[i].update_figure()
         
 
     @pyqtSlot()
     def make_report(self):
-        self.prepareData()
+        self.prepareData()    # maybe already done!
 
         if gd.profile_available:
             make_pdf_report()
@@ -360,11 +362,13 @@ class RowerTableModel(QAbstractTableModel):
 
     def fillRowerTable(self, out):
         self._data.clear()
+        
+        pieces = gd.sessionInfo['Pieces']
+        cntrating = [cr for nm, x, cr, tl  in pieces]
 
         # First header line
         n = 1
-        line = [ 'Target', 'Average', 'start', 't20', 't24', 't28', 't32', 'max' ]
-        series = DataSerie(n, [''] + line)
+        series = DataSerie(n, ['', 'Target', 'Average'] + gd.p_names)
         self.beginInsertRows(QModelIndex(), self.rowCount(), self.rowCount())
         self._data.append(series)
 
@@ -376,16 +380,18 @@ class RowerTableModel(QAbstractTableModel):
 
         # the rest
         self._data.append(
-            DataSerie(2, ['Stroke rate'] + [''] + [''] + [ f'{r:.0f}' for c, r in gd.sessionInfo['PieceCntRating']]) )
+            DataSerie(2, ['Stroke rate'] + [''] + [''] + [ f'{r:.0f}' for c, r in cntrating]) )
         """
         self._data.append(
-            DataSerie(2, ['Drive time'] + ['', '', '', '', '', '', '' , '' , '' ]) )
+            DataSerie(2, ['Drive time'] + ['' for i in range(len(gd.p_names)+2)]) )
         """
         # rhythm moet naar boat profile
         self._data.append(
             DataSerie(2, ['Rhythm (% Cycle time)'] + [''] + [''] + [ f'{r["Rhythm"]:.0f}' for r in ri]) )
+        """
         self._data.append(
-            DataSerie(2, ['', '', '', '', '', '', '' , '' , '' ]) )
+            DataSerie(2, ['' for i in range(len(gd.p_names)+3)]) )
+        """
         self._data.append(
             DataSerie(2, ['Catch angle (\u00b0)'] + [''] + [''] + [ f'{r["CatchA"]:.0f}' for r in ri]) )
         self._data.append(
@@ -401,9 +407,9 @@ class RowerTableModel(QAbstractTableModel):
         """
         self._data.append(
             DataSerie(2, ['Effective angle (%)'] + ['', '', '', '', '', '', '' , '' ]) )
-        """
         self._data.append(
-            DataSerie(2, ['', '', '', '', '', '', '' , '' , '' ]) )
+            DataSerie(2, ['' for i in range(len(gd.p_names)+3)]) )
+        """
         self._data.append(
             DataSerie(2, ['Gate force average'] + [''] + [''] + [ f'{r["GFEff"]:.0f}' for r in ri]) )
         self._data.append(
@@ -418,9 +424,9 @@ class RowerTableModel(QAbstractTableModel):
             DataSerie(2, ['Gate force up to 70% at (\u00b0)'] + [''] + [''] + [ f'{r["UpAt70"]:.0f}' for r in ri]) )
         self._data.append(
             DataSerie(2, ['Gate force under 70% at (\u00b0)'] + [''] + [''] + [ f'{r["DownAt70"]:.0f}' for r in ri]) )
-        """
         self._data.append(
-            DataSerie(2, ['', '', '', '', '', '', '' , '' , '' ]) )
+            DataSerie(2, ['' for i in range(len(gd.p_names)+3)]) )            
+        """
         self._data.append(
             DataSerie(2, ['Work (J)'] + [''] + [''] + [ f'{r["Work"]:.0f}' for r in ri]) )
         self._data.append(
@@ -430,7 +436,7 @@ class RowerTableModel(QAbstractTableModel):
         self._data.append(
             DataSerie(2, ['Power/weight'] + [''] + [''] + [ f'{r["PperKg"]:.2f}' for r in ri]) )
         self._data.append(
-            DataSerie(2, ['Progn Power target rate'] + ['', '', '', '', '', '', '' , '' ]) )
+            DataSerie(2, ['Progn Power target rate'] +  ['' for i in range(len(gd.p_names)+2)]) )
         
         self.endInsertRows()
         self._column = len(self._data[0].data())
@@ -438,3 +444,98 @@ class RowerTableModel(QAbstractTableModel):
         #print('rowertable')
         #for i in self._data:
         #    print(i.data())
+
+
+# dataModel for the different boat types
+class DataBoatsModel(QAbstractListModel, QObject):
+    """
+
+    """
+
+    stateChanged = pyqtSignal()
+
+    # Define role enum
+    SelectedRole = Qt.UserRole
+    NameRole = Qt.UserRole + 1
+    DataRole = Qt.UserRole + 2
+
+    _roles = {
+        SelectedRole : b"selected",
+        NameRole : b"name",
+        DataRole : b"data"
+    }
+    
+    def __init__(self, parent=None):
+        QAbstractListModel.__init__(self, parent)
+        self._data_series = []
+
+    # data model to select boatinfo
+    def load_boatsInfo(self):
+        self._data_series.clear()
+        boats = gd.globals['Boats']
+        for i, name in enumerate(boats):
+            series = DataSerie(name, i)
+            self.add_data(series)
+
+    def add_data(self, data_series):
+        self.beginInsertRows(QModelIndex(), self.rowCount(), self.rowCount())
+        self._data_series.append(data_series)
+        self.endInsertRows()
+    
+    def roleNames(self):
+        return self._roles
+    
+    def rowCount(self, parent=QModelIndex()):
+        return len(self._data_series)
+        
+    def data(self, index, role=Qt.DisplayRole):
+        if(index.row() < 0 or index.row() >= len(self._data_series)):
+            return QVariant()
+        
+        series = self._data_series[index.row()]
+        if role == self.SelectedRole:
+            return series.selected()
+        elif role == self.NameRole:
+            return series.name()
+        elif role == self.DataRole:
+            return series.data()
+        
+        return QVariant()
+    
+    def setData(self, index, value, role=Qt.EditRole):
+        if(index.row() < 0 or index.row() >= len(self._data_series)):
+            return False
+        
+        series = self._data_series[index.row()]
+        if role == self.SelectedRole:
+            series._selected = value
+            self.dataChanged.emit(index, index, [role,])
+            return True
+                
+        return False
+
+    def alldata(self):
+        return self._data_series
+
+    def del_all(self):
+        self.beginRemoveColumns(QModelIndex(), 0, len(self._data_series))
+        self._data_series = []
+        self.endRemoveRows()
+
+    @pyqtSlot(str)
+    def set_boattype(self, type):
+        gd.sessionInfo['BoatType'] = type
+        saveSessionInfo(gd.sessionInfo)
+        gd.boattablemodel.make_profile()
+
+    @pyqtProperty(list, notify=stateChanged)
+    def the_boat_types(self):
+        return [i.name() for i in self.alldata()]
+
+    @pyqtProperty(int, notify=stateChanged)
+    def current_boat_type(self):
+        if gd.sessionInfo == {}:
+            return 0
+        return [i.name() for i in self.alldata()].index(gd.sessionInfo['BoatType'])
+
+        

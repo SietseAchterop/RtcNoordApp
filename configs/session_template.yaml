@@ -1,4 +1,4 @@
-# session info YAML file
+# template of session info YAML file
 
 # State of this session
 #   initial
@@ -39,14 +39,17 @@ Traces: row004107-000001D_traces
 # Speed and distance calibration
 Calibration: 1.0
 
+# start points for pieces in the csv file (by concatenation csv files)
+CsvPieces : []
+
 # First 2 header rows from the csv-file
 Header  : []
 Header2 : []
 uniqHeader: []
 
 # Boat type (scull or sweep, boat type)
-ScullSweep: no
-BoatType: no
+ScullSweep: 'scull'
+BoatType: 'M1x'
 
 # Generated list with for each stroke the time and rating,  derived from GateAngle?
 #    tijd tussen twee opgaande nuldoorgangen, eerste als de tijd
@@ -57,7 +60,7 @@ Tempi :
   - [1680, 13]
   
 
-# Marked pieces: name, start, length, average rating (generated)
+# Marked pieces: list of name, (start, length) , (cnt, average rating) (generated)
 Pieces: []
 
 # filename in videos directory

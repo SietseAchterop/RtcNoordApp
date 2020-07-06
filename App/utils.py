@@ -19,8 +19,6 @@ from catapult import catapult
 
 # sampling rate of the logger
 Hz = 50
-# pieces needed for the profile, in THAT order
-prof_pcs = ['start', 't20', 't24', 't28', 't32', 'max']
 
 def startup():
     """Determine platform we are on.
@@ -169,6 +167,7 @@ def saveSessionInfo(sessionInfo):
     file = sessionsDir() / (gd.config['Session'] + '.yaml')
     fd = Path.open(file, 'w')
     yaml.dump(sessionInfo, fd)
+    p_names = [nm for nm, be, cr, tl in sessionInfo['Pieces']]
 
 
 
@@ -219,15 +218,26 @@ def readCsvData(config, csvdata):
     # aquire boat type from first 2 rows?
     # cope with backwings and there "wrong" connection of the sensors?
 
+    # we can now cope with concatenated csv files created with powerline
+    csvpieces = []
+    skip = False
     for line, row in enumerate(reader):
-        if row[0] != '':
-            row[0] = float(row[0])  # we don't use it anyway.
+        if skip:
+            skip = False
+            continue
+        if len(row) == 0:
+            break
+        if row[0] == 'Time':
+            skip = True
+            csvpieces.append(line/Hz)
+            continue
         for i in range(lenheader):
             if row[i] == '':
                 row[i] = float('NaN')
             else:
                 row[i] = float(row[i])
         csvdata.append(row)
+    gd.sessionInfo['CsvPieces'] = csvpieces
     return header, header2
 
 def makecache(file):
@@ -249,6 +259,12 @@ def makecache(file):
     for s in range(len(h1)):
         if h1[s] == 'Seat Posn':
             gd.dataObject[:, s] = gd.dataObject[:, s] + 700
+
+    # negate StretcherForceX
+    for s in range(len(h1)):
+        if 'StretcherForceX' in h1[s]:
+            gd.dataObject[:, s] = -gd.dataObject[:, s]
+
 
     # impellor working?
     gd.sessionInfo['noDistance'] = False
@@ -299,24 +315,25 @@ def makecache(file):
 
     # Which boats/standards row to use?
     #  set default, can be changed in SessionInfo tab
-    if gd.sessionInfo['ScullSweep'] == 'sweep':
-        if rowercnt == 2:
-            gd.sessionInfo['BoatType'] = 'H2-'
-        elif rowercnt == 4:
-            gd.sessionInfo['BoatType'] = 'H4-'
-        elif rowercnt == 8:
-            gd.sessionInfo['BoatType'] = 'H8+'
+    if gd.sessionInfo['BoatType'] is None:
+        if gd.sessionInfo['ScullSweep'] == 'sweep':
+            if rowercnt == 2:
+                gd.sessionInfo['BoatType'] = 'M2-'
+            elif rowercnt == 4:
+                gd.sessionInfo['BoatType'] = 'M4-'
+            elif rowercnt == 8:
+                gd.sessionInfo['BoatType'] = 'M8+'
+            else:
+                print(f"should not happen: rowercnt = {rowercnt}")
         else:
-            print(f"should not happen: rowercnt = {rowercnt}")
-    else:
-        if rowercnt == 1:
-            gd.sessionInfo['BoatType'] = 'H1x'
-        elif rowercnt == 2:
-            gd.sessionInfo['BoatType'] = 'H2x'
-        elif rowercnt == 4:
-            gd.sessionInfo['BoatType'] = 'H4x'
-        else:
-            print(f"should not happen: rowercnt = {rowercnt}")
+            if rowercnt == 1:
+                gd.sessionInfo['BoatType'] = 'M1x'
+            elif rowercnt == 2:
+                gd.sessionInfo['BoatType'] = 'M2x'
+            elif rowercnt == 4:
+                gd.sessionInfo['BoatType'] = 'M4x'
+            else:
+                print(f"should not happen: rowercnt = {rowercnt}")
 
     gd.sessionInfo['uniqHeader']   = h1
     
@@ -417,34 +434,6 @@ def n_catches(n, x):
         if len(ll) == n:
             break
     return ll
-
-#
-def prof_pieces(pieces):
-    """Returns profile piece indices in correct order or [] if not complete"""
-    r = []
-    for i, (s, p) in enumerate(pieces):
-        if s == 'start':
-            r.append(i)
-    for i, (s, p) in enumerate(pieces):
-        if s == 't20':
-            r.append(i)
-    for i, (s, p) in enumerate(pieces):
-        if s == 't24':
-            r.append(i)
-    for i, (s, p) in enumerate(pieces):
-        if s == 't28':
-            r.append(i)
-    for i, (s, p) in enumerate(pieces):
-        if s == 't32':
-            r.append(i)
-    for i, (s, p) in enumerate(pieces):
-        if s == 'max':
-            r.append(i)
-    if len(r) == 6:
-        return r
-    else:
-        return []
-
 
 def rowersensors(rower):
     """ returns dictionary with sensorname and columnnumber in dataObject """

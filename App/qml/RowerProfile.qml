@@ -32,14 +32,11 @@ Item {
 	}
     }
 
-    ScrollView {
-	width: parent.width
-	height: parent.height
+    ColumnLayout {
+	    anchors.fill: parent
+            Layout.fillWidth: true
 
-    Column {
-
-	Row {
-	    spacing: 20
+	RowLayout {
 	    objectName: 'rrow'
 	    TableView {
 		id: rowerTableView
@@ -53,35 +50,61 @@ Item {
 							         return 50;}
 		rowHeightProvider: function (column) { return 20; }
 		model : modelname(rindex)  // this doesn't seem to work here:  'rowerTableModel' + roweritem.rindex
-		height: 460
-		width: 650  // dit moet anders...
+
+		Layout.fillWidth: true
+		Layout.fillHeight: true
+                
+		Layout.minimumWidth: 200
+		Layout.minimumHeight: 200
+
 		delegate: Rectangle {
+		    implicitWidth: rowerTableView.columnWidthProvider(column)
+		    implicitHeight: 50
 		    // implicitWidth: 100
-		    height: 50
+		    //height: 50
 		    color: {(index%rowerTableView.rows)%2 ? 'gainsboro' : 'aquamarine'}
 		    //  tableView rows en columns gebruiken: om en om andere kleuren
 		    Text {
 			text: display
 		    }
 		}
-		ScrollIndicator.horizontal: ScrollIndicator { }
-		ScrollIndicator.vertical: ScrollIndicator { }
+
 	    }
 
-	    Column {
+	    // plots in the rower profile
+            FigureToolbar {
+		id: stretcherView
+		objectName : 'stretcher' // + roweritem.rindex
+		Component.onCompleted: {
+		    draw_mpl.stretcherprofile(stretcherView.qmlGetFigure, rindex)
+		}
+                            
+		Layout.fillWidth: true
+		Layout.fillHeight: true
+                
+		Layout.minimumWidth: 200
+		Layout.minimumHeight: 200
+            }
+
+	}
+
+	RowLayout {
+
+	    ColumnLayout {
 		spacing: 10
+		
 		Text {
 		    text: ' '
-		    height: 280
+		    height: 100
 		}
 		Tumbler {
 		    id: rowertumbler
 		    
 		    height: 80
-		    model: ['all', 'start', 't20', 't24', 't28', 't32', 'max', 'average']
+		    model: boat_mpl.allPieces
 		    visibleItemCount: 3
     
-		    Component.onCompleted: { rowertumbler.currentIndex = 7 }
+		    Component.onCompleted: { rowertumbler.currentIndex = 1 }
 		    onCurrentIndexChanged: {
 			// ugly
 			switch (roweritem.rindex) {
@@ -137,30 +160,23 @@ Item {
 			}
 		    }
 		}
-
-
-
 	    }
-	}
 
-	// plots in the rower profile
-        FigureToolbar {
-            id: rowerView
-            objectName : 'viewrower' + roweritem.rindex
-	    Component.onCompleted: {
-		draw_mpl.rowerprofile(rowerView.qmlGetFigure, rindex)
-	    }
+
+	    // plots in the rower profile
+            FigureToolbar {
+		id: rowerView
+		objectName : 'viewrower'  // + roweritem.rindex
+		Component.onCompleted: {
+		    draw_mpl.rowerprofile(rowerView.qmlGetFigure, rindex)
+		}
                             
-	    /*
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+		Layout.fillWidth: true
+		Layout.fillHeight: true
                 
-            Layout.minimumWidth: 1000
-            Layout.minimumHeight: 600
-	    */
-	    width: 1000
-	    height: 600
-        }
-    }
+		Layout.minimumWidth: 200
+		Layout.minimumHeight: 200
+            }
+	}
     }
 }

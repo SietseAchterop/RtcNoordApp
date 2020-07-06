@@ -1,4 +1,9 @@
-"""The Gui related classes for the RTCnoord app."""
+""" FormPieces:
+
+    Class to create the plots in the "Setup pieces" tab.
+    Used via Pieces.qml
+
+"""
 
 import os, sys, re, yaml, time, math
 from stat import S_IREAD, S_IRGRP, S_IROTH
@@ -22,11 +27,12 @@ from models import *
 
 import matplotlib.pyplot as plt
 
-# matplotlib plot in Pieces
+# matplotlib plot in Setup pieces, and menu handling
 class FormPieces(QObject):
 
     legendChanged = pyqtSignal()
     statusTextChanged = pyqtSignal()
+    btColorChanged = pyqtSignal()
     stateChanged = pyqtSignal()
 
     def __init__(self, parent=None, data=None, tempi=[]):
@@ -68,14 +74,17 @@ class FormPieces(QObject):
         self.tempoline = None
         self.markers_ax1 = None
         self.markers_ax2 = None
-        
+
         # pieces are put in data_model2
         # markers to be set
         self.mbegin = 0
         self.mend = 0
 
-        # mode:   0:uit, 1:begin, 2:end,  3: create gui entry en -> 1  (via qui -> 0)
+        # mode:   0:uit, 1:begin, 2:end, 
+        #    button normal -> green -> red -> normal
         self.pmode = 0
+        self.newname = ''
+        self._btcolor = 'lightblue'
 
     def onclick_d(self, event):
         try:
@@ -92,14 +101,16 @@ class FormPieces(QObject):
                         b = int(event.xdata*Hz)
                         # we start a piece 2/5 second before the catch, better for displaying
                         self.mbegin = n_catches(1, b)[0]-20
+                        self._btcolor = 'red'
+                        self.btColorChanged.emit()
                         self.pmode = 2
                     elif self.pmode == 2:
                         self.mend = int(event.xdata*Hz)
-                        self.pmode = 3
-                    elif self.pmode == 3:
-                        # will not occurr when the piece is accepted
-                        print('set point in traces 3, remove markers')
-                        self.pmode = 1
+                        gd.data_model2.add_piece(self.newname, (self.mbegin, self.mend))
+                        self.update_figures()
+                        self._btcolor = 'lightblue'
+                        self.btColorChanged.emit()
+                        self.pmode = 0
                 elif event.button == 3:
                     # panning start
                     self.panon = True
@@ -214,6 +225,16 @@ class FormPieces(QObject):
             self._status_text = text
             self.statusTextChanged.emit()
 
+    @pyqtProperty('QString', notify=btColorChanged)
+    def btColor(self):
+        return self._btcolor
+    
+    @btColor.setter
+    def btColor(self, text):
+        if self._btcolor != text:
+            self._btcolor = text
+            self.btColorChanged.emit()
+
     @pyqtProperty(bool, notify=legendChanged)
     def legend(self):
         return self._legend
@@ -239,6 +260,8 @@ class FormPieces(QObject):
     def update_tempo_figure(self):
         if self.figure is None:
             return
+        if gd.sessionInfo == {}:
+            return
     
         self.ax2.clear()
         self.ax2.grid(True)
@@ -256,6 +279,9 @@ class FormPieces(QObject):
             b, e = d.data()
             self.ax2.plot([b/Hz], [0], marker='>', color='g')
             self.ax2.plot([e/Hz], [0], marker='<', color='r')
+
+        for i in gd.sessionInfo['CsvPieces']:
+            self.ax2.vlines(i, 0, 20, transform=self.ax2.get_xaxis_transform(), colors='b')
 
         self.stateChanged.emit()
         
@@ -317,22 +343,57 @@ class FormPieces(QObject):
         
         if self.pmode == 0:
             self.pmode = 1
-        if self.pmode == 3:
-            # create new piece
-            # the profile pieces (start, t20, t24, t28, t32, max) should be contiguous
-            #   we could test for this, and signal is using the delete button for the piece.
-            gd.data_model2.add_piece(name, (self.mbegin, self.mend))
-            self.update_figures()
-            self.pmode = 0
+            self.newname = name
+            self._btcolor = 'green'
+            self.btColorChanged.emit()
+        # rest done in onclick_d
 
     @pyqtSlot(str)
     def remove_piece(self, index):
         gd.data_model2.del_piece(index)
         self.update_figures()
         
+    def piecekey(self, e):
+        name, (start, length), (cnt, rating), tlist = e
+        return rating
+
     @pyqtSlot()
     def savepieces(self):
-        gd.sessionInfo['Pieces'] = [(i.name(), i.data()) for i in gd.data_model2.alldata()]
+        pieces = [(i.name(), i.data()) for i in gd.data_model2.alldata()]
+        
+        # add number of strokes and rating to the list
+        tempi = gd.sessionInfo['Tempi']
+        pcntrating = []
+        for n, (s, e) in pieces:
+            # determine cnt and rating
+            mode = 0
+            scnt = 0
+            rating = 0
+            tlist = []
+            for (t, r) in tempi:
+                if mode == 0:
+                    if t > s:
+                        strt = t
+                        tlist.append(t)
+                        scnt += 1
+                        rating += r
+                        mode = 1
+                elif mode > 0:
+                    if t < e:
+                        scnt += 1
+                        tlist.append(t)
+                        rating += r
+                    else:
+                        cl = (t-strt)/scnt  # cycle length in time steps
+                        break
+            iets = n, (s, e), (scnt, rating/scnt), tlist
+            pcntrating.append(iets)
+
+        # sorteren op grond van rating
+        pcntrating.sort(key=self.piecekey)  
+        gd.sessionInfo['Pieces'] = pcntrating
+        gd.p_names = [ nm for nm, be, cr, tl in gd.sessionInfo['Pieces']]
+        
         saveSessionInfo(gd.sessionInfo)
         gd.boattablemodel.make_profile()
 
@@ -392,6 +453,7 @@ class FormPieces(QObject):
         for i in range(gd.sessionInfo['RowerCnt']):
             gd.rowertablemodel[i] = RowerTableModel(i)
             gd.context.setContextProperty("rowerTableModel"+str(i), gd.rowertablemodel[i])
+        
             
     @pyqtSlot(str)
     def createSessionCsv(self, f):
@@ -503,6 +565,10 @@ class FormPieces(QObject):
     def rowerprofile(self, s, r):
         gd.rowerPlots[r].figure = s[0]()
 
+    @pyqtSlot(list, int)
+    def stretcherprofile(self, s, r):
+        gd.stretcherPlots[r].figure = s[0]()
+
     @pyqtSlot(str)
     def selectSessionFile(self, f):
         """Used from the menu to select an existing session."""
@@ -549,6 +615,8 @@ class FormPieces(QObject):
             return
 
         gd.sessionInfo = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
+        gd.p_names = [ nm for nm, be, cr, tl in gd.sessionInfo['Pieces']]
+
         gd.cal_value = gd.sessionInfo['Calibration']
 
         # list with data for the session Info tab (placeholdertext)

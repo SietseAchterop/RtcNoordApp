@@ -45,47 +45,52 @@ Item {
 		}
 	    }
 
-	    ColumnLayout {
-		Repeater {
-		    id:sessrepeater
-		    model: draw_mpl.nmbrRowers
-		    delegate: RowLayout {
-			spacing: 10
-			
-			RowLayout {
-			    TextField {
-				selectByMouse: true   // is iets raars mee?
-				implicitWidth: 120
-				placeholderText: { sessionId.rowers[index][0] }
-				onAccepted: {
-				    sessionId.rowers[index] = [ text, sessionId.rowers[index][1], sessionId.rowers[index][2], sessionId.rowers[index][3]];
-				    sessionId.sinfo[3][index] = sessionId.rowers[index];
-				    crew_mpl.newsesinfo(sessionId.sinfo)
-				}
+	    ComboBox {
+		Component.onCompleted: { currentIndex = sInfoModel.current_boat_type }
+
+		model: sInfoModel.the_boat_types
+		onActivated: sInfoModel.set_boattype(currentText)
+	    }
+
+	    Repeater {
+		id:sessrepeater
+		model: draw_mpl.nmbrRowers
+		delegate: RowLayout {
+		    spacing: 10
+		    
+		    RowLayout {
+			TextField {
+			    selectByMouse: true   // is iets raars mee?
+			    implicitWidth: 120
+			    placeholderText: { sessionId.rowers[index][0] }
+			    onAccepted: {
+				sessionId.rowers[index] = [ text, sessionId.rowers[index][1], sessionId.rowers[index][2], sessionId.rowers[index][3]];
+				sessionId.sinfo[3][index] = sessionId.rowers[index];
+				crew_mpl.newsesinfo(sessionId.sinfo)
 			    }
-			    TextField {
-				selectByMouse: true   // is iets raars mee?
-				implicitWidth: 60
-				placeholderText: { sessionId.rowers[index][2] }
-				onAccepted: {
-				    sessionId.rowers[index] = [ sessionId.rowers[index][0], sessionId.rowers[index][1], parseInt(text), sessionId.rowers[index][3]];
-				    sessionId.sinfo[3][index] = sessionId.rowers[index];
-				    crew_mpl.newsesinfo(sessionId.sinfo)
-				}
+			}
+			TextField {
+			    selectByMouse: true   // is iets raars mee?
+			    implicitWidth: 60
+			    placeholderText: { sessionId.rowers[index][2] }
+			    onAccepted: {
+				sessionId.rowers[index] = [ sessionId.rowers[index][0], sessionId.rowers[index][1], parseInt(text), sessionId.rowers[index][3]];
+				sessionId.sinfo[3][index] = sessionId.rowers[index];
+				crew_mpl.newsesinfo(sessionId.sinfo)
 			    }
-			    TextField {
-				selectByMouse: true   // is iets raars mee?
-				implicitWidth: 60
-				placeholderText: { sessionId.rowers[index][3] }
-				onAccepted: {
-				    sessionId.rowers[index] = [ sessionId.rowers[index][0], sessionId.rowers[index][1], sessionId.rowers[index][2], parseInt(text)];
-				    sessionId.sinfo[3][index] = sessionId.rowers[index];
-				    crew_mpl.newsesinfo(sessionId.sinfo)
-				}
+			}
+			TextField {
+			    selectByMouse: true   // is iets raars mee?
+			    implicitWidth: 60
+			    placeholderText: { sessionId.rowers[index][3] }
+			    onAccepted: {
+				sessionId.rowers[index] = [ sessionId.rowers[index][0], sessionId.rowers[index][1], sessionId.rowers[index][2], parseInt(text)];
+				sessionId.sinfo[3][index] = sessionId.rowers[index];
+				crew_mpl.newsesinfo(sessionId.sinfo)
 			    }
-			    Text {
-				text: 'Rower ' + (index+1).toString()
-			    }
+			}
+			Text {
+			    text: 'Rower ' + (index+1).toString()
 			}
 		    }
 		}

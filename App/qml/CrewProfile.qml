@@ -8,11 +8,10 @@ import Backend 1.0
 Item {
     id: prcrew
     
-    ScrollView {
-	width: parent.width
-	height: parent.height
+	ColumnLayout {
+	    anchors.fill: parent
+            Layout.fillWidth: true
 
-	Column {
 	    spacing: 10
 	    Text {
 		text: 'Profile crew report'
@@ -25,8 +24,9 @@ Item {
 	    Tumbler {
 		id: crewtumbler
 		    
-		height: 80
-		model: ['start', 't20', 't24', 't28', 't32', 'max', 'average']
+		Layout.preferredWidth: 50
+		Layout.preferredHeight: 50
+		model: crew_mpl.allPieces
 		visibleItemCount: 3
     
 		Component.onCompleted: { crewtumbler.currentIndex = 6 }
@@ -61,10 +61,12 @@ Item {
 		id: crewView
 		objectName : "viewcrew"
                             
-		width: 1000
-		height: 800
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                
+                Layout.minimumWidth: 200
+                Layout.minimumHeight: 200
             }
 	}
-    }
 }
     

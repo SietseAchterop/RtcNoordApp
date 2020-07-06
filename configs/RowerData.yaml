@@ -3,17 +3,33 @@
 
 Rowers:
   {
-  # dummy names
-  P1: [Full Name. 185, 88, 2002, H, 6:20.4],
-  P2: [Full Name. 185, 88, 2002, H, 6:20.4],
-  P3: [Full Name. 185, 88, 2002, H, 6:20.4],
-  P4: [Full Name. 185, 88, 2002, H, 6:20.4],
-  P5: [Full Name. 185, 88, 2002, H, 6:20.4],
-  P6: [Full Name. 185, 88, 2002, H, 6:20.4],
-  P8: [Full Name. 185, 88, 2002, H, 6:20.4],
+  # default names
+  M1:  [Full Name. 185, 88, 2002, H, 6:20.4],
+  M2:  [Full Name. 185, 88, 2002, H, 6:20.4],
+  M3:  [Full Name. 185, 88, 2002, H, 6:20.4],
+  M4:  [Full Name. 185, 88, 2002, H, 6:20.4],
+  M5:  [Full Name. 185, 88, 2002, H, 6:20.4],
+  M6:  [Full Name. 185, 88, 2002, H, 6:20.4],
+  M7:  [Full Name. 185, 88, 2002, H, 6:20.4],
+  M8:  [Full Name. 185, 88, 2002, H, 6:20.4],
+
+  F1:  [Full Name. 185, 88, 2002, H, 6:20.4],
+  LM1: [Full Name. 185, 88, 2002, H, 6:20.4],
+  LF1: [Full Name. 185, 88, 2002, H, 6:20.4],
+  JF1: [Full Name. 185, 88, 2002, H, 6:20.4],
+  JM1: [Full Name. 185, 88, 2002, H, 6:20.4],
+
 
   #
   JBl: [Jan Boterletter, 185, 88, 2002, H, 7:01.0],
   }
 
+Crews:
+  {
+  Single: [ R1 ],
+  Double: [ R1, R2 ],
+  Four:   [ R1, R2, R3, R4 ]'
+  Eight:  [ R1, R2, R3, R4, R5, R6, R7, R8 ]
 
+  }
+  

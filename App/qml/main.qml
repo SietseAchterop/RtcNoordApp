@@ -7,7 +7,7 @@ ApplicationWindow {
     id: applicationWindow
     visible: true
     width: 1000
-    height: 700
+    height: 800
     title: qsTr("RTCNoord")
 
     // Component.onCompleted: console.log("Completed Running!")
@@ -52,8 +52,7 @@ ApplicationWindow {
         text: qsTr("Change BaseDir in config")
         shortcut: StandardKey.Copy
 
-	//iconName: "edit-copy"
-        enabled: (!!activeFocusItem && !!activeFocusItem["change"])
+	//iconName: "edit-copy"8        enabled: (!!activeFocusItem && !!activeFocusItem["change"])
         onTriggered: activeFocusItem.copy()
     }
 

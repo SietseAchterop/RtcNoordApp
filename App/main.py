@@ -1,6 +1,6 @@
 """First version of the RTCnoord application
 
-Used to process and use the Powerline logger data.
+Process and use the Powerline logger data.
 Input is the csv_data that can be extracted from the Powerline software.
 
 This program is a Qt program with a custom backend for use with QtQuick.
@@ -17,8 +17,10 @@ import numpy as np
 from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtQml import QQmlApplicationEngine, qmlRegisterType
 
-# import matplotlib
-# matplotlib.use('Agg')
+import matplotlib
+matplotlib.use('Agg')
+# needed for making reports...
+
 import matplotlib.pyplot as plt
 
 app_Path= Path(__file__).parent.absolute() / '..'
@@ -53,17 +55,18 @@ def interactive(session=None):
     plt.plot(gd.dataObject[:, 2])
     plt.plot(gd.norm_arrays[1, :, 17])
 
+    plt.show()
 """
-
     gd.config = startup()
     gd.globals = readGlobals()
     gd.sessionInfo = selectSession()
+    gd.p_names = [ nm for nm, be, cr, tl in gd.sessionInfo['Pieces']]
 
     if session is not None:
         gd.config['Session'] = session
 
     # if data cached, use that.
-    file = Path.home() / gd.config['BaseDir'] / 'caches' / (gd.config['Session'] + '.npy')
+    file = cachesDir() / (gd.config['Session'] + '.npy')
     try:
         fd = Path.open(file, 'r')
         fd.close()
@@ -73,26 +76,21 @@ def interactive(session=None):
         makecache(file)
 
     # print(gd.sessionInfo)
-    pcs = gd.sessionInfo['Pieces']
-    p = prof_pieces(pcs)
-    if p == []:
-        # print(f'Error profiling, number of pieces {len(pcs)}')
+
+    if gd.sessionInfo['Pieces'] == []:
         gd.profile_available = False
-        self.del_all()
         if gd.profile_available:
             gd.boatPlots.del_all()
         return False
 
-    gd.out = profile(p)
-
+    gd.out = profile()
+    return True
 
 def main():
     """The main entry point when used as a regular app
 
     It assumes a session is selected. When not, a dummy session None is used.
-    A real session can be selected from the menu.
-      Either an existing session or a new one using a csv-file.
-
+    A real session can be created or selected from the menu.
     """
 
     gd.config = startup()
@@ -156,6 +154,15 @@ def main():
         gd.rowerPlots[i] = RowerForm(i)
         gd.context.setContextProperty("rower_mpl"+str(i), gd.rowerPlots[i])
         # print(f'main: create the models  rower {i}      {gd.rowerPlots[i].update_figure}')            
+
+        gd.stretcherPlots[i] = StretcherForm(i)
+        gd.context.setContextProperty("stretcher_mpl"+str(i), gd.stretcherPlots[i])
+        
+
+    # Session info
+    gd.data_model6 = DataBoatsModel()
+    gd.context.setContextProperty("sInfoModel", gd.data_model6)
+    gd.data_model6.load_boatsInfo()
 
     engine.load(str(app_Path / 'App' / 'qml' / 'main.qml'))
 

@@ -189,7 +189,7 @@ class FormView(QObject):
     def update_figure(self):
         if self.figure is None:
             return
-    
+
         self.ax1.clear()
         self.ax1.grid(True)
         self.ax1.set_title('Traces')
@@ -260,10 +260,10 @@ class FormView(QObject):
 
         self.stateChanged.emit()
 
-    def set_windows(self, piece=False, x=0, y=0):
+    def set_windows(self, setpiece=False, x=0, y=0):
         """Set windows for primary and secondary datasets.
            Limit view to 120 seconds max"""
-        if piece:
+        if setpiece:
             xFrom = x
             self._starttime = int(x/Hz)
             xTo = x + len(self._traces[x: y, 1])
@@ -319,7 +319,7 @@ class FormView(QObject):
                         self.stroketime = (t-xFrom)/2
                         break
                 self._length = xTo - xFrom
-                strt, end = self.set_windows(piece=True, x=xFrom, y=xTo)
+                strt, end = self.set_windows(setpiece=True, x=xFrom, y=xTo)
         self.update_figure()
 
     # called from FromPieces (then no 2nd session) and locally with new secondary
@@ -510,7 +510,7 @@ class FormView(QObject):
         gd.sessionInfo2 = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
         gd.cal_value2 = gd.sessionInfo2['Calibration']
 
-        # update dataObject (should be there)
+        # update dataObject2 (should be there)
         if gd.os == 'win32':
             cache_file = re.sub('^/', '', cache_file)   # hack for windows
         cache_file = Path(cache_file)
@@ -583,7 +583,6 @@ class FormView(QObject):
     @pyqtProperty(list, notify=stateChanged)
     def the_2nd_pieces(self):
         return [i.name() for i in gd.data_model5.alldata()]
-
 
     # scaling
     @pyqtSlot(bool)
@@ -661,7 +660,7 @@ class BoatForm(QObject):
     def update_figure(self):
         if self.figure is None:
             return
-    
+
         self.ax1.clear()
         self.ax1.grid(True)
         self.ax1.set_title('Speed')
@@ -679,29 +678,32 @@ class BoatForm(QObject):
         # bootsnelheid, accel, pitch
         if gd.profile_available:
             sensors = gd.sessionInfo['Header']
+            pieces = gd.sessionInfo['Pieces']
+            cntrating = [cr for nm, x, cr, tl  in pieces]
+
             if gd.boatPiece == 0:
-                for i in range(len(prof_pcs)):
-                    self.ax1.plot(gd.norm_arrays[i, :, sensors.index('Speed')], linewidth=0.6, label=prof_pcs[i])
-                    self.ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label=prof_pcs[i])
-                    self.ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.6, label=prof_pcs[i])
+                for i in range(len(gd.p_names)):
+                    self.ax1.plot(gd.norm_arrays[i, :, sensors.index('Speed')], linewidth=0.6, label=gd.p_names[i])
+                    self.ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label=gd.p_names[i])
+                    self.ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.6, label=gd.p_names[i])
                 i = 0
-            elif gd.boatPiece == 7:
+            elif gd.boatPiece == len(gd.p_names) + 1:
                 i = 0
                 speed = np.zeros((100,))
                 accel = np.zeros((100,))
                 pitch = np.zeros((100,))
-                for i in range(len(prof_pcs)):
+                for i in range(len(gd.p_names)):
                     speed += gd.norm_arrays[i, :, sensors.index('Speed')]
                     accel += gd.norm_arrays[i, :, sensors.index('Accel')]
                     pitch += gd.norm_arrays[i, :, sensors.index('Pitch Angle')]
-                self.ax1.plot(speed/6, linewidth=0.6, label=prof_pcs[i])
-                self.ax2.plot(accel/6, linewidth=0.6, label=prof_pcs[i])
-                self.ax3.plot(pitch/6, linewidth=0.6, label=prof_pcs[i])
+                self.ax1.plot(speed/6, linewidth=0.6, label=gd.p_names[i])
+                self.ax2.plot(accel/6, linewidth=0.6, label=gd.p_names[i])
+                self.ax3.plot(pitch/6, linewidth=0.6, label=gd.p_names[i])
             else:
                 i = gd.boatPiece - 1
-                self.ax1.plot(gd.norm_arrays[i, :, sensors.index('Speed')], linewidth=0.6, label=prof_pcs[i])
-                self.ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label=prof_pcs[i])
-                self.ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.6, label=prof_pcs[i])
+                self.ax1.plot(gd.norm_arrays[i, :, sensors.index('Speed')], linewidth=0.6, label=gd.p_names[i])
+                self.ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label=gd.p_names[i])
+                self.ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.6, label=gd.p_names[i])
 
 
             # gate angle of the stroke (optional?)
@@ -716,14 +718,14 @@ class BoatForm(QObject):
                     self.ax1.plot((gd.norm_arrays[i, :, ind_ga])/17+4, linewidth=0.6, label='Angle')
             
             pa = []
-            for i in range(len(prof_pcs)):
+            for i in range(len(gd.p_names)):
                 # accel and tempo per piece
-                d, a = gd.out[i]
-                pa.append((d['Speed'], gd.sessionInfo['PieceCntRating'][i][1]))
+                d, aa = gd.out[i]
+                pa.append((d['Speed'], cntrating[i][1]))
             pa = list(zip(*pa))
             p = [ 10*x for x in pa[0]]  # ad hoc scaling, speed in decimeters/second
-            self.ax4.scatter(list(range(6)), p, marker='H', color='green')
-            self.ax4.scatter(list(range(6)), pa[1], marker='H', color='blue')
+            self.ax4.scatter(list(range(len(gd.p_names))), p, marker='H', color='green', label='Accel')  # Todo: labels zichtbaar maken
+            self.ax4.scatter(list(range(len(gd.p_names))), pa[1], marker='H', color='blue', label='Tempo')
 
         if self.legend:
             self.ax1.legend(loc='lower right')
@@ -744,6 +746,12 @@ class BoatForm(QObject):
         gd.boatPiece = s
         self.update_figure()
 
+    @pyqtProperty(list, notify=stateChanged)
+    def allPieces(self):
+        if gd.p_names == []:
+            return ['no pieces']
+        else:
+            return ['all'] + gd.p_names + ['average']
 
 # matplotlib plot in Crew Profile
 class CrewForm(QObject):
@@ -816,7 +824,7 @@ class CrewForm(QObject):
     def update_figure(self):
         if self.figure is None:
             return
-    
+
         self.ax1.clear()
         self.ax1.grid(True)
         self.ax1.set_title('Gate Angle')
@@ -839,10 +847,10 @@ class CrewForm(QObject):
         # do plotting of all rowers for the selected piece
         # speed, accel, pitch
         if gd.profile_available:
-
+            pieces = gd.sessionInfo['Pieces']
             rcnt = gd.sessionInfo['RowerCnt']
-            if gd.crewPiece < 6:
-                d, a = gd.out[gd.crewPiece]
+            if gd.crewPiece < len(gd.p_names):
+                d, aa = gd.out[gd.crewPiece]
                 for r in range(rcnt):
                     sns = rowersensors(r)
                     # print(f'Create crewplot for {r}')
@@ -858,9 +866,9 @@ class CrewForm(QObject):
                     
                     self.een  = self.ax1.plot(gd.norm_arrays[gd.crewPiece, :, i], linewidth=0.6, label=f'R {r+1}')
                     self.twee = self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, j], linewidth=0.6, label=f'R {r+1}')
-                    # self.drie = self.ax3.plot(gd.norm_arrays[gd.crewPiece, :, k], linewidth=0.6, label=prof_pcs[r])
+                    # self.drie = self.ax3.plot(gd.norm_arrays[gd.crewPiece, :, k], linewidth=0.6, label=gd.p_names[r])
 
-                    self.vier = self.ax4.plot(a[0+r], linewidth=0.6, label='Power')
+                    self.vier = self.ax4.plot(aa[0+r], linewidth=0.6, label='Power')
             else:
                 # average pieces
                 for r in range(rcnt):
@@ -877,7 +885,7 @@ class CrewForm(QObject):
                     # todo: create switch to control working in this case
                     
                     # average
-                    nmbrpieces = len(prof_pcs)
+                    nmbrpieces = len(gd.p_names)
                     angle = np.zeros((100,))
                     force = np.zeros((100,))
                     power = np.zeros((100,))
@@ -891,7 +899,7 @@ class CrewForm(QObject):
                     # plot
                     self.ax1.plot(angle/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
                     self.ax2.plot(force/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
-                    # self.ax3.plot(stetcherZ/nmbrpieces:, k], linewidth=0.6, label=prof_pcs[r])
+                    # self.ax3.plot(stetcherZ/nmbrpieces:, k], linewidth=0.6, label=gd.p_names[r])
 
                     self.ax4.plot(power/nmbrpieces, linewidth=0.6, label='Power')
 
@@ -911,6 +919,13 @@ class CrewForm(QObject):
     def showPiece(self, s):
         gd.crewPiece = s
         self.update_figure()
+
+    @pyqtProperty(list, notify=stateChanged)
+    def allPieces(self):
+        if gd.p_names == []:
+            return ['no pieces']
+        else:
+            return gd.p_names + ['average']
 
     # session Info tab
     sessionsig = pyqtSignal(list, arguments =['sessig'])
@@ -1014,11 +1029,12 @@ class RowerForm(QObject):
         # speed, accel, pitch
         scaleAngle = 10
         if gd.profile_available:
+            pieces = gd.sessionInfo['Pieces']
             sensors = gd.sessionInfo['Header']
             rsens = rowersensors(self.rower)
             if gd.rowerPiece[self.rower] == 0:
                 # all
-                for i in range(len(prof_pcs)):
+                for i in range(len(gd.p_names)):
                     if gd.sessionInfo['ScullSweep'] == 'sweep':
                         # print(f'Create rowerplot for {self.rower}')
                         self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
@@ -1030,34 +1046,34 @@ class RowerForm(QObject):
                         self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label='GateForceX')
                         self.ax3.plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
                                       gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6)
-                    d, a = gd.out[i]
-                    self.vijf = self.ax4.plot( a[0+self.rower], linewidth=0.6, label='Power')
+                    d, aa = gd.out[i]
+                    self.vijf = self.ax4.plot(aa[0+self.rower], linewidth=0.6, label='Power')
                 self.ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label='Accel')
-            elif gd.rowerPiece[self.rower] == 7:
+            elif gd.rowerPiece[self.rower] == len(gd.p_names) + 1:
                 # average
                 angle = np.zeros((100,))
                 forceX = np.zeros((100,))
                 accel = np.zeros((100,))
                 power = np.zeros((100,))
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
-                    for i in range(len(prof_pcs)):
+                    for i in range(len(gd.p_names)):
                         angle += gd.norm_arrays[i, :, rsens['GateAngle']]
                         forceX += gd.norm_arrays[i, :, rsens['GateForceX']]
                         accel += gd.norm_arrays[i, :, sensors.index('Accel')]
-                        d, a = gd.out[i]
-                        power += a[0+self.rower]
+                        d, aa = gd.out[i]
+                        power += aa[0+self.rower]
                     self.ax1.plot(scaleAngle*angle/6, linewidth=0.6, label='GateAngle')
                     self.ax1.plot(forceX/6, linewidth=0.6, label='GateForceX')
                     self.ax2.plot(accel/6, linewidth=0.6, label='Accel')
                     self.ax3.plot(angle/6, forceX/6, linewidth=0.6)
                     self.ax4.plot(power/6, linewidth=0.6, label='Power')
                 else:
-                    for i in range(len(prof_pcs)):
+                    for i in range(len(gd.p_names)):
                         angle += gd.norm_arrays[i, :, rsens['P GateAngle']]
                         forceX += gd.norm_arrays[i, :, rsens['P GateForceX']]
                         accel += gd.norm_arrays[i, :, sensors.index('Accel')]
-                        d, a = gd.out[i]
-                        power += a[0+self.rower]
+                        d, aa = gd.out[i]
+                        power += aa[0+self.rower]
                     self.ax1.plot(scaleAngle*angle/6, linewidth=0.6, label='P GateAngle')
                     self.ax1.plot(forceX/6, linewidth=0.6, label='P GateForceX')
                     self.ax2.plot(accel/6, linewidth=0.6, label='Accel')
@@ -1081,8 +1097,8 @@ class RowerForm(QObject):
                                   gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6)
                 self.ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label='Accel')
 
-                d, a = gd.out[i]
-                self.vijf = self.ax4.plot( a[0+self.rower], linewidth=0.6, label='Power')
+                d, aa = gd.out[i]
+                self.vijf = self.ax4.plot(aa[0+self.rower], linewidth=0.6, label='Power')
 
         if self.legend:
             self.ax1.legend()
@@ -1101,3 +1117,99 @@ class RowerForm(QObject):
     def showPiece(self, s):
         gd.rowerPiece[self.rower] = s
         self.update_figure()
+        gd.stretcherPlots[self.rower].update_figure()
+
+# matplotlib plot in Rower Profile
+class StretcherForm(QObject):
+
+    legendChanged = pyqtSignal()
+    statusTextChanged = pyqtSignal()
+    stateChanged = pyqtSignal()
+
+    def __init__(self, rower, parent=None, data=None, traces=None):
+        QObject.__init__(self, parent)
+
+        self._status_text = ""
+        self._figure = None
+        self.ax1 = None
+        
+        self._legend = True
+
+        self._data = data
+        self.rower = rower
+
+    @property
+    def figure(self):
+        return self._figure
+    
+    @figure.setter
+    def figure(self, fig):
+        self._figure = fig
+        self._figure.set_facecolor('white')
+        self.ax1 = self.figure.add_subplot(111)    
+
+        # Signal connection
+        self.stateChanged.connect(self._figure.canvas.draw_idle)
+        self.legendChanged.connect(self._figure.canvas.draw_idle)
+        
+        self.update_figure()
+        
+    @pyqtProperty(bool, notify=legendChanged)
+    def legend(self):
+        return self._legend
+    
+    @legend.setter
+    def legend(self, legend):
+        if self.figure is None:
+            return
+            
+        if self._legend != legend:
+            self._legend = legend
+            if self._legend:
+                self.axes.legend()
+            else:
+                leg = self.axes.get_legend()
+                if leg is not None:
+                    leg.remove()
+            self.legendChanged.emit()
+
+    @pyqtSlot()
+    def update_figure(self):
+        if self.figure is None:
+            return
+    
+        self.ax1.clear()
+        self.ax1.grid(True)
+        self.ax1.set_title('Stretcher')
+
+        if gd.profile_available:
+            pieces = gd.sessionInfo['Pieces']
+            sensors = gd.sessionInfo['Header']
+            rsens = rowersensors(self.rower)
+            if 'StretcherForceX' not in sensors:
+                self.ax1.set_title('No Stretcher sensor')
+                return
+
+            # use dataObject directly, because of NaN's; we can't use interp1d.
+            # todo: show data of all strokes to see variation
+            
+            if gd.rowerPiece[self.rower] == 0:
+                # all DOEN WE NIET
+                pass
+            elif gd.rowerPiece[self.rower] == len(gd.p_names) + 1:
+                # average DOEN WE NIET
+                pass
+            else: 
+                print(f'stretch {self.rower}   {gd.rowerPiece[self.rower]}')
+            
+                # a piece (alleen dit)
+                i = gd.rowerPiece[self.rower] - 1
+                name, se, nr, sp = pieces[i]
+                self.ax1.plot(gd.dataObject[sp[0]:sp[1], rsens['StretcherForceX']], linewidth=0.6, label='StretcherForceX')
+                self.ax1.plot(10*gd.dataObject[sp[0]:sp[1], rsens['Stretcher RL']], linewidth=0.6, label='Stretcher RL')
+                self.ax1.plot(10*gd.dataObject[sp[0]:sp[1], rsens['Stretcher TB']], linewidth=0.6, label='Stretcher TB')
+
+        if self.legend:
+            self.ax1.legend()
+
+        self.stateChanged.emit()

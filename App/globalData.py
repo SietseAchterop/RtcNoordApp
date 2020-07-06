@@ -49,15 +49,20 @@ boatPlots = None
 boatPiece = 0
 
 # Crew piece used in report
+#   moet anders
 crewPiece = 6
 
-# Rowers: models and plots, up to eight
-rowertablemodel = [None, None, None, None, None, None, None, None]
-rowerPlots =  [None, None, None, None, None, None, None, None]
-rowerPiece = [7, 7, 7, 7, 7, 7, 7, 7]
+# Rowers: models and plots, up to twelve pieces
+rowertablemodel = [None, None, None, None, None, None, None, None, None, None, None, None]
+rowerPlots =  [None, None, None, None, None, None, None, None, None, None, None, None]
+stretcherPlots =  [None, None, None, None, None, None, None, None, None, None, None, None]
+rowerPiece = [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
 
 
 #
+# list of piece names from 'Pieces'
+p_names = []
+
 mainPieces = None
 mainView = None
 

@@ -2,7 +2,9 @@
 # vim: ts=4 sw=4 et
 #
 
-#  Just a local copy from python-mpv, absolute path for mpv-1.dll
+######   Patched for RtcNoordApp   ################################
+#  Just a local copy from python-mpv, absolute path for mpv-1.dll #
+###################################################################
 
 # Python MPV library module
 # Copyright (C) 2017 Sebastian Götte <code@jaseg.net>

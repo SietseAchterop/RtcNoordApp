@@ -12,17 +12,12 @@ Item {
 	return modeldata
     }
 
-    ScrollView {
-	width: parent.width
-	height: parent.height
+    ColumnLayout {
+	anchors.fill: parent
+        Layout.fillWidth: true
 
-    Column {
 
-	Text {
-	    text: ' '
-	}
-	Row {
-	    spacing:0
+	RowLayout {
     
 	    TableView {
 		id: boatTableView
@@ -33,8 +28,10 @@ Item {
                                                              else return 50; }
 		rowHeightProvider: function (column) { return 20; }
 		model: boatTableModel
-		height: 260
-		width: 500  // dit moet anders...
+		height: 220
+		//width: 600  // dit moet anders... (groot genoeg voor het aantal pieces)
+		Layout.fillWidth: true
+		Layout.preferredWidth: 400
 		delegate: Rectangle {
 		    // implicitWidth: 100
 		    height: 50
@@ -49,15 +46,8 @@ Item {
 	    }
 
 	    Column {
-
+		Layout.fillWidth: true
 		Row {
-		    Button {
-			text: 'Create profile'
-			onPressed: {
-			    boatTableModel.make_profile();
-			    boatTableView.forceLayout()
-			}
-		    }
 
 		    Column {
 			CheckBox {
@@ -102,7 +92,7 @@ Item {
 		    id: tumbler
 		    
 		    height: 80
-		    model: ['all', 'start', 't20', 't24', 't28', 't32', 'max', 'average']
+		    model: boat_mpl.allPieces
 		    visibleItemCount: 3
     
 		    onCurrentIndexChanged: {
@@ -140,16 +130,11 @@ Item {
             id: boatView
             objectName : "viewboat"
                             
-	    /*
             Layout.fillWidth: true
             Layout.fillHeight: true
                 
-            Layout.minimumWidth: 1000
-            Layout.minimumHeight: 600
-	    */
-	    width: 1000
-	    height: 600
+            Layout.minimumWidth: 200
+            Layout.minimumHeight: 200
         }
-    }
     }
 }

@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 import globalData as gd
 from utils import *
 
-def profile(pindex):
+def profile():
     """Create a profile with averaging over n strokes
 
     Globals
@@ -27,77 +27,32 @@ def profile(pindex):
 
     Parameters
     ----------
-    pindex: list of indices of the profile pieces in correct order
+
     """
     # offset: how much later to start
 
-    # get correct pieces to use
     pieces = gd.sessionInfo['Pieces']
-    # convert pieces to dict
-    pd = { pieces[i][0]: pieces[i][1] for i in pindex}
+    if pieces == []:
+        gd.profile_available = False
+        return []
+    
+    # allocate array for the average arrays, we need at least one cycle
+    length = int(1.5*Hz*60/min([r for name, (a, b), (cnt, r), tl in pieces]))
+    sensors = gd.sessionInfo['Header']
+    uniqsens = gd.sessionInfo['uniqHeader']
+    av_arrays = np.zeros((len(pieces), length, len(sensors)))
 
-    # Calculate the size for the averaging array for profiling
-    #  also number of strokes and average rating of the pieces
-    tempi = gd.sessionInfo['Tempi']
-    # maximum length of the pieces (normally that of the t20 piece)
-    mx = 0
-    # positions used for averaging
-    pos = []
-    nlist = []
-    # use correct order
-    for nm in prof_pcs:
-        b, e = pd[nm]
-        # assume tempi long enough
-        # list with startpoints in this piece
-        tlist = []
-        scnt = 0
-        mode = 0
-        rating = 0
-        for (t, r) in tempi:
-            if mode == 0:
-                if t > b:
-                    strt = t
-                    tlist.append(t)
-                    scnt += 1
-                    rating += r
-                    mode = 1
-            elif mode > 0:
-                if t < e:
-                    tlist.append(t)
-                    scnt += 1
-                    rating += r
-                else:
-                    cl = (t-strt)/scnt  # cycle length in time steps
-                    break
-        if cl > mx:
-            mx = cl
-        pos.append(tlist)
-        """
-        print('profile:')
-        print([i for i in tlist])
-        print([gd.dataObject[i,0] for i in tlist])        
-        print([gd.dataObject[i,1] for i in tlist])        
-        print([gd.dataObject[i,2] for i in tlist])        
-        print()
-        """
-        # scnt and rating for entire piece
-        rating = rating/scnt
-        nlist.append((scnt, rating))
-    gd.sessionInfo['PieceCntRating'] = nlist
+    # how many strokes to use
     if gd.averaging:
-        n = min([ cnt for cnt, r in nlist])
+        n = min([cnt for name, (a, b), (cnt, r), tl in pieces])
     else:
         n = 1
-
-    sensors = gd.sessionInfo['Header']
-    # allocate array for the average arrays, we need at least one cycle
-    length = int(1.5*mx)
-    av_arrays = np.zeros((len(pd), length, len(sensors)))
 
     # average the data
     #  make offset possible when n == 1?
     #  how to cope with too much variation in tempo?
-    for i, st in enumerate(pos):
+    for i, p in enumerate(pieces):
+        nm, be, c, st = p
         for j in range(n):
             r = st[j] + length
             av_arrays[i, :, :] += gd.dataObject[st[j]:r, :]
@@ -122,7 +77,7 @@ def profile(pindex):
                 av_arrays[:, :, i] =  av_arrays[:, :, i] + av_arrays[:, :, i+1]
 
     # test nan
-    for i in range(len(prof_pcs)):
+    for i in range(len(pieces)):
         for j in range(len(sensors)-2):
             #  Stretcher RL en TB will always have nan values!
             #  Speed Pos (Vel) can alos miss values.
@@ -130,33 +85,27 @@ def profile(pindex):
             if 'Stretcher' not in sensors[j]:
                 for k, c in enumerate(av_arrays[i, :, j]):
                     if math.isnan(c):
-                        print(f'NaN in piece {i} in {sensors[j]} sensor at pos {k}')
-
+                        print(f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}')
 
     # now the real computations
     outcome = []
     # allocate norm_arrays
-    gd.norm_arrays = np.empty((len(prof_pcs), 100, len(sensors)))
+    gd.norm_arrays = np.empty((len(pieces), 100, len(sensors)))
 
-    for i, sp in enumerate(pos):
-        nm = prof_pcs[i]
-        outcome.append(pieceCalculations(nm, sp, av_arrays[i, :, :]))
+    for i, pp in enumerate(pieces):
+        outcome.append(pieceCalculations(pp, i, av_arrays[i, :, :]))
         
     saveSessionInfo(gd.sessionInfo)
     gd.profile_available = True
     return outcome
 
 
-def pieceCalculations(nm, sp, a):
+def pieceCalculations(piece, idx, a):
     """Calculate all parameters needed for the protocol
 
     Parameters
     ----------
-    nm: str
-    Name of piece
-
-    sp: list
-    startpoints of the strokes
+    piece: the piece
 
     a: numpy.array (sensors, length)
     Array containing the averaged sensor data for the stroke
@@ -173,15 +122,17 @@ def pieceCalculations(nm, sp, a):
     [B, A] = signal.butter(4, 2*5/Hz)
     #  We assume that there are NO NaN's in the pieces
 
-    sensors = gd.sessionInfo['Header']
+    nm, aa, (scnt, r), sp = piece
     out = {}
     out['PieceName'] = nm
+
+    sensors = gd.sessionInfo['Header']
 
     """ What we need:
     Boatreport:
       - table boat parameters
       - normalized graphs
-          - speed and accelleration
+          - speed and acceleration
           - pitch, roll, yaw
           - accell/powerloss agains tempi of different pieces ?
     """
@@ -207,11 +158,7 @@ def pieceCalculations(nm, sp, a):
         out['Split'] = 500/speedimp
     # print(f'Split {speedimp}   {out["Split"]} in {nm}')
 
-    # index to use for this piece
-    idx = prof_pcs.index(nm)
-
     # distance per stroke: 60*speed/rating
-    scnt, r = gd.sessionInfo['PieceCntRating'][idx]
     out['DistancePerStroke'] = 60 * speedimp / r
 
     out['Starting points'] = sp
@@ -444,8 +391,8 @@ def pieceCalculations(nm, sp, a):
     # TODO
 
     # normalize data for the averaged stroke in this piece
+    l = sp[1]-sp[0]+2  # little bit longer to really complete te cycle
     for i in range(a.shape[1]):
-        l = sp[1]-sp[0]+2  # little bit longer to really complete te cycle
         x = np.arange(l)
         # wry wrong when l = 105? fill_value helps
         g = interp1d(x, a[0:l, i], kind='cubic', fill_value="extrapolate")

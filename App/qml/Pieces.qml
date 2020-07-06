@@ -76,18 +76,12 @@ Item {
 		   
 		    Button {
 			id: npbutton
-			property color plotColor : "lightblue"  // '#add8e6'
 			text: "New piece"
 			onClicked: {
 			    draw_mpl.new_piece(piecename.text);
-			    if (plotColor == "#add8e6")
-				plotColor = 'red'
-			    else
-				plotColor = 'lightblue'
-
 			}
 			background: Rectangle {
-			    color: npbutton.plotColor
+			    color: draw_mpl.btColor
 			}
 		    }
 		    TextField {
