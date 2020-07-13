@@ -2,7 +2,7 @@
 Installatie rtcapp op een Mac
 =============================
 
-- Until everything works, test using the terminal.
+- MacOS 10.12 or higher is needed because we use Qt 5.12.
 
 - install python3 from
     https://www.python.org/downloads/mac-osx/

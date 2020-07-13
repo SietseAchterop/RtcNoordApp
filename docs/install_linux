@@ -3,28 +3,28 @@ Installing on linux (Ubuntu 19.10)
 =================================
 
 == already installed
+== install (with apt-get,  aptitude)
 mpv
 libmpv-dev
 python3-numpy
-
-== install (with apt-get,  aptitude)
 git
 python3
-  matplotlib
-  scipy
-  pyqt5
-  pyqt5.quick
-  pip3
-  qt5-default
-  qtdeclarative5-dev
-  qml-module-qtquick-layout
+    -matplotlib
+    -numpy
+    -scipy
+    -pyqt5
+    -pyqt5.quick
+    -pip3
+    -qt5-default
+    -qtdeclarative5-dev
+    -qml-module-qtquick-layout
                     -dialogs
 		    -controls2
 	(currently version 2.12)
-  qml-module-qt-labs-settings
-  qml-module-qt-labs-folderlistmodel
+    - qml-module-qt-labs-settings
+    - qml-module-qt-labs-folderlistmodel
 
-== with pip3
+== install with pip3
   pylatex
 
 == optionally (via apt-get) to make reports in pdf
@@ -39,14 +39,14 @@ python-mpv
    - from: https://github.com/jaseg/python-mpv
    - install via pip3
 
-== the versions should be fairly resent, otherwise there are warnings or errors.
+== the versions should be fairly recent, otherwise there are warnings or errors.
 - Basic testing
     - Command:  python tstqtquick.py
        - yields a yellow window
     - Command:  pythong tstmatplotlib.py
        - a simple plot
 
-== apply patch for matplotlib with diff_matplotlib
+== apply patch for matplotlib with diff_matplotlib (not needed anymore?)
   Change the 3 lines in the file described in the patch-file.
   Without this there are a lot of (harmless) errors on exiting the program.  
 
