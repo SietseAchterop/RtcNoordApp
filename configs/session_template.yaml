@@ -9,6 +9,9 @@ State: initial
 CrewInfo:
    The Crew
 
+# Location
+Venue: Location
+
 # Only the first RowerCnt values will be used
 #  name, year, length, weight
 Rowers:
@@ -31,7 +34,7 @@ Misc:
 Timestamp: 2001-12-14 21:59:43.10 -5
 
 # Powerline data set (also for index file)
-Powerline: powerline data set file
+PowerLine: powerline data set file
 
 # Powerline trace export
 Traces: row004107-000001D_traces
@@ -60,14 +63,16 @@ Tempi :
   - [1680, 13]
   
 
-# Marked pieces: list of name, (start, length) , (cnt, average rating) (generated)
+# Marked pieces: list of name, (start, end) , (cnt, average rating), startlist
 Pieces: []
 
-# filename in videos directory
-# index in data en index in video
-# name of piece
+# Video info:
+#   filename in videos directory
+#   videoPos:  position in the video  (red line)
+#   dataPos, position in the data (blue line)
+#   piece name (not yet)
 Video:
-  - None
+  - No file yet
   - 0
   - 0
-  - video
+  - videopiece

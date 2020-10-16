@@ -8,7 +8,7 @@ Matplotlib is used for the graphs.
 
 """
 
-import sys, os, math, time, csv, yaml, shlex
+import os, sys, time, yaml, shlex
 import locale
 from pathlib import Path
 
@@ -18,12 +18,11 @@ from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtQml import QQmlApplicationEngine, qmlRegisterType
 
 import matplotlib
-matplotlib.use('Agg')
+
 # needed for making reports...
+matplotlib.use('Agg')
 
-import matplotlib.pyplot as plt
-
-app_Path= Path(__file__).parent.absolute() / '..'
+app_Path = Path(__file__).parent.absolute() / '..'
 be = app_Path  / 'QtQuickBackend'
 sys.path.append(str(be))
 from backend_qtquick5 import FigureCanvasQTAggToolbar, MatplotlibIconProvider
@@ -35,7 +34,13 @@ from guirest import *
 from utils import *
 from profil import *
 
-from report import make_pdf_report
+# to get rid of Qt warning
+del os.environ['SESSION_MANAGER']
+
+
+def shutdown():
+    del globals()['engine']
+
 
 def interactive(session=None):
     """For interactive use in python.
@@ -92,6 +97,7 @@ def main():
     It assumes a session is selected. When not, a dummy session None is used.
     A real session can be created or selected from the menu.
     """
+    global engine
 
     gd.config = startup()
     # always start without secondary session
@@ -101,6 +107,7 @@ def main():
     # sys_argv = sys.argv
     # sys_argv += ['--style', 'material']
     app = QGuiApplication(sys.argv)
+    # app.aboutToQuit.connect(shutdown)
     
     locale.setlocale(locale.LC_NUMERIC, "C");
 
@@ -175,6 +182,7 @@ def main():
     gd.crewPlots.figure = gd.win.findChild(QObject, "viewcrew").getFigure()
 
     engine.quit.connect(app.quit)
+
     sys.exit(app.exec_())
 
 if __name__ == "__main__":

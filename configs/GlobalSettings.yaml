@@ -29,6 +29,8 @@ RowerModel:
   }
 
 
+# uitleg van de velden
+#   was target voor gemiddelde waardes van de standaard pieces.  Hoe zinnig is dat? Beter alleen T28 en/of T32?
 Standards:
   {
   M1x  : { time : "06:34.0", tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,

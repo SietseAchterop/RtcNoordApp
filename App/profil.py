@@ -83,18 +83,24 @@ def profile():
             #  Speed Pos (Vel) can alos miss values.
             #  we will ignore them for the moment
             if 'Stretcher' not in sensors[j]:
+                printit = True
                 for k, c in enumerate(av_arrays[i, :, j]):
+                    # print only one
                     if math.isnan(c):
-                        print(f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}')
+                        if printit:
+                            print(f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}')
+                            printit = False
 
     # now the real computations
     outcome = []
     # allocate norm_arrays
     gd.norm_arrays = np.empty((len(pieces), 100, len(sensors)))
+    gd.gmin = [0]*len(pieces)
+    gd.gmax = [100]*len(pieces)
 
     for i, pp in enumerate(pieces):
         outcome.append(pieceCalculations(pp, i, av_arrays[i, :, :]))
-        
+
     saveSessionInfo(gd.sessionInfo)
     gd.profile_available = True
     return outcome
@@ -106,6 +112,8 @@ def pieceCalculations(piece, idx, a):
     Parameters
     ----------
     piece: the piece
+
+    idx: index pieces array
 
     a: numpy.array (sensors, length)
     Array containing the averaged sensor data for the stroke
@@ -236,6 +244,9 @@ def pieceCalculations(piece, idx, a):
             ind_fx = rsens['GateForceX']
             ind_fy = rsens['GateForceY']
 
+            if rwr == rwcnt-1:
+                ga_ind = ind_ga
+
             # only look in first stroke
             g_fx = signal.filtfilt(B, A, a[:, ind_fx])
             gate_fx = g_fx[:sp[1]-sp[0]]
@@ -246,6 +257,7 @@ def pieceCalculations(piece, idx, a):
                 a[:, ind_fx] = g_fx
                 a[:, ind_ga] = g_a
 
+            # time points of
             posmin = np.argmin(gate_a)
             posmax = np.argmax(gate_a)
             fmax   = np.argmax(gate_fx)
@@ -302,8 +314,10 @@ def pieceCalculations(piece, idx, a):
             rowerstats['FinA'] = np.max(gate_a)
             rowerstats['TotalA'] = rowerstats['FinA'] - rowerstats['CatchA']
 
-            # rhythm: stroketime/cycletime in %
-            rowerstats['Rhythm'] = 100*float(posmax-posmin)/(sp[1]-sp[0])
+            # only for stroke rower
+            if rwr == 0:
+                # rhythm: stroketime/cycletime in %
+                out['Rhythm'] = 100*float(posmax-posmin)/(sp[1]-sp[0])
 
             # TODO: PowerLegs, PowerTruncArms
 
@@ -318,6 +332,9 @@ def pieceCalculations(piece, idx, a):
             ind_fxp = rsens["P GateForceX"]
             ind_fyp = rsens["P GateForceY"]
 
+            if rwr == rwcnt-1:
+                ga_ind = ind_gap
+
             # only look in the first stroke
             g_fx = signal.filtfilt(B, A, a[:, ind_fxp])
             gate_fx = g_fx[:sp[1]-sp[0]]
@@ -328,6 +345,7 @@ def pieceCalculations(piece, idx, a):
                 a[:, ind_fxp] = g_fx
                 a[:, ind_gap] = g_a
 
+            # time points of
             posmin = np.argmin(gate_a)
             posmax = np.argmax(gate_a)
             fmax   = np.argmax(gate_fx)
@@ -377,9 +395,11 @@ def pieceCalculations(piece, idx, a):
             rowerstats['FinA'] = np.max(gate_a)
             rowerstats['TotalA'] = rowerstats['FinA'] - rowerstats['CatchA']
 
-            # rhythm: stroketime/cycletime in %
-            rowerstats['Rhythm'] = 100*float(posmax-posmin)/(sp[1]-sp[0])
-            
+            # only for stroke rower
+            if rwr == 0:
+                # rhythm: stroketime/cycletime in %
+                out['Rhythm'] = 100*float(posmax-posmin)/(sp[1]-sp[0])
+
             # TODO: PowerLegs, PowerTruncArms
 
             # TODO: HandleVel, HandleVDSSeat
@@ -391,17 +411,26 @@ def pieceCalculations(piece, idx, a):
     # TODO
 
     # normalize data for the averaged stroke in this piece
-    l = sp[1]-sp[0]+2  # little bit longer to really complete te cycle
+    ll = sp[1]-sp[0]+2  # little bit longer to really complete the cycle
+    # print(f"pieces = {gd.sessionInfo['Pieces']}")
+    # print(f'  ll  {ll}   a.shape  {a.shape}')
+    
     for i in range(a.shape[1]):
-        x = np.arange(l)
-        # wry wrong when l = 105? fill_value helps
-        g = interp1d(x, a[0:l, i], kind='cubic', fill_value="extrapolate")
-        xnew = np.arange(100)*((l-1)/(100-1))
-        # print(len(x), len(xnew), len(a[0:l, i]))
+        x = np.arange(ll)
+        # wry wrong when ll = 105? fill_value helps
+        # print(f'=====    {x.shape}    {a[0:ll,i].shape}')
+        g = interp1d(x, a[0:ll, i], kind='cubic', fill_value="extrapolate")
+        xnew = np.arange(100)*((ll-1)/(100-1))
+        # print(len(x), len(xnew), len(a[0:ll, i]))
         # print(f'xnew {xnew}')
-        # print(a[0:l, i])
+        # print(a[0:ll, i])
 
         gd.norm_arrays[idx, :, i] = g(xnew)
+
+    # calculate marker positions
+    g_a = signal.filtfilt(B, A, gd.norm_arrays[idx, :, ga_ind])  # hadden we al uitgerekend
+    gd.gmin[idx] = np.argmin(g_a)
+    gd.gmax[idx] = np.argmax(g_a)
 
     # normalize profile_data
     profile_data = np.zeros((3*rwcnt, 100))

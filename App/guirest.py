@@ -41,7 +41,7 @@ class FormView(QObject):
         # in seconds
         self.xFrom = 0
         self.xTo = 1
-        # in index
+        # secondary
         self.xFrom2 = 0
         self.xTo2 = 1
 
@@ -49,16 +49,15 @@ class FormView(QObject):
         self._length = 2000
         self._starttime = 0
         #
-        self.syncMode = False
+        self.inSync = False
         # synchronisation position for video
-        self.videoStart = 0
+        self.videoPos = 0
         self.videoNewStart = 0
         # current position of frame in data
-        self.videoPos = 0
-        self.pieceWidth = 60
+        self.dataPos = 0
         self.traceCentre = 30
         
-        self.scale = 1
+        self.scaleX = 1
         self.panon = False
         self.pandistance = 0
         self.panbase = self.traceCentre
@@ -71,9 +70,6 @@ class FormView(QObject):
         self._data = data
         self._traces = None
 
-        # the part we show
-        self._window_tr = None
-        self._window_tr2 = None
         # for second session
         self.stroketime = 100  # needed for when no piece is set
         # second session
@@ -96,13 +92,13 @@ class FormView(QObject):
             if event.inaxes == self.ax1:
                 if event.button == 1:
                     if gd.runningvideo:
-                        if self.syncMode:
+                        if self.inSync:
                             self.videoNewStart = event.xdata
                             print(f'vs {self.videoNewStart}')
                         else:
-                            gd.player.seek(event.xdata - self.videoPos)
-                            self.videoPos = event.xdata
-                            print(f'vp {self.videoPos}')
+                            gd.player.seek(event.xdata - self.dataPos)
+                            self.dataPos = event.xdata
+                            print(f'vp {self.dataPos}')
                         self.update_figure()
                 elif event.button == 3:
                     # panning start
@@ -127,9 +123,9 @@ class FormView(QObject):
     def onscroll(self, event):
         try:
             if event.inaxes == self.ax1:
-                self.scale += event.step*0.05  # improve upon this
-                if self.scale < 0.05:
-                    self.scale = 0.05
+                self.scaleX += event.step*0.05  # improve upon this
+                if self.scaleX < 0.05:
+                    self.scaleX = 0.05
                 self.update_figure()
         except TypeError:
             pass
@@ -204,6 +200,7 @@ class FormView(QObject):
         self.ax1.scatter([self.xFrom], [0], marker='>', color='green')
         self.ax1.scatter([self.xTo], [0], marker='<', color='red')
        
+        senslist = []
         for row in range(self._data.rowCount()):
             model_index = self._data.index(row, 0)
             checked = self._data.data(model_index, DataSensorsModel.SelectedRole)
@@ -213,17 +210,19 @@ class FormView(QObject):
                 name = self._data.data(model_index, DataSensorsModel.NameRole)                
                 i = self._data.data(model_index, DataSensorsModel.DataRole) + 1
                 if self.scaling:
-                    scale = factors[i]
+                    scaleY = factors[i]
                 else:
-                    scale = 1
-                values = self._window_tr[:, i] * scale
+                    scaleY = 1
+                values = gd.view_tr[:, i] * scaleY
                 self.ax1.plot(self.times, values, linewidth=0.6,  label=name)
+                senslist.append((i, name, scaleY))
 
         if gd.runningvideo:
-            self.ax1.vlines(self.videoStart, 0, 20, transform=self.ax1.get_xaxis_transform(), colors='r')
-            self.ax1.vlines(self.videoPos, 0, 20, transform=self.ax1.get_xaxis_transform(), colors='b')
+            self.ax1.vlines(self.videoPos, 0, 20, transform=self.ax1.get_xaxis_transform(), colors='r')
+            self.ax1.vlines(self.dataPos, 0, 20, transform=self.ax1.get_xaxis_transform(), colors='b')
 
         # secondary plots
+        secsenslist = []
         if self.secondary:
             factors = gd.sessionInfo2['ScalingFactors']
             for row in range(self._data2.rowCount()):
@@ -235,19 +234,18 @@ class FormView(QObject):
                     name = self._data2.data(model_index, DataSensorsModel.NameRole)                
                     i = self._data2.data(model_index, DataSensorsModel.DataRole) + 1
                     if self.scaling:
-                        scale = factors[i]
+                        scaleY = factors[i]
                     else:
-                        scale = 1
-                    values = self._window_tr2[:, i] * scale
+                        scaleY = 1
+                    values = gd.view_tr2[:, i] * scaleY
                     self.ax1.plot(self.times, values, linewidth=0.7,  label=name, linestyle='--')
+                    secsenslist.append((i, name, scaleY))
 
         self.ax1.plot([self.traceCentre], [0], marker='D', color='b')                
-        # what about pieceWidth?
-        self.ax1.set_xlim((self.traceCentre - self.pieceWidth*self.scale, self.traceCentre + self.pieceWidth*self.scale))
 
         dist = (self.xTo - self.xFrom)
-        xFrom = self.traceCentre - self.scale*dist/2
-        xTo = self.traceCentre + self.scale*dist/2
+        xFrom = self.traceCentre - self.scaleX*dist/2
+        xTo = self.traceCentre + self.scaleX*dist/2
         
         self.ax1.set_xlim(xFrom, xTo)
         # start at correct beginvalue
@@ -258,6 +256,13 @@ class FormView(QObject):
         if has_series and self.legend:
             self.ax1.legend()
 
+        # set values for custom plot in report
+        if senslist != [] or secsenslist != []:
+            gd.extraplot = True
+            gd.extrasettings = [self.xFrom, self.xTo, self._starttime, self.traceCentre, self.scaleX, senslist, secsenslist]
+        else:
+            gd.extraplot = False
+            
         self.stateChanged.emit()
 
     def set_windows(self, setpiece=False, x=0, y=0):
@@ -268,23 +273,23 @@ class FormView(QObject):
             self._starttime = int(x/Hz)
             xTo = x + len(self._traces[x: y, 1])
             self._length = xTo - xFrom
-            self._window_tr = self._traces[xFrom: xTo, :]
+            gd.view_tr = self._traces[xFrom: xTo, :]
             self.times = list(map( lambda x: x/Hz, list(range(xTo-xFrom))))
             self.xFrom = 0
             self.xTo =  int((self._length)/Hz)
             self.traceCentre = self.xTo/2
 
             if self.secondary:
-                if len(self._window_tr2) > self._length:
-                    window2 = np.copy(self._window_tr2[0: self._length, :])
-                    self._window_tr2 = window2
+                if len(gd.view_tr2) > self._length:
+                    window2 = np.copy(gd.view_tr2[0: self._length, :])
+                    gd.view_tr2 = window2
                 else:
-                    a, _ = self._window_tr.shape
-                    s, b = self._window_tr2.shape
-                    window2 = np.copy(self._window_tr2)
+                    a, _ = gd.view_tr.shape
+                    s, b = gd.view_tr2.shape
+                    window2 = np.copy(gd.view_tr2)
                     window2.resize((a, b))
                     window2[s:, :] = np.nan
-                    self._window_tr2 = window2
+                    gd.view_tr2 = window2
 
         else:
             # we limit the initial size of the plot
@@ -292,7 +297,7 @@ class FormView(QObject):
             xFrom = 0
             xTo = self._length
 
-            self._window_tr = self._traces[xFrom: xTo, :]
+            gd.view_tr = self._traces[xFrom: xTo, :]
             self.times = list(map( lambda x: x/Hz, list(range(xTo-xFrom))))
             self.xFrom = int(xFrom/Hz)
             self.xTo = int(xTo/Hz)
@@ -347,15 +352,15 @@ class FormView(QObject):
             window2 = self._traces2[strt: end, :]
             size = window2.shape[0]
             if size < self._length:
-                a, _ = self._window_tr.shape
+                a, _ = gd.view_tr.shape
                 _, b = window2.shape
-                self._window_tr2 = np.copy(window2)
-                self._window_tr2.resize((a, b))
-                self._window_tr2[size:, :] = np.nan
+                gd.view_tr2 = np.copy(window2)
+                gd.view_tr2.resize((a, b))
+                gd.view_tr2[size:, :] = np.nan
             else:
                 #
                 end = strt + self._length
-                self._window_tr2 = np.copy(self._traces2[strt: end, :])
+                gd.view_tr2 = np.copy(self._traces2[strt: end, :])
             # normalise to compare better (only when doing pieces)
         self.update_figure()
 
@@ -375,8 +380,8 @@ class FormView(QObject):
             if not file.is_file():
                 print(f'{file} does not exist, ignored')
                 return
-            self.videoStart = float(v[1])
-            self.videoPos = float(v[2])
+            self.videoPos = float(v[1])
+            self.dataPos = float(v[2])
             print(f'started with {v[1]}  {v[2]}')
             startVideo()
             gd.player.window_scale = 0.5
@@ -385,19 +390,24 @@ class FormView(QObject):
             gd.player.loadfile(file.as_uri())
             time.sleep(0.1)  # why needed?
 
-            gd.player.seek(self.videoStart)
-            self.videoStart = self.videoPos  # now videostart marker ok
+            gd.player.seek(self.videoPos)
+            self.videoPos = self.dataPos  # now videostart marker ok
             self.vid_state = 1
         else:
             stopVideo()
             self.vid_state = 0
-            self.videoStart = 0
             self.videoPos = 0
+            self.dataPos = 0
         self.update_figure()
 
     """
-    sync procedure, starting from video at starting position, directly after starting video
+    sync video to data:
+      - Click the video button
+      - If the video file exists is is shown, otherwise the command is ignored
+      - 
+       , starting from video at starting position, directly after starting video
        then sessionInfo['Video'][1] shows position
+
        Set video on intended syncposiion using the qui.
        Add displacement to old value (a).
 
@@ -415,10 +425,10 @@ class FormView(QObject):
         if gd.runningvideo:
             if on:
                 # fix start in video (a)
-                self.nieuw_vid = float(gd.sessionInfo['Video'][1]) + self.videoPos - self.videoStart
+                self.nieuw_vid = float(gd.sessionInfo['Video'][1]) + self.dataPos - self.videoPos
                 print(f'nv {self.nieuw_vid}')
                 
-                self.syncMode = True
+                self.inSync = True
                 # left button places red line
             else:
                 # fix data wrt video start (b)
@@ -428,8 +438,8 @@ class FormView(QObject):
                 print(f'saved as {gd.sessionInfo["Video"]}')
                 saveSessionInfo(gd.sessionInfo)
                 # put blue line on red one.
-                self.videoPos = self.videoNewStart
-                self.syncMode = False
+                self.dataPos = self.videoNewStart
+                self.inSync = False
                 self.update_figure()
             
     @pyqtSlot()
@@ -437,7 +447,7 @@ class FormView(QObject):
         if gd.novideo:
             return
         gd.player.frame_step()
-        self.videoPos += 0.02
+        self.dataPos += 0.02
         self.update_figure()
 
     @pyqtSlot()
@@ -445,7 +455,7 @@ class FormView(QObject):
         if gd.novideo:
             return
         gd.player.frame_back_step()
-        self.videoPos -= 0.02
+        self.dataPos -= 0.02
         self.update_figure()
 
     @pyqtSlot(float)
@@ -453,8 +463,8 @@ class FormView(QObject):
         if gd.novideo:
             return
         gd.player.seek(s)
-        self.videoPos += s
-        print(f'frame pos {self.videoPos}')
+        self.dataPos += s
+        print(f'frame pos {self.dataPos}')
         self.update_figure()
 
     # handling of second session
@@ -560,7 +570,7 @@ class FormView(QObject):
 
                 # normalize wrt current main piece
                 nmbr_sensors2 = self._traces2.shape[1]                
-                self._window_tr2 = np.zeros((self._length, nmbr_sensors2))
+                gd.view_tr2 = np.zeros((self._length, nmbr_sensors2))
 
                 stretch = stroketime_2nd/self.stroketime
 
@@ -576,7 +586,7 @@ class FormView(QObject):
                             self._traces2[xFrom2+g, i] = 0
                     g = interp1d(x, np.copy(self._traces2[xFrom2:xFrom2+l, i]), kind='cubic', fill_value='extrapolate')
                     xnew = np.arange(self._length)*factor
-                    self._window_tr2[:, i] = g(xnew)
+                    gd.view_tr2[:, i] = g(xnew)
 
                 self.update_figure()
 
@@ -833,7 +843,7 @@ class CrewForm(QObject):
         self.ax2.set_title('Gate ForceX')
         self.ax3.clear()
         self.ax3.grid(True)
-        self.ax3.set_title('Stretcher Force')
+        self.ax3.set_title('StretcherForceX')
         self.ax4.clear()
         self.ax4.grid(True)
         self.ax4.set_title('Power')
@@ -847,9 +857,9 @@ class CrewForm(QObject):
         # do plotting of all rowers for the selected piece
         # speed, accel, pitch
         if gd.profile_available:
-            pieces = gd.sessionInfo['Pieces']
             rcnt = gd.sessionInfo['RowerCnt']
             if gd.crewPiece < len(gd.p_names):
+                # a seperate piece, from the tumbler
                 d, aa = gd.out[gd.crewPiece]
                 for r in range(rcnt):
                     sns = rowersensors(r)
@@ -863,14 +873,20 @@ class CrewForm(QObject):
                     # stretchers not always present!
                     # k = sns['Stretcher Z']
                     # todo: create switch to control working in this case
-                    
-                    self.een  = self.ax1.plot(gd.norm_arrays[gd.crewPiece, :, i], linewidth=0.6, label=f'R {r+1}')
+
+                    self.een = self.ax1.plot(gd.norm_arrays[gd.crewPiece, :, i], linewidth=0.6, label=f'R {r+1}')
                     self.twee = self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, j], linewidth=0.6, label=f'R {r+1}')
                     # self.drie = self.ax3.plot(gd.norm_arrays[gd.crewPiece, :, k], linewidth=0.6, label=gd.p_names[r])
-
                     self.vier = self.ax4.plot(aa[0+r], linewidth=0.6, label='Power')
+
+                    self.ax1.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
+                    self.ax1.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
+                    self.ax2.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
+                    self.ax2.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
+                    self.ax4.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
+                    self.ax4.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
             else:
-                # average pieces
+                # last item which is averageing all the pieces
                 for r in range(rcnt):
                     sns = rowersensors(r)
                     # print(f'Create crewplot for {r}')
@@ -900,9 +916,10 @@ class CrewForm(QObject):
                     self.ax1.plot(angle/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
                     self.ax2.plot(force/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
                     # self.ax3.plot(stetcherZ/nmbrpieces:, k], linewidth=0.6, label=gd.p_names[r])
-
                     self.ax4.plot(power/nmbrpieces, linewidth=0.6, label='Power')
 
+                    # no usefull markers here
+                    
         if self.legend:
             self.ax1.legend()
 
@@ -937,7 +954,10 @@ class CrewForm(QObject):
         gd.sessionInfo['Calibration'] = float(s[1])
         gd.sessionInfo['Misc'] = s[2]
         gd.sessionInfo['Rowers'] = s[3]
+        print(f" sess  {gd.sessionInfo['Video']}   {s[4]}")
         gd.sessionInfo['Video'] = s[4]
+        gd.sessionInfo['PowerLine'] = s[5]
+        gd.sessionInfo['Venue'] = s[6]
         saveSessionInfo(gd.sessionInfo)
 
 
@@ -1100,6 +1120,15 @@ class RowerForm(QObject):
                 d, aa = gd.out[i]
                 self.vijf = self.ax4.plot(aa[0+self.rower], linewidth=0.6, label='Power')
 
+                self.ax1.plot([gd.gmin[i]], [0], marker='v', color='b')
+                self.ax1.plot([gd.gmax[i]], [0], marker='^', color='b')
+                self.ax2.plot([gd.gmin[i]], [0], marker='v', color='b')
+                self.ax2.plot([gd.gmax[i]], [0], marker='^', color='b')
+                self.ax4.plot([gd.gmin[i]], [0], marker='v', color='b')
+                self.ax4.plot([gd.gmax[i]], [0], marker='^', color='b')
+
+
+
         if self.legend:
             self.ax1.legend()
 
@@ -1206,6 +1235,11 @@ class StretcherForm(QObject):
                 self.ax1.plot(gd.dataObject[sp[0]:sp[1], rsens['StretcherForceX']], linewidth=0.6, label='StretcherForceX')
                 self.ax1.plot(10*gd.dataObject[sp[0]:sp[1], rsens['Stretcher RL']], linewidth=0.6, label='Stretcher RL')
                 self.ax1.plot(10*gd.dataObject[sp[0]:sp[1], rsens['Stretcher TB']], linewidth=0.6, label='Stretcher TB')
+
+                # we gebruiken norm_arrays niet
+                f = (sp[1]-sp[0])/100
+                self.ax1.plot([gd.gmin[i]*f], [0], marker='v', color='b')
+                self.ax1.plot([gd.gmax[i]*f], [0], marker='^', color='b')
 
         if self.legend:
             self.ax1.legend()

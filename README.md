@@ -18,14 +18,16 @@ It basically works on linux, windows and mac. See the docs directory for a short
   - In the lower left part of the screens there is a status message.
   - Create a csv-file of the interesting part of a session using the Powerline software, creating a single piece and export the traces.
     Then paste that in, e.g, notepad. Finally put the result with a csv file extention in the csv-data directory, or a subdirectory thereof.
+  - Name the csv with rowernames, date and powerline session number in the name, e.g JohnWill_250220_0123.csv
+  - Save the file in the subdirectory for the correct year in csv_data.
   - Multiple csv-files can also be concatenated and used as the csv-file to create a session.
   - A few csv-files are already included.
   - Start the app and select the csv-file from the menu.
     Now data is preprocessed and saved in a sessionInfo-file and a dataObject-file.
-    The csv-file is not used anymore.
-  - You can only use files that are in the csv- and session-data- directories.
+  - Eventually session informatie will be added to the csv-file.
+  - You can only access files that are in the csv- and session-data- directories.
   - You can create subdirectories in the csv-data to organize your data according to years e.g.
-    There subdirectories will automatically be replicated in the session-data and reports directories.
+    These subdirectories will automatically be replicated in the session-data and reports directories.
   - There is a very basic backup mechanism if a session is created a second time. The previous session file wil be saved in a directory 'old'.
   - The program consists of several tabs that can be selected at the bottom of the screen.
       - Setup pieces: the interesting parts can be selected for further study.
@@ -33,7 +35,8 @@ It basically works on linux, windows and mac. See the docs directory for a short
       - Profile tabs: if pieces are selected a profile of the crew and individual rowers will be created.
           - Boat, Crew, and rower tabs.
       - Session info: configure the session, name the rowers, set calibration value
-	  
+          - Important: fill in the session info when you use the csv-file for the first time! Eventually this data will reside in the csv-file so that it will nog get lost when recreating a session.
+
 ## Status
 
    - This is a basic working version. This is work in progress.
@@ -57,7 +60,7 @@ Data from the currently selected pieces are shown in the right part of the scree
 
 The plot in the bottom part gives an overview of the entire rowing session, it shows the rating.
 With it, the different parts of the session can be easily found.
-If the csv-file consists of a number of parts, blue lines seperates them.
+If the csv-file consists of a number of parts, blue lines seperate them.
 
 To select pieces click on the interesting part in the Rating plot.
 That part is now shown above magnified, and sensordata can be seen when sensors have been selected.
@@ -96,7 +99,7 @@ Clicking in the plot also positions the video.
 The middle video control button is used the synchronise the video with the data as follows.
 First position the video to a point where the data can be found that matches that point.
 E.g. the first turning point of the oars at the intake after a start.
-Then click the button, it will turn red; the video time is set.
+Then click the button, it will turn red; the video position is set.
 Next click on the plot on the correct point in the data.
 Finally click the button again. Synchronisation is complete.
 
@@ -104,23 +107,24 @@ Finally click the button again. Synchronisation is complete.
 
 ### Boat Profile
 
-If pieces are saved a table profiles the pieces 
+If pieces are saved a table profiles the pieces.
 
 ![Eerste](docs/BoatProfile.png)
 
-To create a profile the data from the first stroke of the piece is used, or useing the average of the strokes.
-Select averaging using checkbox.
-The data can also be filtered using the other checkbox. in which case the data of some sensors is filtered for a smoother responce.
+To create a profile the data from the first stroke of the piece is used, or the average of the strokes.
+Select averaging using the checkbox.
+The data can also be filtered using the other checkbox. in which case the data of some sensors is filtered for a smoother response.
 
 The plots show the selected (averaged/filtered) stroke that is used in profiling.
 The plot shows exactly one stroke starting at the point that the stroke rower has his/here oar(s) perpendicular to the boat in the recover.
-Using the tumble wheel below the create profile button we can select which pieces are shown in the plots.
+Using the tumble wheel we can select which pieces are shown in the plots.
 All pieces, the individual pieces or the average of them can be selected.
 
 The profile consists of this screen and the Crew- and Rower- screens, so creating a new profile will also affect those screens.
 The "Create report" creates a pdf version of the profile, see the docs directory for an [example report](docs/example_report.pdf)
 
 The report uses the selected settings of checkboxes and tumble wheels.
+Also the view from "View piece" is shown in the report.
 
 ### Crew Profile
 

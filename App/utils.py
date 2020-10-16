@@ -7,7 +7,6 @@ from shutil import copyfile
 import globalData as gd
 
 import numpy as np
-from scipy import signal
 try:
     import mympv
 except OSError:
@@ -34,7 +33,7 @@ Load the config file to find the data and session to use.
         gd.os = 'android'
     except KeyError:
         pass
-    
+
     if gd.os == 'linux' or gd.os == 'android':
         gd.configfile = Path.home() / '.config' / gd.appname
     elif gd.os == 'win32':
@@ -43,7 +42,7 @@ Load the config file to find the data and session to use.
         gd.configfile = appConfDir / gd.appname
     elif gd.os == 'darwin':
         gd.configfile = Path.home() / 'Library' / 'Application Support' / gd.appname
-    
+
     appDir = Path(sys.argv[0]).parent.absolute().parent
 
     # read or create configfile
@@ -52,7 +51,6 @@ Load the config file to find the data and session to use.
         fd = Path.open(gd.configfile, 'r')
         rtcnoordconfig = fd.read()
         config = yaml.load(rtcnoordconfig, Loader=yaml.UnsafeLoader)
-        dataDir = Path.home() / config['BaseDir']
     except IOError:
         if gd.os == 'win32':
             if not localSettingsDir.is_dir():
@@ -95,7 +93,7 @@ def readGlobals():
         fd = Path.open(configsDir() / 'GlobalSettings.yaml')
         inhoud = fd.read()
     except IOError:
-        print(f'Cannot read GlobalSettings file.')
+        print('Cannot read GlobalSettings file.')
         exit()
 
     globals = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
@@ -134,13 +132,14 @@ def reportsDir():
         path = path / gd.config['SubDir']
     return path
 
+
 # select and read session info
 def selectSession():
     """Load the selected session.
 
     Use session None if the selected one does not exist
     """
-    
+
     if not gd.config['Session']:
         print('No session set, should not happen')
 
@@ -167,7 +166,8 @@ def saveSessionInfo(sessionInfo):
     file = sessionsDir() / (gd.config['Session'] + '.yaml')
     fd = Path.open(file, 'w')
     yaml.dump(sessionInfo, fd)
-    p_names = [nm for nm, be, cr, tl in sessionInfo['Pieces']]
+    # waarom dit?
+    gd.p_names = [nm for nm, be, cr, tl in sessionInfo['Pieces']]
 
 
 
@@ -210,6 +210,9 @@ def readCsvData(config, csvdata):
     Read first 10 columns to determine number of relevant colums (untill Normalized time.
     The further columns are then free for other use: meta data for the session.
        of repair data
+
+    JA, en session info er eventueel bij schrijven!
+
     """
 
     header = next(reader)
@@ -265,7 +268,6 @@ def makecache(file):
         if 'StretcherForceX' in h1[s]:
             gd.dataObject[:, s] = -gd.dataObject[:, s]
 
-
     # impellor working?
     gd.sessionInfo['noDistance'] = False
     distsens = h1.index('Distance')
@@ -274,13 +276,14 @@ def makecache(file):
 
     # use catapult data if available
     catapult()
-    
+
     np.save(file, gd.dataObject)
 
     # correction for backwing rigging: no seat position 1 means backwing.
     #    not now
 
     # use stroke rower to determine start of stroke and rating
+    #   bow has rower number 1
     try:
         h1.index('P GateAngle')
         gd.sessionInfo['ScullSweep'] = 'scull'
@@ -296,8 +299,8 @@ def makecache(file):
         indexes = [i for i, x in enumerate(h1) if x == "GateForceX"]
         j = indexes[-1]
 
-    gd.sessionInfo['Tempi'] = tempi(gd.dataObject[:, i], gd.dataObject[:, j])    
-    
+    gd.sessionInfo['Tempi'] = tempi(gd.dataObject[:, i], gd.dataObject[:, j])
+
     # add position number to sensor name
     n = []
     h1 = copy.copy(h1)
@@ -311,7 +314,7 @@ def makecache(file):
     rowercnt = gd.sessionInfo['RowerCnt'] = int(max(n)) - int(min(n)) + 1
     gd.sessionInfo['RowerCnt'] = rowercnt
     if int(min(n)) != 1:
-        print(f'WARNING: Rower numbering in header2 should start with 1!')
+        print('WARNING: Rower numbering in header2 should start with 1!')
 
     # Which boats/standards row to use?
     #  set default, can be changed in SessionInfo tab
@@ -335,8 +338,8 @@ def makecache(file):
             else:
                 print(f"should not happen: rowercnt = {rowercnt}")
 
-    gd.sessionInfo['uniqHeader']   = h1
-    
+    gd.sessionInfo['uniqHeader'] = h1
+
     saveSessionInfo(gd.sessionInfo)
 
 
@@ -423,7 +426,8 @@ def tempi(gateAngle, gateForce):
 
     return catchList
     """
-    
+
+
 def n_catches(n, x):
     """Return n catches starting at x"""
     ll = []
@@ -435,6 +439,7 @@ def n_catches(n, x):
             break
     return ll
 
+
 def rowersensors(rower):
     """ returns dictionary with sensorname and columnnumber in dataObject """
     #  only once per session
@@ -443,7 +448,7 @@ def rowersensors(rower):
     # which sensors for this rower?
     sindex = {}
     j = -1
-    for s,n in zip(h1, h2):
+    for s, n in zip(h1, h2):
         j += 1
         try:
             i = int(n)
@@ -455,6 +460,7 @@ def rowersensors(rower):
     if sindex == {}:
         print('Empty rowersensors(rower), error in csv-header?')
     return sindex
+
 
 # Video processing
 def videoFile(mp4file):
@@ -471,10 +477,12 @@ def startVideo():
     gd.player.window_scale = 0.5
     gd.runningvideo = True
 
+
 def stopVideo():
     gd.player.terminate()
     del(gd.player)
     gd.runningvideo = False
+
 
 def factors():
     """ return scaling factor for each sensor."""

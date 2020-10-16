@@ -27,6 +27,7 @@ from models import *
 
 import matplotlib.pyplot as plt
 
+
 # matplotlib plot in Setup pieces, and menu handling
 class FormPieces(QObject):
 
@@ -42,7 +43,7 @@ class FormPieces(QObject):
         if s == 'None':
             self._status_text = 'No session loaded, please create or load a session via the menu.'
         else:
-            self._status_text = s            
+            self._status_text = s
 
         self._figure = None
         self.ax1 = None
@@ -59,7 +60,7 @@ class FormPieces(QObject):
         self.panon = False
         self.pandistance = 0
         self.panbase = self.traceCentre
-        
+
         # with legends it becomes slow
         self._legend = False
 
@@ -69,7 +70,7 @@ class FormPieces(QObject):
         self._traces = None
         self.pieceWidth = 60
         self.times = []
-        
+
         # markers
         self.tempoline = None
         self.markers_ax1 = None
@@ -80,7 +81,7 @@ class FormPieces(QObject):
         self.mbegin = 0
         self.mend = 0
 
-        # mode:   0:uit, 1:begin, 2:end, 
+        # mode:   0:uit, 1:begin, 2:end,
         #    button normal -> green -> red -> normal
         self.pmode = 0
         self.newname = ''
@@ -541,6 +542,8 @@ class FormPieces(QObject):
             gd.sessionInfo['Calibration'] = oldInfo['Calibration']
             gd.sessionInfo['Misc'] = oldInfo['Misc']
             gd.sessionInfo['Video'] = oldInfo['Video']
+            gd.sessionInfo['Venue'] = oldInfo['Venue']
+            gd.sessionInfo['PowerLine'] = oldInfo['Powerline']
 
         gd.cal_value = gd.sessionInfo['Calibration']
 
@@ -549,6 +552,23 @@ class FormPieces(QObject):
         
         calibrate()
         self.update_the_models(session)
+
+        # dubbelop, staat ook in selectit
+        # list with data for the session Info tab (placeholdertext)
+        sinfo = [
+            gd.sessionInfo['CrewInfo'],
+            gd.cal_value,
+            gd.sessionInfo['Misc'],
+            gd.sessionInfo['Rowers'],
+            gd.sessionInfo['Video'],
+            gd.sessionInfo['PowerLine'],
+            gd.sessionInfo['Venue'],
+            '...'
+            ]
+
+        gd.crewPlots.sessionsig.emit(sinfo)
+
+        
         
     @pyqtSlot()
     def selectCurrent(self):
@@ -626,6 +646,8 @@ class FormPieces(QObject):
             gd.sessionInfo['Misc'],
             gd.sessionInfo['Rowers'],
             gd.sessionInfo['Video'],
+            gd.sessionInfo['PowerLine'],
+            gd.sessionInfo['Venue'],
             '...'
             ]
 

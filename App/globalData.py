@@ -54,8 +54,8 @@ crewPiece = 6
 
 # Rowers: models and plots, up to twelve pieces
 rowertablemodel = [None, None, None, None, None, None, None, None, None, None, None, None]
-rowerPlots =  [None, None, None, None, None, None, None, None, None, None, None, None]
-stretcherPlots =  [None, None, None, None, None, None, None, None, None, None, None, None]
+rowerPlots = [None, None, None, None, None, None, None, None, None, None, None, None]
+stretcherPlots = [None, None, None, None, None, None, None, None, None, None, None, None]
 rowerPiece = [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
 
 
@@ -80,6 +80,21 @@ custom_report = False
 # the averaged data and normalized data (pieces, length, sensors)
 norm_arrays = None
 out = None
+
+# minimum and maximum of gate angle of the stroke, for markers
+# calculated for each piece
+gmin = []
+gmax = []
+
+# custom plot from View piece
+extraplot = False
+# data for custom plot
+#   [ start, end, scaled, sensorlist, secondlist   ]
+extrasettings = []
+
+# buffers for View piece and custom plot
+view_tr = None
+view_tr2 = None
 
 # mpv player
 novideo = False

@@ -12,17 +12,21 @@ Item {
 	property var sinfo: ([] )
 	property var rowers: ([] )
 	property var video: ([] )
+	property var power: ([] )
+	property var venue: ([] )
 	Connections {
             target: crew_mpl
             onSessionsig: {
 		sessionId.sinfo = sessig;
+
 		crewname.placeholderText = sessig[0];
 		calib.placeholderText = sessig[1];
 		misc.placeholderText = sessig[2];
 		sessionId.rowers = sessig[3];
-		
 		sessionId.video = sessig[4];
 		videoname.placeholderText = sessionId.video[0];
+		sourcename.placeholderText = sessig[5];
+		venuename.placeholderText = sessig[6];
 	    }
 	}
 
@@ -143,7 +147,6 @@ Item {
 		    id: videoname
 		    selectByMouse: true   // is iets raars mee?
 		    implicitWidth: 120
-		    placeholderText: qsTr("Name")
 		    onAccepted: {
 			sessionId.sinfo[4][0] = text;
 			crew_mpl.newsesinfo(sessionId.sinfo)
@@ -151,7 +154,7 @@ Item {
 		}
 		// veldje  piece er nog bij
 		Text {
-		    text: 'Video Info'
+		    text: 'Video file name'
 		}
 	    }
 
@@ -162,10 +165,30 @@ Item {
 		    id: sourcename
 		    selectByMouse: true   // is iets raars mee?
 		    implicitWidth: 120
-		    placeholderText: qsTr("Name")
+		    onAccepted: {
+			sessionId.sinfo[5] = text;
+			crew_mpl.newsesinfo(sessionId.sinfo)
+		    }
 		}
 		Text {
-		    text: 'Data source (powerline)'
+		    text: 'Data source (PowerLine)'
+		}
+	    }
+
+	    RowLayout {
+		spacing: 10
+
+		TextField {
+		    id: venuename
+		    selectByMouse: true   // is iets raars mee?
+		    implicitWidth: 120
+		    onAccepted: {
+			sessionId.sinfo[6] = text;
+			crew_mpl.newsesinfo(sessionId.sinfo)
+		    }
+		}
+		Text {
+		    text: 'Venue'
 		}
 	    }
 	}

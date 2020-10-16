@@ -9,7 +9,7 @@ from utils import *
 
 import matplotlib.pyplot as plt
 
-from pylatex import Document, Section, Subsection, Command, Tabular, Figure, NewPage, TextColor
+from pylatex import Document, Section, Subsection, Command, Tabular, Figure, NewPage, TextColor, VerticalSpace, NewLine
 from pylatex.utils import italic, NoEscape
 
 
@@ -17,8 +17,8 @@ def make_pdf_report():
     """ assume profile available """
 
     pieces = gd.sessionInfo['Pieces']
-    cntrating = [cr for nm, x, cr, tl  in pieces]
-    
+    cntrating = [cr for nm, x, cr, tl in pieces]
+
     # we need a (single) temp dir for intermediates.
     tmpdir = Path.home() / gd.config['BaseDir'] / 'reports' / 'tmp'
     if not tmpdir.is_dir():
@@ -26,26 +26,35 @@ def make_pdf_report():
     # subdir
     if not reportsDir().is_dir():
         reportsDir().mkdir()
-    
+
     reportfile = reportsDir() / gd.config['Session']
 
     crewname = gd.sessionInfo['CrewInfo']
 
     geometry_options = {"top": "5mm", "bottom": "5mm", "right": "5mm", "left": "5mm"}
     doc = Document(documentclass='article', geometry_options=geometry_options, document_options=["12pt"])
-    
-    #doc.preamble.append(Command('title', f'Report for {crewname}'))
-    # doc.preamble.append(Command('date', NoEscape(r'\today')))
+
     doc.preamble.append(NoEscape(r'\usepackage{graphicx}'))
-    #doc.append(NoEscape(r'\maketitle'))
 
     # see https://doc.qt.io/qt-5/qml-color.html for colors
     doc.append(NoEscape(r'\definecolor{aquamarine}{HTML}{7fffd4}'))
     doc.append(NoEscape(r'\definecolor{gainsboro}{HTML}{dcdcdc}'))
 
-    ##   First page
+    #   First page
     with doc.create(Section(f'Boat report {gd.sessionInfo["CrewInfo"]}', numbering=False)):
-        # doc.append(f'Roeiers, info, ..\n')
+
+        doc.append('Rowers: ')
+        r = gd.sessionInfo["Rowers"]
+        for i, ro in enumerate(r):
+            doc.append(f'{r[i][0]}, ')
+        doc.append(NewLine())
+        doc.append(f'Boattype: {gd.sessionInfo["BoatType"]}\n')
+        doc.append(f'Misc: {gd.sessionInfo["Misc"]}\n')
+        doc.append(f'Powerline: {gd.sessionInfo["PowerLine"]}\n')
+        doc.append(f'Venue: {gd.sessionInfo["Venue"]}\n')
+        doc.append(VerticalSpace("5pt"))
+        doc.append(NewLine())
+
         av = ''
         filt = ''
         if gd.averaging:
@@ -54,6 +63,9 @@ def make_pdf_report():
             filt = 'filtered'
         pcs = ['all'] + gd.p_names + ['average']
         doc.append(f'Piece "{pcs[gd.boatPiece]}" used: {av} {filt}\n')
+        doc.append(VerticalSpace("5pt"))
+        doc.append(NewLine())
+
         # get table from boat report
         rows = gd.boattablemodel.rowCount()
         columns = gd.boattablemodel.columnCount()
@@ -88,7 +100,11 @@ def make_pdf_report():
             table.add_empty_row()
             table.add_row((4, 5, 6, 7))
             """
-        doc.append('\n')
+    doc.append(NewPage())
+
+    # Second page
+    with doc.create(Section(f'Boat report {gd.sessionInfo["CrewInfo"]}', numbering=False)):
+
         sensors = gd.sessionInfo['Header']
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
 
@@ -141,15 +157,16 @@ def make_pdf_report():
         plt.savefig(tmpfig)
         tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows
         doc.append(NoEscape(r'\includegraphics[width=1.0\textwidth]{' + f'{tmpfig}'  + r'}'))
+        plt.close(fig)
 
 
-    ##   Second page
+    ##   Third page
     doc.append(NewPage())
     with doc.create(Section('Crew report', numbering=False)):
         pcs = gd.p_names + ['average']
         doc.append(f'Piece "{pcs[gd.crewPiece]}" used.\n')
 
-        crewfig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(nrows=3, ncols=2)
+        fig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(nrows=3, ncols=2)
         ax1.set_title('Gate Angle')
         ax1.grid(True)
         ax2.set_title('Gate ForceX')
@@ -224,18 +241,18 @@ def make_pdf_report():
         plt.savefig(tmpfig)
         tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows
         doc.append(NoEscape(r'\includegraphics[width=1.0\textwidth]{' + f'{tmpfig}'  + r'}'))
+        plt.close(fig)
 
         
     # Rower pages
     doc.append(NewPage())
 
     rwrcnt = gd.sessionInfo['RowerCnt']
-    rfig  = [ None for i in range(rwrcnt)]
+    fig  = [ None for i in range(rwrcnt)]
     rax1  = [ None for i in range(rwrcnt)]
     rax2  = [ None for i in range(rwrcnt)]
     rax3  = [ None for i in range(rwrcnt)]
     rax4  = [ None for i in range(rwrcnt)]
-    sfig  = [ None for i in range(rwrcnt)]
     sax1  = [ None for i in range(rwrcnt)]
 
     for rwr in range(rwrcnt):
@@ -269,11 +286,9 @@ def make_pdf_report():
                     cnt += 1
                 table.add_hline()
 
+            doc.append('\n')
 
-            doc.append(f'\n')
-
-
-            rfig[rwr], ((rax1[rwr], rax2[rwr]), (rax3[rwr], rax4[rwr])) = plt.subplots(nrows=2, ncols=2)
+            fig[rwr], ((rax1[rwr], rax2[rwr]), (rax3[rwr], rax4[rwr])) = plt.subplots(nrows=2, ncols=2)
             rax1[rwr].set_title('GateForceX/GateAngle')
             rax1[rwr].grid(True)
             rax2[rwr].set_title('Acceleration')
@@ -364,11 +379,12 @@ def make_pdf_report():
             plt.savefig(tmpfig)
             tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows
             doc.append(NoEscape(r'\includegraphics[width=0.9\textwidth]{' + f'{tmpfig}'  + r'}'))
+            plt.close(fig[rwr])
 
-            doc.append(f'\n')
+            doc.append('\n')
 
             # stretcher plot
-            sfig[rwr], sax1[rwr] = plt.subplots()
+            fig[rwr], sax1[rwr] = plt.subplots()
             sax1[rwr].set_title('Stretcher')
             sax1[rwr].grid(True)
 
@@ -398,9 +414,46 @@ def make_pdf_report():
             tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows
             doc.append(NoEscape(r'\includegraphics[width=0.6\textwidth]{' + f'{tmpfig}'  + r'}'))
 
+            plt.close(fig[rwr])
+
             if rwr != rwrcnt - 1: 
                 doc.append(NewPage())
 
+    # Extra page
+    if gd.extraplot:
+        doc.append(NewPage())
+
+        fig, extr = plt.subplots()
+        extr.set_title('Custom plot')
+        extr.grid(True)
+        
+        # data from update_plot from View piece, can we do this simpler?
+        [strt, end, strttime, center, scalex, slist, secslist] = gd.extrasettings
+        times = list(map( lambda x: x/Hz, list(range(gd.view_tr.shape[0]))))
+
+        for i, name, scaley in slist:
+            extr.plot(times, gd.view_tr[:, i]*scaley, linewidth=0.5, label=name)
+        for i, name, scale in secslist:
+            extr.plot(times, gd.view_tr2[:, i]*scaley, linewidth=0.5, label=name, linestyle='--')
+
+        dist = (end - strt)
+        xFrom = center - scalex*dist/2
+        xTo = center + scalex*dist/2
+
+        extr.set_xlim(xFrom, xTo)
+        # start at correct beginvalue
+        locs = extr.get_xticks()
+        ticks = [item+strttime for item in locs]
+        extr.set_xticklabels(ticks)
+        extr.legend()
+        plt.tight_layout()
+
+        # we keep using the same name
+        tmpfig = tmpdir / (gd.config['Session'] + '_extra')
+        plt.savefig(tmpfig)
+        tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows
+        doc.append(NoEscape(r'\includegraphics[width=1.0\textwidth]{' + f'{tmpfig}'  + r'}'))
+        plt.close(fig)
 
     # generate report
     doc.generate_pdf(reportfile, clean_tex=True)
