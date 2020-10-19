@@ -8,10 +8,10 @@ mpv
 libmpv-dev
 git
 python3
-    -matplotlib
+    -matplotlib  (voorlopig 3.1.3)
     -numpy
     -scipy
-    -pyqt5
+    -pyqt5       (voorlopig 5.12.3)
     -pyqt5.qtquick
     -pip
     -yaml
@@ -30,7 +30,7 @@ texlive-latex-extra
   pylatex
   python-mpv
 
-  matplotlib moet versie 3.1.3 zijn, dus evt. hier downgraden
+  maybe pyqt5 and matplotlib need to be downgraded to the mentioned versions above.
   
 == the versions should be fairly recent, otherwise there are warnings or errors.
 - Basic testing
@@ -40,11 +40,6 @@ texlive-latex-extra
        - yields a yellow window
     - Command:  python tstmatplotlib.py
        - a simple plot
-
-== not needed anymore: apply patch for matplotlib with diff_matplotlib
-  Change the 3 lines in the file described in the patch-file.
-  Without this there are a lot of (harmless) errors on exiting the program.  
-
 
 
 

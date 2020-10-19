@@ -2,8 +2,6 @@
 Installation rtcapp starting from a freshly installed windows 10
 ================================================================
 
-- If you are already using anaconda/spider, then see the section below.
-
 - install (64bit) python3 from
     https://www.python.org/downloads/windows/
 
@@ -14,57 +12,48 @@ Installation rtcapp starting from a freshly installed windows 10
         AppData/Local/Programs/Python/Python38-64
         AppData/Local/Programs/Python/Python38-64/Scripts
 
-- using pip via the command line:
-     try the following commands:
-       pip list
-       pip show pyqt5
-       pip install pyqt5==rubbish
-           (this shows the available versions of a package)
+- Install the following python modules using pip3 command
+    - matplotlib (3.1.x), PyYAML, pyqt5 (5.12.x), scipy, pylatex
+    - when a version is mentioned use the newest version from that series, e.g.
+         pip3 install matplotlib==3.1.3
+    - find a latest version using
+         pip3 install matplotlib==rubbish
+    - you can find all modules that are installed using
+         pip3 list
 
-- pip install
-    matplotlib==3.1.3, pyyaml, pyqt5, scipy, pylatex
-       (hopefully 3.1.3 is temporary)
-
-- apply matplotlib with diff_matplotlib  (probably not needed anymore)
-    Changes 3 lines in the matplotlib sources
-    Only removes unneeded errors/warnings on exiting.
-
-- The RtcNoordApp can be found at:
-    https://github.com/SietseAchterop/RtcNoordApp.git
-    Download zip or clone with git, see below for git.
     
-- Basic testing from docs directory:
+- Install latex, see https://www.latex-project.org/get
+  This is a document preparation system that is used for scientific publications,
+  especially in the beta sciences. Needed to create the reports.
+      
+  It is optionally in the sense that the program works without it, only the report
+  is not created.
+
+- Install perl, needed for report generation by MikTex
+  Install from
+    http://strawberryperl.com/
+
+- Basic testing
     - Command:  python tstqtquick.py
        - yields a yellow window
-    - Command:  python tstmatplotlib.py
-       - shows a simple plot
+    - Command:  pythong tstmatplotlib.py
+       - a simple plot
+    - Command:  pdflatex tstlatex.tex
+       - tests creating a pdf file
+    Really do this before proceeding!
+    
+- De RtcNoordApp can be found at
+    https://github.com/SietseAchterop/RtcNoordApp.git
+  Download using the zipfile (or git).
     
 - start the rtcapp via the command line
-  - in Meten/RtcNoordApp/App directory
-      python main.py
+  - change directory to RtcNoordApp/App directory
+      python3 main.py
     We can see the errors in the terminal.
 - start via python Idle IDE
 
 - start via desktop
     Create a symbolic link on the Desktop from the file main.pyw
-
-
-To create reports
-==================
-  Install latex, see https://www.latex-project.org/get   (MiKTeX)
-    This is a document preparation system that is used for scientific publications,
-    especially in the beta sciences.
-  Test using tstlatex.tex which creates tstlatex.pdf
-      pdflatex tstlatex.tex
-
-  It is optionally in the sense that the program works without it, only the report
-  is not created.
-
-== Install perl
-  Needed for report generation by MikTex
-  Install from
-    http://strawberryperl.com/
-  Test with tstlatex.tex
 
 Using video (optional)
 ======================
@@ -102,8 +91,7 @@ Installing with anaconda
   - create and select new environment (myenv)
   - add channel conda-forge to channels
   - update/install
-       pyqt5, pyyaml, numpy, scipy, matplotlib
-         matplotlib version 3.1.3 (3.3?)
+       pyqt5 (5.12.3), pyyaml, numpy, scipy, matplotlib (3.1.3)
 
 - start powershell in myenv
   - install pylatex via pip

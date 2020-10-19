@@ -1,7 +1,7 @@
 """Utility functions for the RTCnoord app"""
 
 import sys, os, subprocess, socket, math, time, csv, yaml, copy, shlex
-from pathlib import Path
+from pathlib import Path, PurePath
 from shutil import copyfile
 
 import globalData as gd

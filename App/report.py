@@ -457,3 +457,44 @@ def make_pdf_report():
 
     # generate report
     doc.generate_pdf(reportfile, clean_tex=True)
+
+
+def make_csv_report():
+    """ assume profile available """
+
+    pieces = gd.sessionInfo['Pieces']
+    cntrating = [cr for nm, x, cr, tl in pieces]
+
+    # subdir
+    if not reportsDir().is_dir():
+        reportsDir().mkdir()
+
+    reportfile = reportsDir() / gd.config['Session']
+
+    crewname = gd.sessionInfo['CrewInfo']
+
+    # create csv version of the report from the table data
+    
+    # get table from boat report
+    rows = gd.boattablemodel.rowCount()
+    columns = gd.boattablemodel.columnCount()
+
+    print(f'=====  rows {rows}')
+    print(f'=====  rows {columns}')
+    
+    with open(reportfile.as_posix() + '.csv', mode='w') as report_file:
+        report_writer = csv.writer(report_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        report_writer.writerow([crewname])
+        report_writer.writerow([])
+
+        for i in range(rows):
+            row = []
+            for j in range(columns):
+                index = QAbstractTableModel.index(gd.boattablemodel, i, j)
+                print(f'{str(gd.boattablemodel.data(index))}, ', end='')
+                row.append(str(gd.boattablemodel.data(index)))
+            report_writer.writerow(row)
+            print('\n==')
+            print(row)
+            print('\n==')

@@ -11,7 +11,7 @@ import globalData as gd
 
 from utils import *
 from profil import profile
-from report import make_pdf_report
+from report import make_pdf_report, make_csv_report
 
 class DataSerie(object):
     """Class to contain a data item for the datamodels"""
@@ -316,6 +316,7 @@ class BoatTableModel(QAbstractTableModel):
 
         if gd.profile_available:
             make_pdf_report()
+            make_csv_report()
 
 class RowerTableModel(QAbstractTableModel):
 
