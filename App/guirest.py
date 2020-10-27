@@ -373,10 +373,11 @@ class FormView(QObject):
             return
         
         if self.vid_state == 0:
-            v = gd.metaData['Video']
-            if v[0] == 'None':
+            vfile = gd.metaData['Video']
+            v = gd.sessionInfo['Video']
+            if vfile == 'None':
                 return
-            file = videoFile(v[0])
+            file = videoFile(vfile)
             if not file.is_file():
                 print(f'{file} does not exist, ignored')
                 return
@@ -406,7 +407,7 @@ class FormView(QObject):
       - If the video file exists is is shown, otherwise the command is ignored
       - 
        , starting from video at starting position, directly after starting video
-       then metaInfo['Video'][1] shows position
+       then sessionInfo['Video'][1] shows position
 
        Set video on intended syncposiion using the qui.
        Add displacement to old value (a).
@@ -416,7 +417,7 @@ class FormView(QObject):
        We now know the position in the data (b)
 
        Click middle button, will return to normal
-       Put a and b in metaInfo['Video']
+       Put a and b in sessionInfo['Video']
 
     """
 
@@ -425,18 +426,18 @@ class FormView(QObject):
         if gd.runningvideo:
             if on:
                 # fix start in video (a)
-                self.nieuw_vid = float(gd.metaData['Video'][1]) + self.dataPos - self.videoPos
+                self.nieuw_vid = float(gd.sessionInfo['Video'][1]) + self.dataPos - self.videoPos
                 print(f'nv {self.nieuw_vid}')
                 
                 self.inSync = True
                 # left button places red line
             else:
                 # fix data wrt video start (b)
-                file = gd.metaData['Video'][0]
-                gd.metaData['Video'] = [ file,  str(self.nieuw_vid), str(self.videoNewStart) ]
+                file = gd.metaData['Video']
+                gd.sessionInfo['Video'] = [ file,  str(self.nieuw_vid), str(self.videoNewStart) ]
                 # gd.sessionInfo['Video'][2] = self.videoNewStart
                 print(f'saved as {gd.metaData["Video"]}')
-                saveMetaData(gd.metaData)
+                saveSessionInfo(gd.sessionInfo)
                 # put blue line on red one.
                 self.dataPos = self.videoNewStart
                 self.inSync = False
@@ -962,6 +963,7 @@ class CrewForm(QObject):
     @pyqtSlot('QVariant')
     def newsesinfo(self, sinfo):
         s = sinfo.toVariant()
+        print(f' ===== s  === {s}')
         gd.metaData['CrewName'] = s[0]
         oldcal = float(gd.metaData['Calibration'])
         newcal = float(s[1])
@@ -969,13 +971,16 @@ class CrewForm(QObject):
         gd.metaData['Misc'] = s[2]
         gd.metaData['Rowers'] = s[3]
         gd.metaData['Video'] = s[4]
+        gd.sessionInfo['Video'][0] = s[4]
         gd.metaData['PowerLine'] = s[5]
         gd.metaData['Venue'] = s[6]
         saveMetaData(gd.metaData)
+        saveSessionInfo(gd.sessionInfo)  # hack alleen vanwege video
         if oldcal != newcal:
             gd.cal_value = newcal/oldcal
             calibrate()
             gd.boattablemodel.make_profile()
+        print(f' =====  {gd.metaData["Video"]}')
 
 # matplotlib plot in Rower Profile
 class RowerForm(QObject):

@@ -150,7 +150,7 @@ Again the tumble wheel can be used to select a single piece or the average.
 
 ### Session Info
 
-In this tab some parts of the session can be configured: Crew name, Boat type, calibration value, venue, ..
+In this tab some parts of the session can be configured: Crew name, Boat type, calibration value, venue, video, ..
 Initially the boattype is inferred from the csvdata, but a custom type can be selected.
 
 Be sure to set the values the very first time the session is created from the csv-data.

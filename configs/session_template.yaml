@@ -40,7 +40,7 @@ Pieces: []
 #   dataPos, position in the data (blue line)
 #   piece name (not yet)
 Video:
-  - No file yet
+  - filename in metadata
   - 0
   - 0
   - videopiece

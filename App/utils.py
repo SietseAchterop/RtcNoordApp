@@ -397,12 +397,16 @@ def getMetaData():
         i = next(reader)
         gd.metaData['Misc'] = i[1]
         i = next(reader)
+        print(f'===== video {i}')
         gd.metaData['Video'] = i[1]
         i = next(reader)
         gd.metaData['PowerLine'] = i[1]
         i = next(reader)
         gd.metaData['Spare'] = i[1]
 
+    # voorlopig dubbelop
+    gd.sessionInfo['Video'][0] = gd.metaData['Video']
+    
     gd.cal_value = float(gd.metaData['Calibration'])
 
     # list with data for the session Info tab (placeholdertext)

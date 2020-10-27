@@ -24,7 +24,7 @@ Item {
 		misc.placeholderText = sessig[2];
 		sessionId.rowers = sessig[3];
 		sessionId.video = sessig[4];
-		videoname.placeholderText = sessionId.video[0];
+		videoname.placeholderText = sessionId.video;
 		sourcename.placeholderText = sessig[5];
 		venuename.placeholderText = sessig[6];
 	    }
@@ -148,7 +148,7 @@ Item {
 		    selectByMouse: true   // is iets raars mee?
 		    implicitWidth: 120
 		    onAccepted: {
-			sessionId.sinfo[4][0] = text;
+			sessionId.sinfo[4] = text;
 			crew_mpl.newsesinfo(sessionId.sinfo)
 		    }
 		}
