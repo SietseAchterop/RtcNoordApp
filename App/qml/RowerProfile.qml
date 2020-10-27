@@ -47,7 +47,7 @@ Item {
    							 else if (column == 2)
 							         return 80;
    						              else
-							         return 50;}
+							         return 60;}
 		rowHeightProvider: function (column) { return 20; }
 		model : modelname(rindex)  // this doesn't seem to work here:  'rowerTableModel' + roweritem.rindex
 
@@ -82,8 +82,8 @@ Item {
 		Layout.fillWidth: true
 		Layout.fillHeight: true
                 
-		Layout.minimumWidth: 200
-		Layout.minimumHeight: 200
+		Layout.minimumWidth: 120
+		Layout.minimumHeight: 120
             }
 
 	}

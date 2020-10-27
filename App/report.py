@@ -2,6 +2,8 @@
 import sys, os, math, time, csv, yaml, re
 import numpy as np
 
+from openpyxl import Workbook
+
 from PyQt5.QtCore import QAbstractTableModel
 
 import globalData as gd
@@ -29,7 +31,7 @@ def make_pdf_report():
 
     reportfile = reportsDir() / gd.config['Session']
 
-    crewname = gd.sessionInfo['CrewInfo']
+    crewname = gd.metaData['CrewName']
 
     geometry_options = {"top": "5mm", "bottom": "5mm", "right": "5mm", "left": "5mm"}
     doc = Document(documentclass='article', geometry_options=geometry_options, document_options=["12pt"])
@@ -41,17 +43,18 @@ def make_pdf_report():
     doc.append(NoEscape(r'\definecolor{gainsboro}{HTML}{dcdcdc}'))
 
     #   First page
-    with doc.create(Section(f'Boat report {gd.sessionInfo["CrewInfo"]}', numbering=False)):
+    with doc.create(Section(f'Boat report {gd.metaData["CrewName"]}', numbering=False)):
 
         doc.append('Rowers: ')
-        r = gd.sessionInfo["Rowers"]
-        for i, ro in enumerate(r):
+        r = gd.metaData["Rowers"]
+        for i in range(gd.sessionInfo['RowerCnt']):
             doc.append(f'{r[i][0]}, ')
         doc.append(NewLine())
-        doc.append(f'Boattype: {gd.sessionInfo["BoatType"]}\n')
-        doc.append(f'Misc: {gd.sessionInfo["Misc"]}\n')
-        doc.append(f'Powerline: {gd.sessionInfo["PowerLine"]}\n')
-        doc.append(f'Venue: {gd.sessionInfo["Venue"]}\n')
+        doc.append(f'Boattype: {gd.metaData["BoatType"]}\n')
+        doc.append(f'Calibration: {gd.metaData["Calibration"]}\n')
+        doc.append(f'Misc: {gd.metaData["Misc"]}\n')
+        doc.append(f'Powerline: {gd.metaData["PowerLine"]}\n')
+        doc.append(f'Venue: {gd.metaData["Venue"]}\n')
         doc.append(VerticalSpace("5pt"))
         doc.append(NewLine())
 
@@ -103,7 +106,7 @@ def make_pdf_report():
     doc.append(NewPage())
 
     # Second page
-    with doc.create(Section(f'Boat report {gd.sessionInfo["CrewInfo"]}', numbering=False)):
+    with doc.create(Section(f'Boat report {gd.metaData["CrewName"]}', numbering=False)):
 
         sensors = gd.sessionInfo['Header']
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
@@ -471,30 +474,119 @@ def make_csv_report():
 
     reportfile = reportsDir() / gd.config['Session']
 
-    crewname = gd.sessionInfo['CrewInfo']
-
+    crewname = gd.metaData['CrewName']
+    misc = gd.metaData['Misc']
+    calibration = gd.metaData['Calibration']
+    
     # create csv version of the report from the table data
     
     # get table from boat report
     rows = gd.boattablemodel.rowCount()
     columns = gd.boattablemodel.columnCount()
 
-    print(f'=====  rows {rows}')
-    print(f'=====  rows {columns}')
-    
     with open(reportfile.as_posix() + '.csv', mode='w') as report_file:
         report_writer = csv.writer(report_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
         report_writer.writerow([crewname])
+        report_writer.writerow([misc])
+        report_writer.writerow([calibration])
         report_writer.writerow([])
+        report_writer.writerow(['Boat report'])
+        report_writer.writerow([])
+        # welk piece gebruikt erbij
 
         for i in range(rows):
             row = []
             for j in range(columns):
                 index = QAbstractTableModel.index(gd.boattablemodel, i, j)
-                print(f'{str(gd.boattablemodel.data(index))}, ', end='')
                 row.append(str(gd.boattablemodel.data(index)))
             report_writer.writerow(row)
-            print('\n==')
-            print(row)
-            print('\n==')
+
+        rcount = gd.sessionInfo['RowerCnt']
+        for i in range(rcount):
+            name = gd.metaData['Rowers'][i][0]
+            report_writer.writerow([])
+            report_writer.writerow([])
+            report_writer.writerow([f'Rower report {name}'])
+            report_writer.writerow([])
+            # welk piece gebruikt erbij
+
+            rows = gd.rowertablemodel[i].rowCount()
+            columns = gd.rowertablemodel[i].columnCount()
+
+            for r in range(rows):
+                row = []
+                for j in range(columns):
+                    index = QAbstractTableModel.index(gd.rowertablemodel[i], r, j)
+                    row.append(str(gd.rowertablemodel[i].data(index)))
+                report_writer.writerow(row)
+
+
+def make_xlsx_report():
+    """ assume profile available """
+
+    pieces = gd.sessionInfo['Pieces']
+    cntrating = [cr for nm, x, cr, tl in pieces]
+
+    # subdir
+    if not reportsDir().is_dir():
+        reportsDir().mkdir()
+
+    reportfile = reportsDir() / gd.config['Session']
+
+    crewname = gd.metaData['CrewName']
+    misc = gd.metaData['Misc']
+    calibration = gd.metaData['Calibration']
+    
+    # create xlsx version of the report from the table data
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Boat report'
+
+    ws.column_dimensions['A'].width = 30
+    # get table from boat report
+    rows = gd.boattablemodel.rowCount()
+    columns = gd.boattablemodel.columnCount()
+
+    ws.append([''])
+    ws.append([f'Boat report for {crewname}'])
+    ws.append([f'Calibration value: {calibration}'])
+    ws.append([''])
+    ws.append([misc])
+    ws.append([''])
+
+    for i in range(rows):
+        row = []
+        for j in range(columns):
+            index = QAbstractTableModel.index(gd.boattablemodel, i, j)
+            row.append(str(gd.boattablemodel.data(index)))
+        ws.append(row)
+
+    rcount = gd.sessionInfo['RowerCnt']
+    for i in range(rcount):
+        name = gd.metaData['Rowers'][i][0]
+
+        ws = wb.create_sheet(title=f"Rower report {name}")
+        ws.column_dimensions['A'].width = 30
+
+
+        ws.append([''])
+        ws.append([f'Rower report {name} '])
+        ws.append([''])
+
+        rows = gd.rowertablemodel[i].rowCount()
+        columns = gd.rowertablemodel[i].columnCount()
+
+        for r in range(rows):
+            row = []
+            for j in range(columns):
+                index = QAbstractTableModel.index(gd.rowertablemodel[i], r, j)
+                row.append(str(gd.rowertablemodel[i].data(index)))
+            ws.append(row)
+
+    #
+    wb.save(reportfile.as_posix() + '.xlsx')
+
+    #
+    #del wb
+    

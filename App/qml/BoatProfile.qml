@@ -22,10 +22,10 @@ Item {
 	    TableView {
 		id: boatTableView
 		columnWidthProvider: function (column) { if (column == 0)
-                                                           return 150;
+                                                           return 180;
                                                          else if (column == 1)
                                                                 return 100;
-                                                             else return 50; }
+                                                             else return 70; }
 		rowHeightProvider: function (column) { return 20; }
 		model: boatTableModel
 		height: 220
@@ -51,6 +51,7 @@ Item {
 
 		    Column {
 			CheckBox {
+			    // Also set averaging in globalData to the same value!
 			    checked: true
 			    text: qsTr("Averaged")
 			    onPressed: {
@@ -108,9 +109,7 @@ Item {
 			preferredHighlightBegin: height / 2 - (height / tumbler.visibleItemCount / 2)
 			preferredHighlightEnd: height / 2 + (height / tumbler.visibleItemCount / 2)
 			clip: true
-			opacity: 1.0 - 2* (Math.abs(Tumbler.displacement))
 
-			// 0.4 + Math.max(0, 1 - Math.abs(Tumbler.displacement)) * 0.6
 		    }
 		    background: Item {
 			Rectangle {

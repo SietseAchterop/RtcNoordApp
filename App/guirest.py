@@ -1,6 +1,6 @@
 """The rest of the gui related classes for the RTCnoord app."""
 
-import sys, re, yaml, time, math
+import sys, os, re, yaml, time, math
 from stat import S_IREAD, S_IRGRP, S_IROTH
 from pathlib import Path
 
@@ -373,7 +373,7 @@ class FormView(QObject):
             return
         
         if self.vid_state == 0:
-            v = gd.sessionInfo['Video']
+            v = gd.metaData['Video']
             if v[0] == 'None':
                 return
             file = videoFile(v[0])
@@ -406,7 +406,7 @@ class FormView(QObject):
       - If the video file exists is is shown, otherwise the command is ignored
       - 
        , starting from video at starting position, directly after starting video
-       then sessionInfo['Video'][1] shows position
+       then metaInfo['Video'][1] shows position
 
        Set video on intended syncposiion using the qui.
        Add displacement to old value (a).
@@ -416,7 +416,7 @@ class FormView(QObject):
        We now know the position in the data (b)
 
        Click middle button, will return to normal
-       Put a and b in sessionInfo['Video']
+       Put a and b in metaInfo['Video']
 
     """
 
@@ -425,18 +425,18 @@ class FormView(QObject):
         if gd.runningvideo:
             if on:
                 # fix start in video (a)
-                self.nieuw_vid = float(gd.sessionInfo['Video'][1]) + self.dataPos - self.videoPos
+                self.nieuw_vid = float(gd.metaData['Video'][1]) + self.dataPos - self.videoPos
                 print(f'nv {self.nieuw_vid}')
                 
                 self.inSync = True
                 # left button places red line
             else:
                 # fix data wrt video start (b)
-                file = gd.sessionInfo['Video'][0]
-                gd.sessionInfo['Video'] = [ file,  str(self.nieuw_vid), str(self.videoNewStart) ]
+                file = gd.metaData['Video'][0]
+                gd.metaData['Video'] = [ file,  str(self.nieuw_vid), str(self.videoNewStart) ]
                 # gd.sessionInfo['Video'][2] = self.videoNewStart
-                print(f'saved as {gd.sessionInfo["Video"]}')
-                saveSessionInfo(gd.sessionInfo)
+                print(f'saved as {gd.metaData["Video"]}')
+                saveMetaData(gd.metaData)
                 # put blue line on red one.
                 self.dataPos = self.videoNewStart
                 self.inSync = False
@@ -482,9 +482,18 @@ class FormView(QObject):
 
         # only accept files in session_data dir
         sessionbase =  str(Path.home() / gd.config['BaseDir'] / 'session_data') + '/'
+        sessionbase = re.sub('\\\\', '/', sessionbase)   # for windows
         if sessionbase not in session_file:
             # ignore
             return
+
+        # update and use SubDir2
+        tail = re.sub(sessionbase, '', session_file)
+        tail = re.sub('^/', '', tail)   # hack voor windows
+        b = os.path.basename(tail)
+        subdir = re.sub(b, '', tail)
+        gd.config['SubDir2'] = subdir
+
 
         s = os.path.basename(session_file)
         session = re.sub('.yaml', '', s)
@@ -497,7 +506,9 @@ class FormView(QObject):
     def selectSecond(self, session_file, session):
         sesdir = re.sub(session + '.yaml', '', session_file)
         cachesdir = re.sub('session_data', 'caches' , sesdir)
+
         path = Path.home() / gd.config['BaseDir'] / 'caches'
+
         cache_file = cachesdir + session + '.npy'
     
         # what to cleanup exactly?
@@ -512,13 +523,13 @@ class FormView(QObject):
         try:
             fd = Path.open(session_file, 'r')
             inhoud = fd.read()
+            fd.close()
         except IOError:
             print(f'selectSecond: cannot read Sessions file, should not happen  {session_file}')
             gd.config['Session2'] = 'None'
             saveConfig(gd.config)
             exit()
         gd.sessionInfo2 = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
-        gd.cal_value2 = gd.sessionInfo2['Calibration']
 
         # update dataObject2 (should be there)
         if gd.os == 'win32':
@@ -534,11 +545,12 @@ class FormView(QObject):
             saveConfig(gd.config)
             exit()
             
+        getMetaData2()
+        gd.cal_value2 = float(gd.metaData2['Calibration'])
         calibrate(True)
         self.update_the_2nd_models(session)
 
     def update_the_2nd_models(self, session):
-        self.statusText = "Secondary session:  " + session
 
         self._traces2 = gd.dataObject2
         self.secondary = True
@@ -950,16 +962,20 @@ class CrewForm(QObject):
     @pyqtSlot('QVariant')
     def newsesinfo(self, sinfo):
         s = sinfo.toVariant()
-        gd.sessionInfo['CrewInfo'] = s[0]
-        gd.sessionInfo['Calibration'] = float(s[1])
-        gd.sessionInfo['Misc'] = s[2]
-        gd.sessionInfo['Rowers'] = s[3]
-        print(f" sess  {gd.sessionInfo['Video']}   {s[4]}")
-        gd.sessionInfo['Video'] = s[4]
-        gd.sessionInfo['PowerLine'] = s[5]
-        gd.sessionInfo['Venue'] = s[6]
-        saveSessionInfo(gd.sessionInfo)
-
+        gd.metaData['CrewName'] = s[0]
+        oldcal = float(gd.metaData['Calibration'])
+        newcal = float(s[1])
+        gd.metaData['Calibration'] = newcal
+        gd.metaData['Misc'] = s[2]
+        gd.metaData['Rowers'] = s[3]
+        gd.metaData['Video'] = s[4]
+        gd.metaData['PowerLine'] = s[5]
+        gd.metaData['Venue'] = s[6]
+        saveMetaData(gd.metaData)
+        if oldcal != newcal:
+            gd.cal_value = newcal/oldcal
+            calibrate()
+            gd.boattablemodel.make_profile()
 
 # matplotlib plot in Rower Profile
 class RowerForm(QObject):

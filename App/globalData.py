@@ -11,16 +11,22 @@ os = None
 configfile = None
 config = None
 
+# csv dialect
+dialect = None
 # data from the GlobalSettings yaml file
 globals     = {}
 
 # the primary data
 # data from the session yaml file
 sessionInfo = {}
+# metadata from the csv-file
+metaData = {}
+
 # ESSENTIAL: sensors are in same order as in dataObject
 dataObject  = []
 
 # the secondary data
+metaData2    = {}
 sessionInfo2 = {}
 dataObject2  = []
 
@@ -72,7 +78,7 @@ cal_value2 = None
 
 # profile available?
 profile_available = False
-# averaging or not
+# averaging or not (set also in Boatprofile.qml)
 averaging = True
 filter = False
 custom_report = False

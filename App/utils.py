@@ -1,8 +1,8 @@
 """Utility functions for the RTCnoord app"""
 
-import sys, os, subprocess, socket, math, time, csv, yaml, copy, shlex
+import sys, os, subprocess, socket, math, time, csv, yaml, copy, shlex, tempfile, shutil, re
 from pathlib import Path, PurePath
-from shutil import copyfile
+from datetime import date
 
 import globalData as gd
 
@@ -51,18 +51,20 @@ Load the config file to find the data and session to use.
         fd = Path.open(gd.configfile, 'r')
         rtcnoordconfig = fd.read()
         config = yaml.load(rtcnoordconfig, Loader=yaml.UnsafeLoader)
+        fd.close()
     except IOError:
         if gd.os == 'win32':
             if not localSettingsDir.is_dir():
                 localSettingsDir.mkdir()
             if not appConfDir.is_dir():
                 appConfDir.mkdir()
-        copyfile(appDir / 'App' / 'RtcApp', gd.configfile)
+        shutil.copyfile(appDir / 'App' / 'RtcApp', gd.configfile)
         fd = Path.open(gd.configfile, 'r')
         rtcnoordconfig = fd.read()
         config = yaml.load(rtcnoordconfig, Loader=yaml.UnsafeLoader)
-
-    # we now have a configfile
+        fd.close
+        
+    # we now have a configfile, now the base dir
     base_dir = Path.home() / config['BaseDir']
     if not base_dir.is_dir():
         base_dir.mkdir()
@@ -74,9 +76,7 @@ Load the config file to find the data and session to use.
         (base_dir / 'reports').mkdir()
         (base_dir / 'peach').mkdir()
         # fill configs
-        copyfile(appDir / 'configs' / 'GlobalSettings.yaml', base_dir / 'configs' / 'GlobalSettings.yaml')
-        copyfile(appDir / 'configs' / 'session_template.yaml', base_dir / 'configs' / 'session_template.yaml')
-        copyfile(appDir / 'configs' / 'RowerData.yaml', base_dir / 'configs' / 'RowerData.yaml')
+        shutil.copyfile(appDir / 'configs' / 'RowerData.yaml', base_dir / 'configs' / 'RowerData.yaml')
         config['Session'] = 'None'
         saveConfig(config)
     # we now have the  data directories
@@ -84,20 +84,15 @@ Load the config file to find the data and session to use.
 
 def saveConfig(config):
     """Save config data to the yaml file."""
-    fd = Path.open(gd.configfile, 'w')
-    yaml.dump(config, fd)
+    with Path.open(gd.configfile, 'w') as fd:
+        yaml.dump(config, fd)
+    
 
-def readGlobals():
-    """Return the GlobalSettings from the config."""
-    try:
-        fd = Path.open(configsDir() / 'GlobalSettings.yaml')
-        inhoud = fd.read()
-    except IOError:
-        print('Cannot read GlobalSettings file.')
-        exit()
+def appconfigsDir():
+    """ Return the config dir of the app """
+    path = Path(sys.argv[0]).parent.absolute().parent / 'configs' 
+    return path
 
-    globals = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
-    return globals
 
 def configsDir():
     """Return the path to the configs dir."""
@@ -111,11 +106,25 @@ def csvsDir():
         path = path / gd.config['SubDir']
     return path
 
+def csvs2Dir():
+    """Return the path to the csv_data dir as used for the secondary session."""
+    path = Path.home() / gd.config['BaseDir'] / 'csv_data'
+    if gd.config['SubDir2'] != '':
+        path = path / gd.config['SubDir2']
+    return path
+
 def sessionsDir():
     """Return the path to the session_data dir."""
     path = Path.home() / gd.config['BaseDir'] / 'session_data'
     if gd.config['SubDir'] != '':
         path = path / gd.config['SubDir']
+    return path
+
+def sessions2Dir():
+    """Return the path to the session_data dir as used for the secondary session."""
+    path = Path.home() / gd.config['BaseDir'] / 'session_data'
+    if gd.config['SubDir2'] != '':
+        path = path / gd.config['SubDir2']
     return path
 
 def cachesDir():
@@ -132,9 +141,22 @@ def reportsDir():
         path = path / gd.config['SubDir']
     return path
 
+def readGlobals():
+    """Return the GlobalSettings from the config."""
+    try:
+        fd = Path.open(appconfigsDir() / 'GlobalSettings.yaml')
+        inhoud = fd.read()
+        fd.close()
+    except IOError:
+        print('Cannot read GlobalSettings file.')
+        exit()
+
+    globals = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
+    return globals
+
 
 # select and read session info
-def selectSession():
+def loadSession():
     """Load the selected session.
 
     Use session None if the selected one does not exist
@@ -150,6 +172,7 @@ def selectSession():
     try:
         fd = Path.open(file, 'r')
         inhoud = fd.read()
+        fd.close()
     except IOError:
         print(f'SelectSession: cannot read Sessions file, should not happen   {file}')
         gd.config['Session'] = 'None'
@@ -160,15 +183,70 @@ def selectSession():
     # new config set
     return yaml.load(inhoud, Loader=yaml.UnsafeLoader)
 
+def saveMetaData(metadata, savetime=False):
+    # vervang metadata in csv file
+    path = csvsDir() / (gd.config['Session'] + '.csv')
+    #
+    tmpdir = tempfile.gettempdir()
+    tmpfd = Path(tmpdir) / 'rtcapp'
+    shutil.move(path, tmpfd)
+
+    d = date.today()
+    with Path.open(path, 'w') as fd:
+        '''
+        '''
+        #  write directly is faster, but we need to cater for the csv-delimiter
+        #  make this better later
+
+        # alleen tijd aanpassen bij savetime==True
+
+
+        if gd.dialect.delimiter == ',':
+            if savetime:
+                fd.write(f'Metadata, {d.strftime("%d-%m-%Y")}\n')
+            else:
+                fd.write(f'Metadata, {metadata["Sessiontime"]}\n')
+
+            fd.write('Crew name, ' + metadata['CrewName'] + '\n')
+            fd.write('Boattype, ' + metadata['BoatType'] + '\n')
+            fd.write('Calibration, ' + str(metadata['Calibration']) + '\n')
+            fd.write('Venue, ' + metadata['Venue'] + '\n')
+            for i in range(8):
+                fd.write(f'Rower {i+1}, ' + metadata['Rowers'][i][0] + ', ' + str(metadata['Rowers'][i][1]) + ', ' + str(metadata['Rowers'][i][2]) + ', ' + str(metadata['Rowers'][i][3]) + '\n')        
+            fd.write('Misc, ' + metadata['Misc'] + '\n')
+            fd.write('Video, ' + metadata['Video'] + '\n')
+            fd.write('Data source, ' + metadata['PowerLine'] + '\n')
+            fd.write('Spare, ' + metadata['Spare'] + '\n')
+        else:
+            if savetime:
+                fd.write(f'Metadata\t{d.strftime("%d-%m-%Y")}\n')
+            else:
+                fd.write(f'Metadata\t{metadata["Sessiontime"]}\n')
+                
+            fd.write('Crew name\t' + metadata['CrewName'] + '\n')
+            fd.write('Boattype\t' + metadata['BoatType'] + '\n')
+            fd.write('Calibration\t' + str(metadata['Calibration']) + '\n')
+            fd.write('Venue\t' + metadata['Venue'] + '\n')
+            for i in range(8):
+                fd.write(f'Rower {i+1}\t' + metadata['Rowers'][i][0] + '\t' + str(metadata['Rowers'][i][1]) + '\t' + str(metadata['Rowers'][i][2]) + '\t' + str(metadata['Rowers'][i][3]) + '\n')        
+            fd.write('Misc\t' + metadata['Misc'] + '\n')
+            fd.write('Video\t' + metadata['Video'] + '\n')
+            fd.write('Data source\t' + metadata['PowerLine'] + '\n')
+            fd.write('Spare\t' + metadata['Spare'] + '\n')
+        count = 0
+        with open(tmpfd) as infile:
+            for line in infile:
+                if count < 17:  # number of lines with metadata to skip
+                    count += 1
+                else:
+                    fd.write(line)
 
 def saveSessionInfo(sessionInfo):
     """Save session data to the yaml file."""
     file = sessionsDir() / (gd.config['Session'] + '.yaml')
-    fd = Path.open(file, 'w')
-    yaml.dump(sessionInfo, fd)
-    # waarom dit?
+    with Path.open(file, 'w') as fd:
+        yaml.dump(sessionInfo, fd)
     gd.p_names = [nm for nm, be, cr, tl in sessionInfo['Pieces']]
-
 
 
 def calibrate(secondary=False):
@@ -187,61 +265,195 @@ def calibrate(secondary=False):
         gd.dataObject2[:, i] = gd.dataObject2[:, i] * gd.cal_value2
         i = gd.sessionInfo2['Header'].index('Distance')
         gd.dataObject2[:, i] = gd.dataObject2[:, i] * gd.cal_value2
-        
 
 # csv and session file have same name
 def readCsvData(config, csvdata):
     """Read data for a session from the csv-file.
 
     Csv data can use comma or tab as delimiter
-    """
+
+    After a first use metadata is present in the higher columns, containing the SessionInfo data.
+
+    === Todo
+    Zet metadata voor csvdata indien nog niet aanwezig
+       os.system(f'mv {csvfile} {saved};  cat {metadata} {saved} > {csvfile}')
+
+    Metadata staat er daarmee altijd
+    Aantal rijen van metadata moet altijd hetzelfde blijven, en lengte van rows niet niet langer worden dan de rest (iets van 20 velden)
+    Dus
+     - vul sessionInfo met metadata
+     - lees csvfile
+
+    In Session info tab
+      save knop voor update metadata in csvfile
+          csvdata = tail (wordcount - metadatalenght)
+          os.system(f'cat {metadata} {csvdata} > {csvfile}')
+
+
+    sessioninfo splitsen in deel csv en deel sessioninfo, of dubbel in csv?
     
+
+    with statement gebruiken!
+
+    """
+
     path = csvsDir() / (config['Session'] + '.csv')
-    fd = Path.open(path, newline='')
-    dialect = csv.Sniffer().sniff(fd.read(20000))
-    fd.seek(0)
-    reader = csv.reader(fd, dialect)    
 
-    # if we could use the logger directly.
-    # preheader:  rtcnoord, logger, filename, from, to
+    # hier zorgen dat metadata er voor staat
 
-    """
-    Idea:
-    Read first 10 columns to determine number of relevant colums (untill Normalized time.
-    The further columns are then free for other use: meta data for the session.
-       of repair data
+    with Path.open(path, newline='') as fd:
+        gd.dialect = csv.Sniffer().sniff(fd.readline())
+        fd.seek(0)
+        reader = csv.reader(fd, gd.dialect)    
 
-    JA, en session info er eventueel bij schrijven!
+        header = next(reader)
+    if header[0] == 'Time':
+        tmpdir = tempfile.gettempdir()
+        tmpfd = Path(tmpdir) / 'rtcapp'
+        metadata = appconfigsDir() / 'metadata.csv'
+        shutil.move(path, tmpfd)
+        with open(path, 'w') as fd:
+            with open(metadata) as infile:
+                for line in infile:
+                    if gd.dialect.delimiter != ',':
+                        line = re.sub(',', gd.dialect.delimiter, line)
+                    fd.write(line)
+            with open(tmpfd) as infile:
+                for line in infile:
+                    fd.write(line)
 
-    """
+    #  now for real
+    csvpieces = []   # for when the csv file is made up from multiple pieces from the peach data.
+    with Path.open(path, newline='') as fd:
+        reader = csv.reader(fd, gd.dialect)    
 
-    header = next(reader)
-    lenheader = len(header)
-    header2 = next(reader)
-    # aquire boat type from first 2 rows?
-    # cope with backwings and there "wrong" connection of the sensors?
+        # skip the 17 metadata lines (will be processed later)
+        for i in range(17):
+            header = next(reader)
+        
+        # the peach data
+        header = next(reader)
+        lenheader = len(header)
+        header2 = next(reader)
 
-    # we can now cope with concatenated csv files created with powerline
-    csvpieces = []
-    skip = False
-    for line, row in enumerate(reader):
-        if skip:
-            skip = False
-            continue
-        if len(row) == 0:
-            break
-        if row[0] == 'Time':
-            skip = True
-            csvpieces.append(line/Hz)
-            continue
-        for i in range(lenheader):
-            if row[i] == '':
-                row[i] = float('NaN')
-            else:
-                row[i] = float(row[i])
-        csvdata.append(row)
-    gd.sessionInfo['CsvPieces'] = csvpieces
+        # aquire boat type from first 2 rows. See makecache
+        # cope with backwings and there "wrong" connection of the sensors?
+
+        # We can now cope with concatenated csv files created with powerline
+        #   we skip the first 2 lines of each part
+        skip = False
+        for line, row in enumerate(reader):
+            if skip:
+                skip = False
+                continue
+            if len(row) == 0:
+                break
+            if row[0] == 'Time':
+                skip = True
+                csvpieces.append(line/Hz)
+                continue
+            # we leave room for the sessioninfo metadata
+            for i in range(lenheader):
+                if row[i] == '':
+                    row[i] = float('NaN')
+                else:
+                    row[i] = float(row[i])
+            csvdata.append(row)
+        gd.sessionInfo['CsvPieces'] = csvpieces
+    
+    # if no metadata, then put defaults in
+    #  Metadata to be found in row 3 and column lenheader+2
+
+    # else, use it to fill sessioninfo
+
     return header, header2
+
+def getMetaData():
+    path = csvsDir() / (gd.config['Session'] + '.csv')
+
+    with Path.open(path, newline='') as fd:
+        gd.dialect = csv.Sniffer().sniff(fd.readline())
+        fd.seek(0)  # waarom ook al weer?
+        reader = csv.reader(fd, gd.dialect)    
+
+        # voorlopig vaste volgorde in metadata!!
+        i = next(reader)
+        gd.metaData['Sessiontime'] = i[1]
+        i = next(reader)
+        gd.metaData['CrewName'] = i[1]
+        i = next(reader)
+        gd.metaData['BoatType'] = i[1]
+        i = next(reader)
+        gd.metaData['Calibration'] = i[1]
+        i = next(reader)
+        gd.metaData['Venue'] = i[1]
+
+        rwrs = []
+        for k in range(8):
+            i = next(reader)
+            rwrs.append([i[1], i[2], i[3], i[4]])
+        gd.metaData['Rowers'] = rwrs
+
+        i = next(reader)
+        gd.metaData['Misc'] = i[1]
+        i = next(reader)
+        gd.metaData['Video'] = i[1]
+        i = next(reader)
+        gd.metaData['PowerLine'] = i[1]
+        i = next(reader)
+        gd.metaData['Spare'] = i[1]
+
+    gd.cal_value = float(gd.metaData['Calibration'])
+
+    # list with data for the session Info tab (placeholdertext)
+    sinfo = [
+        gd.metaData['CrewName'],
+        gd.cal_value,
+        gd.metaData['Misc'],
+        gd.metaData['Rowers'],
+        gd.metaData['Video'],
+        gd.metaData['PowerLine'],
+        gd.metaData['Venue'],
+        '...'
+    ]
+
+    gd.crewPlots.sessionsig.emit(sinfo)
+
+    calibrate()
+
+def getMetaData2():
+    path = csvs2Dir() / (gd.config['Session2'] + '.csv')
+
+    with Path.open(path, newline='') as fd:
+        dialect = csv.Sniffer().sniff(fd.readline())
+        fd.seek(0)  # waarom ook al weer?
+        reader = csv.reader(fd, dialect)    
+
+        i = next(reader)
+        # voorlopig vaste volgorde in metadata!!
+        i = next(reader)
+        gd.metaData2['CrewName'] = i[1]
+        i = next(reader)
+        gd.metaData2['BoatType'] = i[1]
+        i = next(reader)
+        gd.metaData2['Calibration'] = i[1]
+        i = next(reader)
+        gd.metaData2['Venue'] = i[1]
+
+        rwrs = []
+        for k in range(8):
+            i = next(reader)
+            rwrs.append([i[1], i[2], i[3], i[4]])
+        gd.metaData2['Rowers'] = rwrs
+
+        i = next(reader)
+        gd.metaData2['Misc'] = i[1]
+        i = next(reader)
+        gd.metaData2['Video'] = i[1]
+        i = next(reader)
+        gd.metaData2['PowerLine'] = i[1]
+        i = next(reader)
+        gd.metaData2['Spare'] = i[1]
 
 def makecache(file):
     """Create and cache the data read from the csv-file in a .npy file """
@@ -271,7 +483,7 @@ def makecache(file):
     # impellor working?
     gd.sessionInfo['noDistance'] = False
     distsens = h1.index('Distance')
-    if np.sum(gd.dataObject[100, distsens]) == 0:
+    if np.sum(gd.dataObject[50, distsens]) == 0:  # we assume csv file is not too small
         gd.sessionInfo['noDistance'] = True
 
     # use catapult data if available
@@ -310,37 +522,45 @@ def makecache(file):
             h1[i] = h1[i] + ' ' + h2[i]
             h2[i] = int(h2[i])
     # number of rowers
-    #  depend on correct connections (backwings)
+    #  depend on correct connections!  (backwings)
     rowercnt = gd.sessionInfo['RowerCnt'] = int(max(n)) - int(min(n)) + 1
     gd.sessionInfo['RowerCnt'] = rowercnt
     if int(min(n)) != 1:
         print('WARNING: Rower numbering in header2 should start with 1!')
 
+    getMetaData()
+    
     # Which boats/standards row to use?
     #  set default, can be changed in SessionInfo tab
-    if gd.sessionInfo['BoatType'] is None:
+    if gd.metaData['BoatType'] is None:
         if gd.sessionInfo['ScullSweep'] == 'sweep':
             if rowercnt == 2:
-                gd.sessionInfo['BoatType'] = 'M2-'
+                gd.metaData['BoatType'] = 'M2-'
             elif rowercnt == 4:
-                gd.sessionInfo['BoatType'] = 'M4-'
+                gd.metaData['BoatType'] = 'M4-'
             elif rowercnt == 8:
-                gd.sessionInfo['BoatType'] = 'M8+'
+                gd.metaData['BoatType'] = 'M8+'
             else:
                 print(f"should not happen: rowercnt = {rowercnt}")
         else:
             if rowercnt == 1:
-                gd.sessionInfo['BoatType'] = 'M1x'
+                gd.metaData['BoatType'] = 'M1x'
             elif rowercnt == 2:
-                gd.sessionInfo['BoatType'] = 'M2x'
+                gd.metaData['BoatType'] = 'M2x'
             elif rowercnt == 4:
-                gd.sessionInfo['BoatType'] = 'M4x'
+                gd.metaData['BoatType'] = 'M4x'
             else:
                 print(f"should not happen: rowercnt = {rowercnt}")
 
     gd.sessionInfo['uniqHeader'] = h1
 
     saveSessionInfo(gd.sessionInfo)
+
+    gd.mainPieces.update_the_models(gd.config['Session'])
+
+    # boattype to csv-metadata
+    # savetime eigenlijk fout bij repair van cache!
+    saveMetaData(gd.metaData, True)
 
 
 def tempi(gateAngle, gateForce):

@@ -14,7 +14,6 @@ It basically works on linux, windows and mac. See the docs directory for a short
   - The very first time the program is started a system dependant configuration-file RtcApp will be created where the "BaseDir" for all rowing data is set.
     The default value of BaseDir is RtcNoord in your home-directory.
     If that directory doesn't exist, it and a number of subdirectories will be created and filled with some data.
-    With an upgrade of the software it probably is best to remove the BaseDir before starting the new version.
   - In the lower left part of the screens there is a status message.
   - Create a csv-file of the interesting part of a session using the Powerline software, creating a single piece and export the traces.
     Then paste that in, e.g, notepad. Finally put the result with a csv file extention in the csv-data directory, or a subdirectory thereof.
@@ -24,9 +23,10 @@ It basically works on linux, windows and mac. See the docs directory for a short
   - A few csv-files are already included.
   - Start the app and select the csv-file from the menu.
     Now data is preprocessed and saved in a sessionInfo-file and a dataObject-file.
-  - Eventually session informatie will be added to the csv-file.
+  - Metadata like, distance calibration value, rowernames etc. is prepended to the csv-file for it to be preserved with the data.
+    In the Session info tab the correct values can be filled in.
   - You can only access files that are in the csv- and session-data- directories.
-  - You can create subdirectories in the csv-data to organize your data according to years e.g.
+  - You can create subdirectories in the csv-data to organize your data according to years for example.
     These subdirectories will automatically be replicated in the session-data and reports directories.
   - There is a very basic backup mechanism if a session is created a second time. The previous session file wil be saved in a directory 'old'.
   - The program consists of several tabs that can be selected at the bottom of the screen.
@@ -55,6 +55,14 @@ It is used to select the interesting pieces from the session.
 
 We can select the different sensors by checking the sensors, here two sensors are selected.
 Data from the currently selected pieces are shown in the right part of the screen.
+
+In the report properties are distilled from the pieces into some tables.
+It is, for the these properties to be as usefull as possible, important to select the pieces in such a way that rowing is constant within the piece.
+So no starts of variations in tempo and power.
+
+You can of course select a start in a piece, but most properties mentioned in the tables, like power, are not very usefull.
+In such a case you probably will look more to the plots in the View piece tab.
+
 
 ![Eerste](docs/SetupPieces.png)
 
@@ -144,7 +152,9 @@ Again the tumble wheel can be used to select a single piece or the average.
 
 In this tab some parts of the session can be configured: Crew name, Boat type, calibration value, venue, ..
 Initially the boattype is inferred from the csvdata, but a custom type can be selected.
-A skiff will always start with type Hx1, but it of course can be LD1x.
+
+Be sure to set the values the very first time the session is created from the csv-data.
+Note that an item only is really entered when the enter key is used after entering the value!
 
 ![Eerste](docs/SessionInfo.png)
 

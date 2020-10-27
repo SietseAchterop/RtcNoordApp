@@ -5,12 +5,10 @@
 
 """
 
-import os, sys, re, yaml, time, math
+import os, sys, re, yaml, time, math, shutil, csv
 from stat import S_IREAD, S_IRGRP, S_IROTH
-
 import traceback
 
-from shutil import copyfile, move
 from pathlib import Path, PureWindowsPath, PurePosixPath
 import numpy as np
 from scipy.interpolate import interp1d
@@ -216,6 +214,9 @@ class FormPieces(QObject):
 
         self.update_tempo_figure()
         
+    def asdf(self, t):
+        self.statusText(t)
+
     @pyqtProperty('QString', notify=statusTextChanged)
     def statusText(self):
         return self._status_text
@@ -454,8 +455,8 @@ class FormPieces(QObject):
         for i in range(gd.sessionInfo['RowerCnt']):
             gd.rowertablemodel[i] = RowerTableModel(i)
             gd.context.setContextProperty("rowerTableModel"+str(i), gd.rowertablemodel[i])
-        
-            
+
+
     @pyqtSlot(str)
     def createSessionCsv(self, f):
         """Used from the menu when (re)creating a new session."""
@@ -479,7 +480,7 @@ class FormPieces(QObject):
 
         # session- and caches- dirs should reflect csv-dir
         b = os.path.basename(csv_file)
-        session = re.sub('.csv', '', b)
+        session = re.sub('\.csv', '', b)
         session_file = sessionsDir() / (session + '.yaml')
         cache_file = cachesDir() / (session + '.npy')
         
@@ -519,7 +520,7 @@ class FormPieces(QObject):
                 fd.close()
                 print(f'createSessionCsv: old file already exists!')
             except:
-                move(session_file, oldfile)
+                shutil.move(session_file, oldfile)
         except IOError:
             # assume no session_file
             pass
@@ -535,41 +536,13 @@ class FormPieces(QObject):
         saveConfig(gd.config)
 
         # create sessionfile
-        copyfile(configsDir() / 'session_template.yaml', session_file)
-        gd.sessionInfo = selectSession()
-        if oldInfo is not None:
-            gd.sessionInfo['CrewInfo'] = oldInfo['CrewInfo']
-            gd.sessionInfo['Calibration'] = oldInfo['Calibration']
-            gd.sessionInfo['Misc'] = oldInfo['Misc']
-            gd.sessionInfo['Video'] = oldInfo['Video']
-            gd.sessionInfo['Venue'] = oldInfo['Venue']
-            gd.sessionInfo['PowerLine'] = oldInfo['Powerline']
+        shutil.copyfile(appconfigsDir() / 'session_template.yaml', session_file)
+        gd.sessionInfo = loadSession()
 
-        gd.cal_value = gd.sessionInfo['Calibration']
-
-        # read numpy data
+        # create numpy data
+        #  also add metadata to csv file if not yet present.
         makecache(cache_file)
-        
-        calibrate()
-        self.update_the_models(session)
 
-        # dubbelop, staat ook in selectit
-        # list with data for the session Info tab (placeholdertext)
-        sinfo = [
-            gd.sessionInfo['CrewInfo'],
-            gd.cal_value,
-            gd.sessionInfo['Misc'],
-            gd.sessionInfo['Rowers'],
-            gd.sessionInfo['Video'],
-            gd.sessionInfo['PowerLine'],
-            gd.sessionInfo['Venue'],
-            '...'
-            ]
-
-        gd.crewPlots.sessionsig.emit(sinfo)
-
-        
-        
     @pyqtSlot()
     def selectCurrent(self):
         """Used when starting the program."""
@@ -627,6 +600,7 @@ class FormPieces(QObject):
         try:
             fd = Path.open(session_file, 'r')
             inhoud = fd.read()
+            fd.close()
         except IOError:
             print(f'selectIt: cannot read Sessions file, should not happen  {session_file}')
             gd.config['Session'] = 'None'
@@ -635,23 +609,7 @@ class FormPieces(QObject):
             return
 
         gd.sessionInfo = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
-        gd.p_names = [ nm for nm, be, cr, tl in gd.sessionInfo['Pieces']]
-
-        gd.cal_value = gd.sessionInfo['Calibration']
-
-        # list with data for the session Info tab (placeholdertext)
-        sinfo = [
-            gd.sessionInfo['CrewInfo'],
-            gd.cal_value,
-            gd.sessionInfo['Misc'],
-            gd.sessionInfo['Rowers'],
-            gd.sessionInfo['Video'],
-            gd.sessionInfo['PowerLine'],
-            gd.sessionInfo['Venue'],
-            '...'
-            ]
-
-        gd.crewPlots.sessionsig.emit(sinfo)
+        gd.p_names = [nm for nm, be, cr, tl in gd.sessionInfo['Pieces']]
 
         # update dataObject (should be there)
         try:
@@ -663,6 +621,6 @@ class FormPieces(QObject):
             print("Repairing cache file,")
             makecache(cache_file)
 
-        calibrate()
-        self.update_the_models(session)
+        getMetaData()
+        gd.mainPieces.update_the_models(gd.config['Session'])
         gd.boattablemodel.make_profile()

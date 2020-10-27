@@ -34,13 +34,7 @@ from guirest import *
 from utils import *
 from profil import *
 
-# to get rid of Qt warning
-del os.environ['SESSION_MANAGER']
-
-
-def shutdown():
-    del globals()['engine']
-
+app = None
 
 def interactive(session=None):
     """For interactive use in python.
@@ -62,6 +56,8 @@ def interactive(session=None):
 
     plt.show()
 """
+    global app
+
     gd.config = startup()
     gd.globals = readGlobals()
     gd.sessionInfo = selectSession()
@@ -97,7 +93,7 @@ def main():
     It assumes a session is selected. When not, a dummy session None is used.
     A real session can be created or selected from the menu.
     """
-    global engine
+    global app
 
     gd.config = startup()
     # always start without secondary session
@@ -119,7 +115,7 @@ def main():
     qmlRegisterType(FigureCanvasQTAggToolbar, "Backend", 1, 0, "FigureToolbar")
     imgProvider = MatplotlibIconProvider()
 
-    engine = QQmlApplicationEngine(parent=app)
+    engine = QQmlApplicationEngine()
     engine.addImageProvider("mplIcons", imgProvider)
     gd.context = engine.rootContext()
 
@@ -180,8 +176,6 @@ def main():
     gd.mainView.figure = gd.win.findChild(QObject, "viewpiece").getFigure()
     gd.boatPlots.figure = gd.win.findChild(QObject, "viewboat").getFigure()
     gd.crewPlots.figure = gd.win.findChild(QObject, "viewcrew").getFigure()
-
-    engine.quit.connect(app.quit)
 
     sys.exit(app.exec_())
 

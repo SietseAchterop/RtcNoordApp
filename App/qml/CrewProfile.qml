@@ -43,7 +43,7 @@ Item {
 		    preferredHighlightBegin: height / 2 - (height / crewtumbler.visibleItemCount / 2)
 		    preferredHighlightEnd: height / 2 + (height / crewtumbler.visibleItemCount / 2)
 		    clip: true
-		    opacity: 1.0 - 2* (Math.abs(Tumbler.displacement))
+
 		}
 		background: Item {
 		    Rectangle {

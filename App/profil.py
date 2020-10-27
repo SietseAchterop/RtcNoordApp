@@ -88,8 +88,9 @@ def profile():
                     # print only one
                     if math.isnan(c):
                         if printit:
-                            print(f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}')
+                            gd.mainPieces.statusText = "Profile error: " + f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}'
                             printit = False
+                            print("Profile error: " + f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}')
 
     # now the real computations
     outcome = []
@@ -151,14 +152,14 @@ def pieceCalculations(piece, idx, a):
     speed = np.mean(a[:, i])
     out['Speed'] = speed
 
-    # Speed from impeller is better!
+    # Does this give a better average speed?
     # use entire piece
     distsens = gd.sessionInfo['Header'].index('Distance')
     bb = gd.dataObject[sp[0], distsens]
     ee = gd.dataObject[sp[-1], distsens]
     speedimp =  (ee - bb)/(float(sp[-1] - sp[0])/50)
     out['Speedimp'] = speedimp
-
+    
     if gd.sessionInfo['noDistance']:
         # just for now
         out['Split'] = 0
@@ -194,7 +195,7 @@ def pieceCalculations(piece, idx, a):
     #    max - min
     # speed fluctuation power loss
     i = sensors.index('Speed')
-    out['PowerLoss'] = 100*(1 - speedimp**3/np.mean(a[:, i]**3))
+    out['PowerLoss'] = 100*(1 - speed**3/np.mean(a[:, i]**3))
 
     """
     Crewreport:
@@ -229,7 +230,7 @@ def pieceCalculations(piece, idx, a):
     prof_data = np.zeros((3*rwcnt, length))
 
     scullsweep = gd.sessionInfo['ScullSweep']
-    boattype = gd.sessionInfo['BoatType']
+    boattype = gd.metaData['BoatType']
     inboard = gd.globals['Boats'][boattype]['inboard']
     outboard = gd.globals['Boats'][boattype]['outboard']
     
@@ -307,7 +308,7 @@ def pieceCalculations(piece, idx, a):
             work = np.trapz(power[:sp[1]-sp[0]], dx=1/Hz)
             rowerstats['Work'] = work
             rowerstats['PMean'] = Hz*work/(sp[1]-sp[0])
-            rowerstats['PperKg'] = rowerstats['PMean']/gd.sessionInfo['Rowers'][rwr][3]
+            rowerstats['PperKg'] = rowerstats['PMean']/int(gd.metaData['Rowers'][rwr][3])
             
             # catch/finish angles
             rowerstats['CatchA'] = np.min(gate_a)
@@ -388,7 +389,7 @@ def pieceCalculations(piece, idx, a):
             work = np.trapz(power[:sp[1]-sp[0]], dx=1/Hz)
             rowerstats['Work'] = Hz*work/(sp[1]-sp[0])
             rowerstats['PMean'] = Hz*work/(sp[1]-sp[0])
-            rowerstats['PperKg'] = rowerstats['PMean']/gd.sessionInfo['Rowers'][rwr][3]
+            rowerstats['PperKg'] = rowerstats['PMean']/int(gd.metaData['Rowers'][rwr][3])
             
             # catch/finish angles
             rowerstats['CatchA'] = np.min(gate_a)
@@ -411,14 +412,13 @@ def pieceCalculations(piece, idx, a):
     # TODO
 
     # normalize data for the averaged stroke in this piece
-    ll = sp[1]-sp[0]+2  # little bit longer to really complete the cycle
+    ll = sp[1]-sp[0]+1  # little bit longer to really complete the cycle?
     # print(f"pieces = {gd.sessionInfo['Pieces']}")
     # print(f'  ll  {ll}   a.shape  {a.shape}')
     
     for i in range(a.shape[1]):
         x = np.arange(ll)
         # wry wrong when ll = 105? fill_value helps
-        # print(f'=====    {x.shape}    {a[0:ll,i].shape}')
         g = interp1d(x, a[0:ll, i], kind='cubic', fill_value="extrapolate")
         xnew = np.arange(100)*((ll-1)/(100-1))
         # print(len(x), len(xnew), len(a[0:ll, i]))
