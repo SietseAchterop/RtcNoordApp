@@ -397,7 +397,6 @@ def getMetaData():
         i = next(reader)
         gd.metaData['Misc'] = i[1]
         i = next(reader)
-        print(f'===== video {i}')
         gd.metaData['Video'] = i[1]
         i = next(reader)
         gd.metaData['PowerLine'] = i[1]

@@ -241,7 +241,7 @@ class FormView(QObject):
                     self.ax1.plot(self.times, values, linewidth=0.7,  label=name, linestyle='--')
                     secsenslist.append((i, name, scaleY))
 
-        self.ax1.plot([self.traceCentre], [0], marker='D', color='b')                
+        self.ax1.plot([self.traceCentre], [0], marker='D', color='b')
 
         dist = (self.xTo - self.xFrom)
         xFrom = self.traceCentre - self.scaleX*dist/2
@@ -963,7 +963,6 @@ class CrewForm(QObject):
     @pyqtSlot('QVariant')
     def newsesinfo(self, sinfo):
         s = sinfo.toVariant()
-        print(f' ===== s  === {s}')
         gd.metaData['CrewName'] = s[0]
         oldcal = float(gd.metaData['Calibration'])
         newcal = float(s[1])
@@ -980,7 +979,6 @@ class CrewForm(QObject):
             gd.cal_value = newcal/oldcal
             calibrate()
             gd.boattablemodel.make_profile()
-        print(f' =====  {gd.metaData["Video"]}')
 
 # matplotlib plot in Rower Profile
 class RowerForm(QObject):

@@ -410,11 +410,11 @@ class RowerTableModel(QAbstractTableModel):
         targ = targets['slipIn']
         aslip = sum([r['Slip'] for r in ri])/len(gd.p_names)
         self._data.append(
-            DataSerie(2, ['Catch slip (\u00b0)  (40%)'] + [f'{targ:.0f}'] + [f'{aslip:.0f}'] + [f'{r["Slip"]:.0f}' for r in ri]))
+            DataSerie(2, ['Catch slip (\u00b0) '] + [f'{targ:.0f}'] + [f'{aslip:.0f}'] + [f'{r["Slip"]:.0f}' for r in ri]))
         targ = targets['slipOut']
         awash = sum([r['Wash'] for r in ri])/len(gd.p_names)
         self._data.append(
-            DataSerie(2, ['Finish wash (\u00b0)  (40%)'] + [f'{targ:.0f}'] + [f'{awash:.0f}'] + [f'{r["Wash"]:.0f}' for r in ri]))
+            DataSerie(2, ['Finish wash (\u00b0) '] + [f'{targ:.0f}'] + [f'{awash:.0f}'] + [f'{r["Wash"]:.0f}' for r in ri]))
         targ = targets['angleOut'] - targets['angleIn'] - targets['slipIn'] - targets['slipOut']
         effan = sum([r['EffAngle'] for r in ri])/len(gd.p_names)
         self._data.append(

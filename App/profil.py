@@ -277,10 +277,14 @@ def pieceCalculations(piece, idx, a):
             """
             # slip: number of degrees after the turning point in the angle the force is above the threshold
             # threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
-            threshold = 0.4*rowerstats['GFMax']
+            # threshold = 0.4*rowerstats['GFMax']
+            # voorlopig als bij knrb, een vaste kracht
+            threshold = 30*9.81
+            
             slippos = np.argmax(gate_fx > threshold)
             # threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
             # start looking at posmax/2
+            threshold = 15*9.81
             washpos = fmax + np.argmax(gate_fx[fmax: ] < threshold)
 
             # degrees from beginning of stroke
@@ -364,10 +368,13 @@ def pieceCalculations(piece, idx, a):
             """
             # slip: number of degrees after the turning point in the angle the force is above the threshold
             # threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
-            threshold = 0.4*rowerstats['GFMax']
+            # threshold = 0.4*rowerstats['GFMax']
+            # voorlopig als bij knrb, een vaste kracht
+            threshold = 30*9.81
             slippos = np.argmax(gate_fx > threshold)
             # threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
             # start looking at posmax/2
+            threshold = 15*9.81
             washpos = fmax + np.argmax(gate_fx[fmax: ] < threshold)
 
             rowerstats['Slip'] = gate_a[slippos] - gate_a[posmin]
