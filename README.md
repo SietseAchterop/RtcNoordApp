@@ -132,7 +132,7 @@ All pieces, the individual pieces or the average of them can be selected.
 
 The profile consists of this screen and the Crew- and Rower- screens, so creating a new profile will also affect those screens.
 The "Create report" creates a pdf version of the profile, see the docs directory for an [example report](docs/example_report.pdf).
-It also creates a spreadsheet that contains the tables for further processing, see [example sheet](docc/example_report.xlsx).
+It also creates a spreadsheet that contains the tables for further processing, see [example sheet](docs/example_report.xlsx).
 
 The report uses the selected settings of checkboxes and tumble wheels.
 Also the view from "View piece" is shown in the report.
