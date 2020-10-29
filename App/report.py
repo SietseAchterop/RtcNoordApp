@@ -427,7 +427,11 @@ def make_pdf_report():
         doc.append(NewPage())
 
         fig, extr = plt.subplots()
-        extr.set_title('Custom plot')
+        s2 = gd.config['Session2']
+        if s2 == '':
+            extr.set_title('Custom plot')
+        else:
+            extr.set_title(f'Custom plot (second session: {s2})')
         extr.grid(True)
         
         # data from update_plot from View piece, can we do this simpler?

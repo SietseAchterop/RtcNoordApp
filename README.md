@@ -11,7 +11,7 @@ It basically works on linux, windows and mac. See the docs directory for a short
 ## Usage
 
   - Start the program from the App directory with: "python main.py", or create an Icon on the desktop and use that.
-  - The very first time the program is started a system dependant configuration-file RtcApp will be created where the "BaseDir" for all rowing data is set.
+  - The very first time the program is started a system dependant configuration-file RtcApp will be created. It contains the "BaseDir" for where all rowing data is put and the name of the current session.
     The default value of BaseDir is RtcNoord in your home-directory.
     If that directory doesn't exist, it and a number of subdirectories will be created and filled with some data.
   - In the lower left part of the screens there is a status message.
@@ -23,19 +23,21 @@ It basically works on linux, windows and mac. See the docs directory for a short
   - A few csv-files are already included.
   - Start the app and select the csv-file from the menu.
     Now data is preprocessed and saved in a sessionInfo-file and a dataObject-file.
-  - Metadata like, distance calibration value, rowernames etc. is prepended to the csv-file for it to be preserved with the data.
-    In the Session info tab the correct values can be filled in.
+    Metadata like, distance calibration value, rowernames etc. is prepended to the csv-file for it to be preserved with the data.
+  - Now first go to the Session info tab to fill in the correct metadata.
+    Each item is only entered by using the Enter key after typing in the value!
   - You can only access files that are in the csv- and session-data- directories.
   - You can create subdirectories in the csv-data to organize your data according to years for example.
     These subdirectories will automatically be replicated in the session-data and reports directories.
   - There is a very basic backup mechanism if a session is created a second time. The previous session file wil be saved in a directory 'old'.
   - The program consists of several tabs that can be selected at the bottom of the screen.
       - Setup pieces: the interesting parts can be selected for further study.
-      - View pieces: study the these parts in detail, comparing with data from another session, ...
-      - Profile tabs: if pieces are selected a profile of the crew and individual rowers will be created.
+      - View pieces: study the these parts in detail, comparing with data from another session. Also a video(frame) of the session can be shown if available.
+      - Profile tabs: if pieces are selected/saved a profile of the boat, crew and individual rowers will be created.
           - Boat, Crew, and rower tabs.
       - Session info: configure the session, name the rowers, set calibration value
           - Important: fill in the session info when you use the csv-file for the first time! Eventually this data will reside in the csv-file so that it will nog get lost when recreating a session.
+   - It the program crashes, please delete the current session file in the session_data directory to recover.
 
 ## Status
 
