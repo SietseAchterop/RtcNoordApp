@@ -10,6 +10,7 @@ import globalData as gd
 from utils import *
 
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
 
 from pylatex import Document, Section, Subsection, Command, Tabular, Figure, NewPage, TextColor, VerticalSpace, NewLine
 from pylatex.utils import italic, NoEscape
@@ -105,6 +106,10 @@ def make_pdf_report():
             """
     doc.append(NewPage())
 
+    # for the plots
+    fontP = FontProperties()
+    fontP.set_size('xx-small')
+
     # Second page
     with doc.create(Section(f'Boat report {gd.metaData["CrewName"]}', numbering=False)):
 
@@ -153,7 +158,7 @@ def make_pdf_report():
         ax4.scatter(list(range(len(gd.p_names))), p, marker='H', color='green')
         ax4.scatter(list(range(len(gd.p_names))), pa[1], marker='H', color='blue')
 
-        ax1.legend(loc='lower right')
+        ax1.legend(loc='lower right', prop=fontP)
         plt.tight_layout()
 
         tmpfig = tmpdir / gd.config['Session']
@@ -236,7 +241,7 @@ def make_pdf_report():
 
                 ax4.plot(power/nmbrpieces, linewidth=0.5, label='Power')
 
-        ax1.legend(loc='lower right')
+        ax1.legend(loc='lower right', prop=fontP)
         plt.tight_layout()
 
         # we keep using the same name
@@ -310,17 +315,17 @@ def make_pdf_report():
                 for i in range(len(gd.p_names)):
                     if gd.sessionInfo['ScullSweep'] == 'sweep':
                         # print(f'Make rowerplot for {self.rower}')
-                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
-                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label='GateForceX')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.5, label=f'{gd.p_names[i]} A')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label=f'{gd.p_names[i]} FX')
                         rax3[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
-                                       gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5)
+                                       gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label=f'{gd.p_names[i]}')
                     else:
-                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
-                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label='GateForceX')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.5, label=f'{gd.p_names[i]} A')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label=f'{gd.p_names[i]} FX')
                         rax3[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
-                                       gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5)
-                    d, a = gd.out[piece]
-                    rax4[rwr].plot( a[0+rwr], linewidth=0.5, label='Power')
+                                       gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label=f'{gd.p_names[i]}')
+                    d, aa = gd.out[i]
+                    rax4[rwr].plot(aa[0+rwr], linewidth=0.5, label=f'{gd.p_names[i]}')
                 rax2[rwr].plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.5, label='Accel')
             elif gd.rowerPiece[rwr] == 7:
                 # average
@@ -373,9 +378,10 @@ def make_pdf_report():
                 d, a = gd.out[i]
                 rax4[rwr].plot( a[0+rwr], linewidth=0.5, label='Power')
 
-            rax1[rwr].legend(loc='lower right')
-            rax2[rwr].legend(loc='lower right')
-            rax4[rwr].legend(loc='lower right')
+            # rax1[rwr].legend(loc='lower right', prop=fontP, bbox_to_anchor=(1.05, 1))
+            rax1[rwr].legend(loc='lower right', prop=fontP)
+            rax3[rwr].legend(loc='lower right', prop=fontP)
+            rax4[rwr].legend(loc='lower right', prop=fontP)
             plt.tight_layout()
             
             tmpfig = tmpdir / (gd.config['Session'] + f'_{rwr}')
@@ -409,7 +415,7 @@ def make_pdf_report():
                     sax1[rwr].plot(10*gd.dataObject[sp[0]:sp[1], rsens['Stretcher RL']], linewidth=0.6, label='Stretcher RL')
                     sax1[rwr].plot(10*gd.dataObject[sp[0]:sp[1], rsens['Stretcher TB']], linewidth=0.6, label='Stretcher TB')
 
-            sax1[rwr].legend(loc='lower right')
+            sax1[rwr].legend(loc='lower right', prop=fontP)
             plt.tight_layout()
             
             tmpfig = tmpdir / (gd.config['Session'] + f'_{rwr}_s')

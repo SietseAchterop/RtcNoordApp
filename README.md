@@ -100,18 +100,24 @@ The plots are "normalized" in a crude way so that they overlap even if the rates
 
 ### Using video
 
-The View piece screen can also be used to connect a video session to the data.
-To use this a video file has to be selected in the Session info tab.
-After selecting a video via the button the video appears.
-The video can be controlled with the video control button, apart from the middle one.
-Clicking in the plot also positions the video.
+When a video is made during the session it is possible to show the video (frames) next to the data, where a connection is made between the frame and the point in the data.
+This is done in the View piece tab.
 
-The middle video control button is used the synchronise the video with the data as follows.
-First position the video to a point where the data can be found that matches that point.
+To use this a video file name has to be selected in the Session info tab.
+The file should reside in the RtcNoord/videos directory.
+Then clicking on the Video button in the View page tab will show the video frame with the associated data frame.
+The video can be controlled with the video control buttons to more a single or a larger number of frames.
+Clicking in the plot also positions the video.
+A red line is the initial position of the video upon start and a blue line shows the place in the data of which the video frame is shown.
+
+The middle button is used to synchronize the video with the data as follows.
+First position the video to a point of which you know the place in the data.
 E.g. the first turning point of the oars at the intake after a start.
-Then click the button, it will turn red; the video position is set.
+Note that the blue line follows the video.
+Then click the middle control button, it will turn red; the video position is set.
 Next click on the plot on the correct point in the data.
-Finally click the button again. Synchronisation is complete.
+Finally click the middle control button again. The blue line moves to that point and synchronisation is complete.
+
 
 ![Eerste](docs/ViewVideo.png)
 

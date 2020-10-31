@@ -265,7 +265,7 @@ class BoatTableModel(QAbstractTableModel):
             DataSerie(2, ['500m split'] + [f'{int(split/60)}:{split%60:04.1f}'] + [f'{int(d["Split"]/60)}:{d["Split"]%60:04.1f}' for d, e in out]))
         dist = sum([d["DistancePerStroke"] for d, e in out])/len(gd.p_names)
         self._data.append(
-            DataSerie(2, ['Distance/stroke'] + [f'{dist:.2f}'] + [f'{d["DistancePerStroke"]:.2f}' for d, e in out]))
+            DataSerie(2, ['Distance/stroke'] + [f'{dist:.1f}'] + [f'{d["DistancePerStroke"]:.1f}' for d, e in out]))
         ploss = sum([d['PowerLoss'] for d, e in out])/len(gd.p_names)
         self._data.append(
             DataSerie(2, ['Speed power loss(%)'] + [f'{ploss:.1f}'] + [f'{d["PowerLoss"]:.1f}' for d, e in out]))
@@ -421,6 +421,10 @@ class RowerTableModel(QAbstractTableModel):
             DataSerie(2, ['Effective angle (\u00b0)'] + [f'{targ:.0f}'] + [f'{effan:.0f}'] + [f'{r["EffAngle"]:.0f}' for r in ri]))
         self._data.append(
             DataSerie(2, ['Gate force average'] + [''] + [''] + [ f'{r["GFEff"]:.0f}' for r in ri]) )
+        """
+        self._data.append(
+            DataSerie(2, ['Gate force max'] + [''] + [''] + [ f'{r["GFMax"]:.0f}' for r in ri]) )
+        """
         self._data.append(
             DataSerie(2, ['Ratio avg/max Gate force'] + [''] + [''] + ['', '', '', '', '', '', '' , '' ]))
         """

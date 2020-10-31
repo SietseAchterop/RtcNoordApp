@@ -65,6 +65,7 @@ def profile():
         # here the general signals
         i = sensors.index('Accel')
         av_arrays[:, :, i] = signal.filtfilt(B, A, av_arrays[:, :, i])
+        # angle and force later when we distinguish between scull and sweep
 
     # scull: gate angle and force:  average and add
     #        Use port side
@@ -92,22 +93,38 @@ def profile():
                             printit = False
                             print("Profile error: " + f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}')
 
-    # now the real computations
+
+    #
     outcome = []
-    # allocate norm_arrays
-    gd.norm_arrays = np.empty((len(pieces), 100, len(sensors)))
     gd.gmin = [0]*len(pieces)
     gd.gmax = [100]*len(pieces)
 
+    # allocate norm_arrays to 100 datapoints
+    gd.norm_arrays = np.empty((len(pieces), 100, len(sensors)))
+
     for i, pp in enumerate(pieces):
-        outcome.append(pieceCalculations(pp, i, av_arrays[i, :, :]))
+        nm, be, c, sp = pp
+
+        # find end of stroke (can be changed due to averageing!)
+        # find next zero after sp[ 1 1/2]
+        ststeps = sp[1]-sp[0]+0    # of +1 ?
+    
+        for k in range(len(sensors)):
+            x = np.arange(ststeps)
+            # wry wrong when ststeps = 105? fill_value helps
+            g = interp1d(x, av_arrays[i, 0:ststeps, k], kind='cubic', fill_value="extrapolate")
+            xnew = np.arange(100)*((ststeps-1)/(100-1))
+
+            gd.norm_arrays[i, :, k] = g(xnew)
+
+        outcome.append(pieceCalculations(pp, i, ststeps))
 
     saveSessionInfo(gd.sessionInfo)
     gd.profile_available = True
     return outcome
 
 
-def pieceCalculations(piece, idx, a):
+def pieceCalculations(piece, idx, ststeps):
     """Calculate all parameters needed for the protocol
 
     Parameters
@@ -116,9 +133,6 @@ def pieceCalculations(piece, idx, a):
 
     idx: index pieces array
 
-    a: numpy.array (sensors, length)
-    Array containing the averaged sensor data for the stroke
-
     Returns
     -------
     outcome: dict with calculated values
@@ -126,6 +140,8 @@ def pieceCalculations(piece, idx, a):
     profile_data: extra arrays per rower: power, ...
        sizes depend on boattype and number of rowers
     """
+
+    a = gd.norm_arrays[idx, :, :]
 
     # will need filtering for some signals
     [B, A] = signal.butter(4, 2*5/Hz)
@@ -148,8 +164,8 @@ def pieceCalculations(piece, idx, a):
     # number of strokes and average rating: in sessionInfo
 
     # 500 meter split in seconds
-    i = sensors.index('Speed')
-    speed = np.mean(a[:, i])
+    spind = sensors.index('Speed')
+    speed = np.mean(a[:, spind])
     out['Speed'] = speed
 
     # Does this give a better average speed?
@@ -157,7 +173,7 @@ def pieceCalculations(piece, idx, a):
     distsens = gd.sessionInfo['Header'].index('Distance')
     bb = gd.dataObject[sp[0], distsens]
     ee = gd.dataObject[sp[-1], distsens]
-    speedimp =  (ee - bb)/(float(sp[-1] - sp[0])/50)
+    speedimp =  (ee - bb)/(float(sp[-1] - sp[0])/Hz)
     out['Speedimp'] = speedimp
     
     if gd.sessionInfo['noDistance']:
@@ -174,12 +190,9 @@ def pieceCalculations(piece, idx, a):
 
     # maximum speed at %cycle
     #  filter speed, find maximum in stroke.
-    length = sp[1] - sp[0]
-    f_speed = signal.filtfilt(B, A, a[0: length, i])
-    mm = f_speed.argmax()
-    mn = f_speed.argmin()
-    out['MaxAtP'] = (mm/length)*100
-    out['MinAtP'] = (mn/length)*100
+    f_speed = signal.filtfilt(B, A, a[:, spind])
+    out['MaxAtP'] = f_speed.argmax()
+    out['MinAtP'] = f_speed.argmin()
     # positive en negative acceleration at %cycle
 
     # center yaw, pitch and angle ( averages in boat table) ?
@@ -226,20 +239,20 @@ def pieceCalculations(piece, idx, a):
     # allocate data for profile data: power, handleVel, handleVDSSeat (3)
     #   or in a 3rd dimension?
     rwcnt = gd.sessionInfo['RowerCnt']
-    length = a.shape[0]
+    length = 100     # nu altijd 100   a.shape[0]
     prof_data = np.zeros((3*rwcnt, length))
 
     scullsweep = gd.sessionInfo['ScullSweep']
     boattype = gd.metaData['BoatType']
     inboard = gd.globals['Boats'][boattype]['inboard']
     outboard = gd.globals['Boats'][boattype]['outboard']
+    # rename IOratio?
+    IOratio = inboard * outboard/(inboard+outboard)
     
     for rwr in range(rwcnt):
         rsens = rowersensors(rwr)
         rowerstats = {}
         if scullsweep == 'sweep':
-            # rename IOratio?
-            IOratio = inboard * outboard/(inboard+outboard)
 
             ind_ga = rsens['GateAngle']
             ind_fx = rsens['GateForceX']
@@ -248,32 +261,27 @@ def pieceCalculations(piece, idx, a):
             if rwr == rwcnt-1:
                 ga_ind = ind_ga
 
-            # only look in first stroke
             g_fx = signal.filtfilt(B, A, a[:, ind_fx])
-            gate_fx = g_fx[:sp[1]-sp[0]]
             g_a = signal.filtfilt(B, A, a[:, ind_ga])
-            gate_a = g_a[:sp[1]-sp[0]]
             if gd.filter:
                 # gate force and angle of all rowers
                 a[:, ind_fx] = g_fx
                 a[:, ind_ga] = g_a
 
             # time points of
-            posmin = np.argmin(gate_a)
-            posmax = np.argmax(gate_a)
-            fmax   = np.argmax(gate_fx)
+            posmin = np.argmin(g_a)
+            posmax = np.argmax(g_a)
+            fmax   = np.argmax(g_fx)
 
-            rowerstats['GFMax'] = np.amax(gate_fx)   # also use fy?
-            # only use the stroke
-            rowerstats['GFEff'] = np.mean(gate_fx[: posmax])
+            rowerstats['GFMax'] = np.amax(g_fx)   # also use g_fy?
 
             """
             # gate force up/down at 70% at
             threshold = 0.7*rowerstats['GFMax']
-            upat70 = np.argmax(gate_fx > threshold)
-            downat70 = fmax + np.argmax(gate_fx[fmax: ] < threshold)
-            rowerstats['UpAt70'] = gate_a[upat70] - gate_a[posmin]
-            rowerstats['DownAt70'] = gate_a[posmax] - gate_a[downat70]
+            upat70 = np.argmax(g_fx > threshold)
+            downat70 = fmax + np.argmax(g_fx[fmax: ] < threshold)
+            rowerstats['UpAt70'] = g_a[upat70] - g_a[posmin]
+            rowerstats['DownAt70'] = g_a[posmax] - g_a[downat70]
             """
             # slip: number of degrees after the turning point in the angle the force is above the threshold
             # threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
@@ -281,48 +289,49 @@ def pieceCalculations(piece, idx, a):
             # voorlopig als bij knrb, een vaste kracht
             threshold = 30*9.81
             
-            slippos = np.argmax(gate_fx > threshold)
+            slippos = np.argmax(g_fx > threshold)
             # threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
-            # start looking at posmax/2
+            # start looking at after posmax
             threshold = 15*9.81
-            washpos = fmax + np.argmax(gate_fx[fmax: ] < threshold)
+            washpos = fmax + np.argmax(g_fx[fmax: ] < threshold)
 
             # degrees from beginning of stroke
-            rowerstats['Slip'] = gate_a[slippos] - gate_a[posmin]
+            rowerstats['Slip'] = g_a[slippos] - g_a[posmin]
             if slippos < posmin:
                 rowerstats['Slip'] = -rowerstats['Slip']
             # degrees wrt end of stroke
-            rowerstats['Wash'] = gate_a[posmax] - gate_a[washpos]
-            rowerstats['EffAngle'] = gate_a[washpos] - gate_a[slippos]
+            rowerstats['Wash'] = g_a[posmax] - g_a[washpos]
+            rowerstats['EffAngle'] = g_a[washpos] - g_a[slippos]
+
+            rowerstats['GFEff'] = np.mean(g_fx[posmin: posmax])
 
             # power
             ga_rad          = math.pi * a[:, ind_ga] / 180
             # force in forward direction:
             pinForceTS      = (np.multiply(a[:, ind_fx], np.cos(ga_rad)) -
-                                      np.multiply(a[:, ind_fy], np.sin(ga_rad)))
+                               np.multiply(a[:, ind_fy], np.sin(ga_rad)))
             moment          = IOratio * pinForceTS
             # speed in radians per second:
-            gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)               # should be gate_a!
+            gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)
             power = moment * gateAngleVel
             prof_data[0+rwr]   = power
             # 0 being the first, add rwcnt and 2*rwcnt to the index for the next
 
-            # a single stroke
-            rowerstats['PMax']  = np.max(power[:sp[1]-sp[0]])
-            work = np.trapz(power[:sp[1]-sp[0]], dx=1/Hz)
+            rowerstats['PMax']  = np.max(power)
+            work = np.trapz(power, dx=ststeps/(100*Hz))
             rowerstats['Work'] = work
-            rowerstats['PMean'] = Hz*work/(sp[1]-sp[0])
+            rowerstats['PMean'] = Hz*work/ststeps
             rowerstats['PperKg'] = rowerstats['PMean']/int(gd.metaData['Rowers'][rwr][3])
             
             # catch/finish angles
-            rowerstats['CatchA'] = np.min(gate_a)
-            rowerstats['FinA'] = np.max(gate_a)
+            rowerstats['CatchA'] = np.min(g_a)
+            rowerstats['FinA'] = np.max(g_a)
             rowerstats['TotalA'] = rowerstats['FinA'] - rowerstats['CatchA']
 
             # only for stroke rower
             if rwr == 0:
                 # rhythm: stroketime/cycletime in %
-                out['Rhythm'] = 100*float(posmax-posmin)/(sp[1]-sp[0])
+                out['Rhythm'] = float(posmax-posmin)
 
             # TODO: PowerLegs, PowerTruncArms
 
@@ -330,7 +339,6 @@ def pieceCalculations(piece, idx, a):
             #        uses gateAngleVel. from data or calculate? (peachCalc does both!
 
         else:   # scull
-            IOratio = inboard * outboard/(inboard+outboard)
 
             # we already added P and S together in P
             ind_gap = rsens["P GateAngle"]
@@ -342,71 +350,71 @@ def pieceCalculations(piece, idx, a):
 
             # only look in the first stroke
             g_fx = signal.filtfilt(B, A, a[:, ind_fxp])
-            gate_fx = g_fx[:sp[1]-sp[0]]
             g_a = signal.filtfilt(B, A, a[:, ind_gap])
-            gate_a = g_a[:sp[1]-sp[0]]
             if gd.filter:
                 # gate force and angle of all rowers
                 a[:, ind_fxp] = g_fx
                 a[:, ind_gap] = g_a
 
             # time points of
-            posmin = np.argmin(gate_a)
-            posmax = np.argmax(gate_a)
-            fmax   = np.argmax(gate_fx)
+            posmin = np.argmin(g_a)
+            posmax = np.argmax(g_a)
+            fmax   = np.argmax(g_fx)
 
-            rowerstats['GFMax'] = np.amax(gate_fx)
-            rowerstats['GFEff'] = np.mean(gate_fx[: posmax])
+            rowerstats['GFMax'] = np.amax(g_fx)
 
             """
             # gate force up/down at 70% at
             threshold = 0.7*rowerstats['GFMax']
             upat70 = np.argmax(gate_fx > threshold)
             downat70 = fmax + np.argmax(gate_fx[fmax: ] < threshold)
-            rowerstats['UpAt70'] = gate_a[upat70] - gate_a[posmin]
-            rowerstats['DownAt70'] = gate_a[posmax] - gate_a[downat70]
+            rowerstats['UpAt70'] = g_a[upat70] - g_a[posmin]
+            rowerstats['DownAt70'] = g_a[posmax] - g_a[downat70]
             """
             # slip: number of degrees after the turning point in the angle the force is above the threshold
             # threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
             # threshold = 0.4*rowerstats['GFMax']
             # voorlopig als bij knrb, een vaste kracht
             threshold = 30*9.81
-            slippos = np.argmax(gate_fx > threshold)
+            slippos = np.argmax(g_fx > threshold)
             # threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
             # start looking at posmax/2
             threshold = 15*9.81
-            washpos = fmax + np.argmax(gate_fx[fmax: ] < threshold)
+            washpos = fmax + np.argmax(g_fx[fmax: ] < threshold)
 
-            rowerstats['Slip'] = gate_a[slippos] - gate_a[posmin]
+            rowerstats['Slip'] = g_a[slippos] - g_a[posmin]
             if slippos < posmin:
                 rowerstats['Slip'] = -rowerstats['Slip']
-            rowerstats['Wash'] = gate_a[posmax] - gate_a[washpos]
-            rowerstats['EffAngle'] = gate_a[washpos] - gate_a[slippos]
+            rowerstats['Wash'] = g_a[posmax] - g_a[washpos]
+            rowerstats['EffAngle'] = g_a[washpos] - g_a[slippos]
 
-            # power (both oars merged)
-            gate_a       = signal.filtfilt(B, A, a[:, ind_gap])
+            # average between catch en finish
+            rowerstats['GFEff'] = np.mean(g_fx[posmin:posmax])
+
+            # power (both oars already merged)
             ga_rad          = math.pi * (a[:, ind_gap]) / 180
             pinForceTS   = (np.multiply(a[:, ind_fxp], np.cos(ga_rad)) -
                             np.multiply(a[:, ind_fyp], np.sin(ga_rad)))
             moment       = IOratio * pinForceTS
-            gateAngleVel = np.gradient(math.pi*g_a/180, 1/Hz)                           # should be gate_a!
+            gateAngleVel = np.gradient(math.pi*g_a/180, 1/Hz)
             power = moment * gateAngleVel
             prof_data[0+rwr]   = power
-            rowerstats['PMax']  = np.max(power[:sp[1]-sp[0]])
-            work = np.trapz(power[:sp[1]-sp[0]], dx=1/Hz)
-            rowerstats['Work'] = Hz*work/(sp[1]-sp[0])
-            rowerstats['PMean'] = Hz*work/(sp[1]-sp[0])
+
+            rowerstats['PMax']  = np.max(power)
+            work = np.trapz(power, dx=ststeps/(100*Hz))
+            rowerstats['Work'] = work
+            rowerstats['PMean'] = Hz*work/ststeps
             rowerstats['PperKg'] = rowerstats['PMean']/int(gd.metaData['Rowers'][rwr][3])
             
             # catch/finish angles
-            rowerstats['CatchA'] = np.min(gate_a)
-            rowerstats['FinA'] = np.max(gate_a)
+            rowerstats['CatchA'] = np.min(g_a)
+            rowerstats['FinA'] = np.max(g_a)
             rowerstats['TotalA'] = rowerstats['FinA'] - rowerstats['CatchA']
 
             # only for stroke rower
             if rwr == 0:
                 # rhythm: stroketime/cycletime in %
-                out['Rhythm'] = 100*float(posmax-posmin)/(sp[1]-sp[0])
+                out['Rhythm'] = float(posmax-posmin)
 
             # TODO: PowerLegs, PowerTruncArms
 
@@ -415,40 +423,12 @@ def pieceCalculations(piece, idx, a):
         #
         out[rwr] = rowerstats
 
-    #
-    # TODO
-
-    # normalize data for the averaged stroke in this piece
-    ll = sp[1]-sp[0]+1  # little bit longer to really complete the cycle?
-    # print(f"pieces = {gd.sessionInfo['Pieces']}")
-    # print(f'  ll  {ll}   a.shape  {a.shape}')
-    
-    for i in range(a.shape[1]):
-        x = np.arange(ll)
-        # wry wrong when ll = 105? fill_value helps
-        g = interp1d(x, a[0:ll, i], kind='cubic', fill_value="extrapolate")
-        xnew = np.arange(100)*((ll-1)/(100-1))
-        # print(len(x), len(xnew), len(a[0:ll, i]))
-        # print(f'xnew {xnew}')
-        # print(a[0:ll, i])
-
-        gd.norm_arrays[idx, :, i] = g(xnew)
-
     # calculate marker positions
     g_a = signal.filtfilt(B, A, gd.norm_arrays[idx, :, ga_ind])  # hadden we al uitgerekend
     gd.gmin[idx] = np.argmin(g_a)
     gd.gmax[idx] = np.argmax(g_a)
 
-    # normalize profile_data
-    profile_data = np.zeros((3*rwcnt, 100))
-    l = sp[1]-sp[0]+2
-    x = np.arange(l)
-    for i  in range(3*rwcnt):
-        g = interp1d(x, prof_data[i, 0:l], kind='cubic', fill_value="extrapolate")
-        xnew = np.arange(100)*((l-1)/(100-1))
-        profile_data[i, :] = g(xnew)
-
-    return out, profile_data
+    return out, prof_data
 
 
 def visualize(data):

@@ -22,7 +22,7 @@ from utils import *
 from models import *
 
 import matplotlib.pyplot as plt
-
+from matplotlib.font_manager import FontProperties
 
 # matplotlib plot in View Piece
 class FormView(QObject):
@@ -401,28 +401,11 @@ class FormView(QObject):
             self.dataPos = 0
         self.update_figure()
 
-    """
-    sync video to data:
-      - Click the video button
-      - If the video file exists is is shown, otherwise the command is ignored
-      - 
-       , starting from video at starting position, directly after starting video
-       then sessionInfo['Video'][1] shows position
-
-       Set video on intended syncposiion using the qui.
-       Add displacement to old value (a).
-
-       Click middle button, with will turn red
-       Click exactly on intended position.
-       We now know the position in the data (b)
-
-       Click middle button, will return to normal
-       Put a and b in sessionInfo['Video']
-
-    """
 
     @pyqtSlot(bool)
     def sync_mode(self, on):
+        """ Sync video with data, see README
+        """
         if gd.runningvideo:
             if on:
                 # fix start in video (a)
@@ -635,6 +618,7 @@ class BoatForm(QObject):
         self.drie = None
         
         self._legend = True
+        self.fontP = FontProperties()
 
         self._data = data
 
@@ -653,6 +637,8 @@ class BoatForm(QObject):
         self.ax2 = self._figure.add_subplot(gs[0, 1])
         self.ax3 = self._figure.add_subplot(gs[1, 0])
         self.ax4 = self._figure.add_subplot(gs[1, 1])
+
+        self.fontP.set_size('xx-small')
 
         # Signal connection
         self.stateChanged.connect(self._figure.canvas.draw_idle)
@@ -751,7 +737,7 @@ class BoatForm(QObject):
             self.ax4.scatter(list(range(len(gd.p_names))), pa[1], marker='H', color='blue', label='Tempo')
 
         if self.legend:
-            self.ax1.legend(loc='lower right')
+            self.ax1.legend(loc='lower right', prop=self.fontP)
 
         self.stateChanged.emit()
 
@@ -798,6 +784,7 @@ class CrewForm(QObject):
         self.drie = None
         
         self._legend = True
+        self.fontP = FontProperties()
 
         self._data = data
 
@@ -817,6 +804,8 @@ class CrewForm(QObject):
         self.ax4 = self._figure.add_subplot(gs[1, 1])
         self.ax5 = self._figure.add_subplot(gs[2, 0])
         self.ax6 = self._figure.add_subplot(gs[2, 1])
+
+        self.fontP.set_size('xx-small')
 
         # Signal connection
         self.stateChanged.connect(self._figure.canvas.draw_idle)
@@ -934,7 +923,7 @@ class CrewForm(QObject):
                     # no usefull markers here
                     
         if self.legend:
-            self.ax1.legend()
+            self.ax1.legend(loc='upper left', prop=self.fontP)
 
         self.stateChanged.emit()
 
@@ -1002,6 +991,7 @@ class RowerForm(QObject):
         self.drie = None
         
         self._legend = True
+        self.fontP = FontProperties()
 
         self._data = data
         self.rower = rower
@@ -1014,12 +1004,14 @@ class RowerForm(QObject):
     def figure(self, fig):
         self._figure = fig
         self._figure.set_facecolor('white')
-        fig.subplots_adjust(hspace=0.3)
+        fig.subplots_adjust(hspace=0.4, wspace=0.1)
         gs = self._figure.add_gridspec(2, 2)
         self.ax1 = self._figure.add_subplot(gs[0, 0])
         self.ax2 = self._figure.add_subplot(gs[0, 1])
         self.ax3 = self._figure.add_subplot(gs[1, 0])
         self.ax4 = self._figure.add_subplot(gs[1, 1])
+
+        self.fontP.set_size('xx-small')
 
         # Signal connection
         self.stateChanged.connect(self._figure.canvas.draw_idle)
@@ -1076,17 +1068,17 @@ class RowerForm(QObject):
                 for i in range(len(gd.p_names)):
                     if gd.sessionInfo['ScullSweep'] == 'sweep':
                         # print(f'Create rowerplot for {self.rower}')
-                        self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
-                        self.ax1.plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label='GateForceX')
+                        self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.6, label=f'{gd.p_names[i]} a')
+                        self.ax1.plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]} fX')
                         self.ax3.plot(gd.norm_arrays[i, :, rsens['GateAngle']],
                                       gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6)
                     else:
-                        self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
-                        self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label='GateForceX')
+                        self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.6, label=f'{gd.p_names[i]} a')
+                        self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]} fX')
                         self.ax3.plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
-                                      gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6)
+                                      gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]}')
                     d, aa = gd.out[i]
-                    self.vijf = self.ax4.plot(aa[0+self.rower], linewidth=0.6, label='Power')
+                    self.vijf = self.ax4.plot(aa[0+self.rower], linewidth=0.6, label=f'{gd.p_names[i]}')
                 self.ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label='Accel')
             elif gd.rowerPiece[self.rower] == len(gd.p_names) + 1:
                 # average
@@ -1146,10 +1138,10 @@ class RowerForm(QObject):
                 self.ax4.plot([gd.gmin[i]], [0], marker='v', color='b')
                 self.ax4.plot([gd.gmax[i]], [0], marker='^', color='b')
 
-
-
         if self.legend:
-            self.ax1.legend()
+            self.ax1.legend(prop=self.fontP, loc='upper right')
+            self.ax3.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)
+            self.ax4.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)
 
         self.stateChanged.emit()
 
