@@ -141,10 +141,15 @@ def reportsDir():
         path = path / gd.config['SubDir']
     return path
 
-def readGlobals():
+def readGlobals(cwd = 'onzin'):
     """Return the GlobalSettings from the config."""
     try:
-        fd = Path.open(appconfigsDir() / 'GlobalSettings.yaml')
+        # PAS OP: klopt niet bij interactive, appconfdir geeft /usr/configs
+        if cwd == 'onzin':
+            fd = Path.open(appconfigsDir() / 'GlobalSettings.yaml')            
+        else:
+            fd = open(cwd + '/../configs/' + 'GlobalSettings.yaml')
+
         inhoud = fd.read()
         fd.close()
     except IOError:
@@ -182,6 +187,41 @@ def loadSession():
 
     # new config set
     return yaml.load(inhoud, Loader=yaml.UnsafeLoader)
+
+
+def selectCurrentInteractive():
+    """Used in main.interactive """
+    session = gd.config['Session']
+    session_file = sessionsDir() / (session + '.yaml')
+
+    # from selectIt
+    session_file = sessionsDir() / (session + '.yaml')
+    cache_file = cachesDir() / (session + '.npy')
+
+    # update sessionInfo
+    try:
+        fd = Path.open(session_file, 'r')
+        inhoud = fd.read()
+        fd.close()
+    except IOError:
+        print(f'selectCurrentInteractive: cannot read Sessions file, should not happen  {session_file}')
+        print('   Restart complete interactive session!')
+        return
+
+    gd.sessionInfo = yaml.load(inhoud, Loader=yaml.UnsafeLoader)
+    gd.p_names = [nm for nm, be, cr, tl in gd.sessionInfo['Pieces']]
+
+    # update dataObject (should be there)
+    try:
+        fd = Path.open(cache_file, 'r')
+        fd.close()
+        gd.dataObject = np.load(cache_file)
+    except IOError:
+        print(f'selectCurrentInteractive: cannot read cachefile, should not happen  {cache_file}')
+        exit()
+
+    getMetaData(True)
+
 
 def saveMetaData(metadata, savetime=False):
     # vervang metadata in csv file
@@ -368,7 +408,7 @@ def readCsvData(config, csvdata):
 
     return header, header2
 
-def getMetaData():
+def getMetaData(interactive=False):
     path = csvsDir() / (gd.config['Session'] + '.csv')
 
     with Path.open(path, newline='') as fd:
@@ -408,19 +448,20 @@ def getMetaData():
     
     gd.cal_value = float(gd.metaData['Calibration'])
 
-    # list with data for the session Info tab (placeholdertext)
-    sinfo = [
-        gd.metaData['CrewName'],
-        gd.cal_value,
-        gd.metaData['Misc'],
-        gd.metaData['Rowers'],
-        gd.metaData['Video'],
-        gd.metaData['PowerLine'],
-        gd.metaData['Venue'],
-        '...'
-    ]
+    if interactive == False:
+        # list with data for the session Info tab (placeholdertext)
+        sinfo = [
+            gd.metaData['CrewName'],
+            gd.cal_value,
+            gd.metaData['Misc'],
+            gd.metaData['Rowers'],
+            gd.metaData['Video'],
+            gd.metaData['PowerLine'],
+            gd.metaData['Venue'],
+            '...'
+        ]
 
-    gd.crewPlots.sessionsig.emit(sinfo)
+        gd.crewPlots.sessionsig.emit(sinfo)
 
     calibrate()
 

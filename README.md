@@ -38,6 +38,7 @@ It basically works on linux, windows and mac. See the docs directory for a short
       - Session info: configure the session, name the rowers, set calibration value
           - Important: fill in the session info when you use the csv-file for the first time! Eventually this data will reside in the csv-file so that it will nog get lost when recreating a session.
    - It the program crashes, please delete the current session file in the session_data directory to recover.
+   - There also is a basic interactive way to manipulate the data in a python session.
 
 ## Status
 
@@ -172,3 +173,32 @@ Note that an item only is really entered when the enter key is used after enteri
 
   -  X/Y plots
   -  A tab to use video separate from the rest. E.g. to easilty make a short loop in the video a a slow speed.
+
+
+### Advanced used
+
+It is possible to use the data from a session directly in python.
+There prototyping and other experiments on the data can by done from the python prompt.
+To do this, start python3 in the RtcNoordApp directory.
+
+Then after the following commands
+
+    import globalData as gd
+    import main
+    main.interactive()
+
+data from the session can be viewed, for example
+
+    gd.sessionInfo
+    import matplotlib.pyplot as plt
+
+    gd.dataObject.shape
+    plt.plot(gd.dataObject[:, 2])
+    gd.norm_arrays.shape
+    plt.plot(gd.norm_arrays[0, :, 17])
+
+    plt.show()
+
+    main.myFirstExtension('Hallo!')
+
+

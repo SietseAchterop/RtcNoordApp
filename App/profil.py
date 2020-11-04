@@ -101,7 +101,6 @@ def profile():
 
     # allocate norm_arrays to 100 datapoints
     gd.norm_arrays = np.empty((len(pieces), 100, len(sensors)))
-
     for i, pp in enumerate(pieces):
         nm, be, c, sp = pp
 

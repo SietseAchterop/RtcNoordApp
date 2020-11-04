@@ -19,20 +19,13 @@ from PyQt5.QtQml import QQmlApplicationEngine, qmlRegisterType
 
 import matplotlib
 
-# needed for making reports...
-matplotlib.use('Agg')
-
-app_Path = Path(__file__).parent.absolute() / '..'
-be = app_Path  / 'QtQuickBackend'
-sys.path.append(str(be))
-from backend_qtquick5 import FigureCanvasQTAggToolbar, MatplotlibIconProvider
-
 import globalData as gd
 
 from formpieces import FormPieces
 from guirest import *
 from utils import *
 from profil import *
+from extensions import *
 
 app = None
 
@@ -47,24 +40,35 @@ def interactive(session=None):
     main.interactive()
 
     Now the global data can be used for experiments and development.
+    For example:
 
     gd.sessionInfo
     import matplotlib.pyplot as plt
 
+    gd.dataObject.shape
     plt.plot(gd.dataObject[:, 2])
-    plt.plot(gd.norm_arrays[1, :, 17])
+    gd.norm_arrays.shape
+    plt.plot(gd.norm_arrays[0, :, 17])
 
     plt.show()
+
+    main.myFirstExtension('Hallo!')
+
 """
     global app
 
     gd.config = startup()
-    gd.globals = readGlobals()
-    gd.sessionInfo = selectSession()
+    gd.globals = readGlobals(os.getcwd())
+    gd.sessionInfo = loadSession()
     gd.p_names = [ nm for nm, be, cr, tl in gd.sessionInfo['Pieces']]
 
-    if session is not None:
-        gd.config['Session'] = session
+    if gd.config['Session'] is None:
+        print('No session selected, should not happen!')
+        print('Should be started in the RtcNoordApp/App directory')
+        print('   Restart complete interactive session!')
+        return
+        
+    selectCurrentInteractive()
 
     # if data cached, use that.
     file = cachesDir() / (gd.config['Session'] + '.npy')
@@ -76,7 +80,6 @@ def interactive(session=None):
         # first time, when there is no cache yet
         makecache(file)
 
-    # print(gd.sessionInfo)
 
     if gd.sessionInfo['Pieces'] == []:
         gd.profile_available = False
@@ -94,6 +97,14 @@ def main():
     A real session can be created or selected from the menu.
     """
     global app
+
+    # needed for making reports...
+    matplotlib.use('Agg')
+
+    app_Path = Path(__file__).parent.absolute() / '..'
+    be = app_Path  / 'QtQuickBackend'
+    sys.path.append(str(be))
+    from backend_qtquick5 import FigureCanvasQTAggToolbar, MatplotlibIconProvider
 
     gd.config = startup()
     # always start without secondary session
