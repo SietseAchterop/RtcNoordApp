@@ -236,43 +236,23 @@ def saveMetaData(metadata, savetime=False):
         '''
         '''
         #  write directly is faster, but we need to cater for the csv-delimiter
-        #  make this better later
-
-        # alleen tijd aanpassen bij savetime==True
-
-
-        if gd.dialect.delimiter == ',':
-            if savetime:
-                fd.write(f'Metadata, {d.strftime("%d-%m-%Y")}\n')
-            else:
-                fd.write(f'Metadata, {metadata["Sessiontime"]}\n')
-
-            fd.write('Crew name, ' + metadata['CrewName'] + '\n')
-            fd.write('Boattype, ' + metadata['BoatType'] + '\n')
-            fd.write('Calibration, ' + str(metadata['Calibration']) + '\n')
-            fd.write('Venue, ' + metadata['Venue'] + '\n')
-            for i in range(8):
-                fd.write(f'Rower {i+1}, ' + metadata['Rowers'][i][0] + ', ' + str(metadata['Rowers'][i][1]) + ', ' + str(metadata['Rowers'][i][2]) + ', ' + str(metadata['Rowers'][i][3]) + '\n')        
-            fd.write('Misc, ' + metadata['Misc'] + '\n')
-            fd.write('Video, ' + metadata['Video'] + '\n')
-            fd.write('Data source, ' + metadata['PowerLine'] + '\n')
-            fd.write('Spare, ' + metadata['Spare'] + '\n')
+        dlm = gd.dialect.delimiter
+        if savetime:
+            fd.write(f'Metadata{dlm} {d.strftime("%d-%m-%Y")}\n')
         else:
-            if savetime:
-                fd.write(f'Metadata\t{d.strftime("%d-%m-%Y")}\n')
-            else:
-                fd.write(f'Metadata\t{metadata["Sessiontime"]}\n')
-                
-            fd.write('Crew name\t' + metadata['CrewName'] + '\n')
-            fd.write('Boattype\t' + metadata['BoatType'] + '\n')
-            fd.write('Calibration\t' + str(metadata['Calibration']) + '\n')
-            fd.write('Venue\t' + metadata['Venue'] + '\n')
-            for i in range(8):
-                fd.write(f'Rower {i+1}\t' + metadata['Rowers'][i][0] + '\t' + str(metadata['Rowers'][i][1]) + '\t' + str(metadata['Rowers'][i][2]) + '\t' + str(metadata['Rowers'][i][3]) + '\n')        
-            fd.write('Misc\t' + metadata['Misc'] + '\n')
-            fd.write('Video\t' + metadata['Video'] + '\n')
-            fd.write('Data source\t' + metadata['PowerLine'] + '\n')
-            fd.write('Spare\t' + metadata['Spare'] + '\n')
+            fd.write(f'Metadata{dlm} {metadata["Sessiontime"]}\n')
+
+        fd.write(f'Crew name{dlm} ' + metadata['CrewName'] + '\n')
+        fd.write(f'Boattype{dlm} ' + metadata['BoatType'] + '\n')
+        fd.write(f'Calibration{dlm} ' + str(metadata['Calibration']) + '\n')
+        fd.write(f'Venue{dlm} ' + metadata['Venue'] + '\n')
+        for i in range(8):
+            fd.write(f'Rower {i+1}{dlm} ' + metadata['Rowers'][i][0] + f'{dlm} ' + str(metadata['Rowers'][i][1]) + f'{dlm} ' + str(metadata['Rowers'][i][2]) + f'{dlm} ' + str(metadata['Rowers'][i][3]) + '\n')        
+        fd.write(f'Misc{dlm} ' + metadata['Misc'] + '\n')
+        fd.write(f'Video{dlm} ' + metadata['Video'] + '\n')
+        fd.write(f'Data source{dlm} ' + metadata['PowerLine'] + '\n')
+        fd.write(f'Spare{dlm} ' + metadata['Spare'] + '\n')
+        
         count = 0
         with open(tmpfd) as infile:
             for line in infile:
@@ -310,25 +290,12 @@ def calibrate(secondary=False):
 def readCsvData(config, csvdata):
     """Read data for a session from the csv-file.
 
-    Csv data can use comma or tab as delimiter
+    Csv data can use comma, semicolumn or tab as delimiter
 
-    After a first use metadata is present in the higher columns, containing the SessionInfo data.
+    After a first use metadata is present in the first rows, containing the SessionInfo data.
 
-    === Todo
-    Zet metadata voor csvdata indien nog niet aanwezig
-       os.system(f'mv {csvfile} {saved};  cat {metadata} {saved} > {csvfile}')
-
-    Metadata staat er daarmee altijd
-    Aantal rijen van metadata moet altijd hetzelfde blijven, en lengte van rows niet niet langer worden dan de rest (iets van 20 velden)
-    Dus
-     - vul sessionInfo met metadata
-     - lees csvfile
-
-    In Session info tab
-      save knop voor update metadata in csvfile
-          csvdata = tail (wordcount - metadatalenght)
-          os.system(f'cat {metadata} {csvdata} > {csvfile}')
-
+    In Session info tab, save knop voor update metadata in csvfile?
+    Nu moet je de enter niet vergeten bij iedere verandering.
 
     sessioninfo splitsen in deel csv en deel sessioninfo, of dubbel in csv?
     
@@ -339,14 +306,13 @@ def readCsvData(config, csvdata):
 
     path = csvsDir() / (config['Session'] + '.csv')
 
-    # hier zorgen dat metadata er voor staat
-
+    # Prepend metadata if not yet present (first time)
     with Path.open(path, newline='') as fd:
         gd.dialect = csv.Sniffer().sniff(fd.readline())
         fd.seek(0)
         reader = csv.reader(fd, gd.dialect)    
-
         header = next(reader)
+
     if header[0] == 'Time':
         tmpdir = tempfile.gettempdir()
         tmpfd = Path(tmpdir) / 'rtcapp'
@@ -355,6 +321,7 @@ def readCsvData(config, csvdata):
         with open(path, 'w') as fd:
             with open(metadata) as infile:
                 for line in infile:
+                    # make sure we use correct delimiter
                     if gd.dialect.delimiter != ',':
                         line = re.sub(',', gd.dialect.delimiter, line)
                     fd.write(line)

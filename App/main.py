@@ -25,7 +25,7 @@ from formpieces import FormPieces
 from guirest import *
 from utils import *
 from profil import *
-from extensions import *
+#from extensions import *
 
 app = None
 
@@ -52,7 +52,9 @@ def interactive(session=None):
 
     plt.show()
 
-    main.myFirstExtension('Hallo!')
+    result = main.myFirstExtension(1000)
+    plt.plot(result)
+    ptl.show()
 
 """
     global app
@@ -192,3 +194,17 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+#######  Place for extention functions to be used in an interactive session.
+
+def myFirstExtension(n):
+    # some stuff with the data
+    s_1_data = gd.dataObject[0:n, 1]
+    s_2_data = gd.dataObject[0:n, 2]
+    return s_1_data + s_2_data
+
+
+####### End of extentions
+
+    

@@ -175,10 +175,10 @@ Note that an item only is really entered when the enter key is used after enteri
   -  A tab to use video separate from the rest. E.g. to easilty make a short loop in the video a a slow speed.
 
 
-### Advanced used
+### Advanced use
 
 It is possible to use the data from a session directly in python.
-There prototyping and other experiments on the data can by done from the python prompt.
+There prototyping and other experiments on the data can be done from the python prompt.
 To do this, start python3 in the RtcNoordApp directory.
 
 Then after the following commands
@@ -199,6 +199,9 @@ data from the session can be viewed, for example
 
     plt.show()
 
-    main.myFirstExtension('Hallo!')
+    result = main.myFirstExtension(1000)
+    plt.plot(result)
+    plt.show()
+    
 
 
