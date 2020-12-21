@@ -219,7 +219,9 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
         self.blitbox = bbox
         l, b, w, h = bbox.bounds
         t = b + h
-        self.repaint(l, self.renderer.height-t, w, h)       
+        #self.repaint(l, self.renderer.height-t, w, h)
+        # waar is repaint?  Dit werkt, maar verplaatsen van de mplcursors niet.
+        self.draw()
 
     def geometryChanged(self, new_geometry, old_geometry):
         w = new_geometry.width()

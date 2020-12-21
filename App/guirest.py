@@ -23,6 +23,7 @@ from models import *
 
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+import mplcursors
 
 # matplotlib plot in View Piece
 class FormView(QObject):
@@ -214,7 +215,9 @@ class FormView(QObject):
                 else:
                     scaleY = 1
                 values = gd.view_tr[:, i] * scaleY
-                self.ax1.plot(self.times, values, linewidth=0.6,  label=name)
+                lines1 = self.ax1.plot(self.times, values, linewidth=0.6,  label=name)
+                mplcursors.cursor(lines1)
+
                 senslist.append((i, name, scaleY))
 
         if gd.runningvideo:
@@ -238,8 +241,9 @@ class FormView(QObject):
                     else:
                         scaleY = 1
                     values = gd.view_tr2[:, i] * scaleY
-                    self.ax1.plot(self.times, values, linewidth=0.7,  label=name, linestyle='--')
+                    lines2 = self.ax1.plot(self.times, values, linewidth=0.7,  label=name, linestyle='--')
                     secsenslist.append((i, name, scaleY))
+                    mplcursors.cursor(lines2)
 
         self.ax1.plot([self.traceCentre], [0], marker='D', color='b')
 

@@ -320,10 +320,14 @@ def readCsvData(config, csvdata):
         shutil.move(path, tmpfd)
         with open(path, 'w') as fd:
             with open(metadata) as infile:
+                count = 0
                 for line in infile:
                     # make sure we use correct delimiter
                     if gd.dialect.delimiter != ',':
                         line = re.sub(',', gd.dialect.delimiter, line)
+                    if count == 0:
+                        line = f'Metadata{gd.dialect.delimiter} {date.today().strftime("%d-%m-%Y")}\n'
+                    count += 1
                     fd.write(line)
             with open(tmpfd) as infile:
                 for line in infile:
@@ -470,6 +474,7 @@ def makecache(file):
     """Create and cache the data read from the csv-file in a .npy file """
     csvdata = []
     h1, h2 = readCsvData(gd.config, csvdata)
+    # metadata has been skipped
     gd.sessionInfo['Header']   = h1
     gd.sessionInfo['Header2']  = h2
     gd.sessionInfo['ScalingFactors'] = factors()
@@ -570,8 +575,7 @@ def makecache(file):
     gd.mainPieces.update_the_models(gd.config['Session'])
 
     # boattype to csv-metadata
-    # savetime eigenlijk fout bij repair van cache!
-    saveMetaData(gd.metaData, True)
+    saveMetaData(gd.metaData)
 
 
 def tempi(gateAngle, gateForce):

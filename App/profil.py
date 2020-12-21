@@ -89,7 +89,9 @@ def profile():
                     # print only one
                     if math.isnan(c):
                         if printit:
-                            gd.mainPieces.statusText = "Profile error: " + f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}'
+                            if gd.mainPieces is not None:
+                                # no Qt stuff in interactive mode
+                                gd.mainPieces.statusText = "Profile error: " + f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}'
                             printit = False
                             print("Profile error: " + f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}')
 
