@@ -87,6 +87,7 @@ There is some panning and zooming possible with the mouse-wheel and right button
 
 In this tab we study the traces in more detail.
 Some panning and zooming is also possible here.
+Clicking on a line displays the sensors value.
 The next screenshot shows a number of sensors, where they are scaled in such a way that the individual graphs are more or less the same size.
 
 ![Eerste](docs/ViewPiece.png)
