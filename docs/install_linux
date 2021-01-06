@@ -16,6 +16,7 @@ python3
     -pip
     -yaml
     -openpyxl
+    -mplcursors
 qtdeclarative5-dev
 qt5-default
 qml-module-qtquick-layout

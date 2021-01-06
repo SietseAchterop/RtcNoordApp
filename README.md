@@ -10,22 +10,23 @@ It basically works on linux, windows and mac. See the docs directory for a short
 
 ## Usage
 
-  - Start the program from the App directory with: "python main.py", or create an Icon on the desktop and use that.
+  - When collecting data using the Peach system, do not forget to fill in at least the crewname(s) and the calibration factor for the distance in the Session Details of the Powerline software!
+  - Create a csv-file of the interesting part of a session using the Powerline software, creating a single piece and export the traces.
+    Then paste that in, e.g, notepad. Finally put the result with a csv file extention in the csv-data directory, or a subdirectory thereof. Using a year as the name of a subdirectory is one way of doing it.
+  - Name the csv with rowernames, date and powerline session number in the name, e.g JohnWill_250220_0123.csv
+  - Save the file in the correct subdirectory, e.g. for the correct year in the csv_data directory.
+  - Multiple csv-files can also be concatenated and used as the csv-file to create a session. There should be no empty lines between the parts.
+  - A few csv-files are already included with the app.
+  - Start the RtcNoordApp program from the App directory with: "python main.py", or create a link or an Icon on the desktop and use that.
   - The very first time the program is started a system dependant configuration-file RtcApp will be created. It contains the "BaseDir" for where all rowing data is put and the name of the current session.
     The default value of BaseDir is RtcNoord in your home-directory.
     If that directory doesn't exist, it and a number of subdirectories will be created and filled with some data.
   - In the lower left part of the screens there is a status message.
-  - Create a csv-file of the interesting part of a session using the Powerline software, creating a single piece and export the traces.
-    Then paste that in, e.g, notepad. Finally put the result with a csv file extention in the csv-data directory, or a subdirectory thereof.
-  - Name the csv with rowernames, date and powerline session number in the name, e.g JohnWill_250220_0123.csv
-  - Save the file in the subdirectory for the correct year in csv_data.
-  - Multiple csv-files can also be concatenated and used as the csv-file to create a session.
-  - A few csv-files are already included.
-  - Start the app and select the csv-file from the menu.
+  - To start working with the program select a csv-file using the menu.
     Now data is preprocessed and saved in a sessionInfo-file and a dataObject-file.
-    Metadata like, distance calibration value, rowernames etc. is prepended to the csv-file for it to be preserved with the data.
   - Now first go to the Session info tab to fill in the correct metadata.
-    Each item is only entered by using the Enter key after typing in the value!
+    Metadata like, distance calibration value, rowernames etc. is prepended to the csv-file for it to be preserved with the data.
+    Beware that each item is only entered by using the Enter key after typing in the value!
   - You can only access files that are in the csv- and session-data- directories.
   - You can create subdirectories in the csv-data to organize your data according to years for example.
     These subdirectories will automatically be replicated in the session-data and reports directories.
@@ -39,6 +40,7 @@ It basically works on linux, windows and mac. See the docs directory for a short
           - Important: fill in the session info when you use the csv-file for the first time! Eventually this data will reside in the csv-file so that it will nog get lost when recreating a session.
    - It the program crashes, please delete the current session file in the session_data directory to recover.
    - There also is a basic interactive way to manipulate the data in a python session.
+
 
 ## Status
 

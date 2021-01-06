@@ -13,7 +13,7 @@ Installation rtcapp starting from a freshly installed windows 10
         AppData/Local/Programs/Python/Python38-64/Scripts
 
 - Install the following python modules using pip3 command
-    - matplotlib (3.1.x), PyYAML, pyqt5 (5.12.x), scipy, pylatex, openpyxl
+    - matplotlib (3.1.x), PyYAML, pyqt5 (5.12.x), scipy, pylatex, openpyxl, mplcursors
     - when a version is mentioned use the newest version from that series, e.g.
          pip3 install matplotlib==3.1.3
     - find a latest version using
