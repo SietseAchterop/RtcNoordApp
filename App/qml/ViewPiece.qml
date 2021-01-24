@@ -161,6 +161,41 @@ Item {
 		    text: ''
 		}
 
+		RowLayout {
+
+
+		    Slider {
+			id: slider
+			from: -20
+			to: 20
+			value: 0
+			onValueChanged: piece_mpl.shift = value
+			Component.onCompleted: value = piece_mpl.shift
+			/*
+			  Hoe slider op 0 zetten bij overgang naar een nieuwe secondary sessie?
+
+			onPressedChanged: {
+			    if(pressed) {
+				console.log("pressed")
+			    }
+			    else
+				console.log("released")
+			} */
+		    }
+
+		Text {
+		    width: 20
+		    text: Math.round(slider.value)
+		}
+
+		}
+		
+		Text {
+		    width: 20
+		    Layout.minimumHeight: 50
+		    text: ''
+		}
+
 		Text {
 		    width: 20
 		    Layout.minimumHeight: 50

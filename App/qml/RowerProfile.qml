@@ -15,19 +15,19 @@ Item {
 	switch (i) {
 	case 0: return rowerTableModel0;
 	    break;
-	case 1:	return  rowerTableModel1
+	case 1:	return rowerTableModel1
 	    break;
 	case 2: return rowerTableModel2;
 	    break;
-	case 3:	return  rowerTableModel3
+	case 3:	return rowerTableModel3
 	    break;
 	case 4: return rowerTableModel4;
 	    break;
-	case 5:	return  rowerTableModel5
+	case 5:	return rowerTableModel5
 	    break;
 	case 6: return rowerTableModel6;
 	    break;
-	case 7:	return  rowerTableModel7
+	case 7:	return rowerTableModel7
 	    break;
 	}
     }
@@ -36,11 +36,16 @@ Item {
 	    anchors.fill: parent
             Layout.fillWidth: true
 
+	Text {
+	    text: 'Rower: ' + rower_mpl0.rowerData[rindex][0] 
+	    height: 50
+	}
+
 	RowLayout {
 	    objectName: 'rrow'
 	    TableView {
 		id: rowerTableView
-		columnWidthProvider: function (column) { if (column == 0)
+		function columnWidthProvider(column) { if (column == 0)
 							   return 180;
 							 else if (column == 1)
 							         return 70;
@@ -48,7 +53,7 @@ Item {
 							         return 80;
    						              else
 							         return 60;}
-		rowHeightProvider: function (column) { return 20; }
+		function rowHeightProvider(column) { return 20; }
 		model : modelname(rindex)  // this doesn't seem to work here:  'rowerTableModel' + roweritem.rindex
 
 		Layout.fillWidth: true
@@ -59,7 +64,7 @@ Item {
 
 		delegate: Rectangle {
 		    implicitWidth: rowerTableView.columnWidthProvider(column)
-		    implicitHeight: 50
+		    implicitHeight: 20
 		    // implicitWidth: 100
 		    //height: 50
 		    color: {(index%rowerTableView.rows)%2 ? 'gainsboro' : 'aquamarine'}
@@ -94,8 +99,8 @@ Item {
 		spacing: 10
 		
 		Text {
-		    text: ' '
-		    height: 100
+		    text: ''
+		    height: 10
 		}
 		Tumbler {
 		    id: rowertumbler

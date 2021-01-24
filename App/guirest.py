@@ -11,9 +11,9 @@ from pathlib import Path
 import numpy as np
 from scipy.interpolate import interp1d
 
-from PyQt5.QtCore import QVariant, QObject, pyqtSignal, pyqtSlot, pyqtProperty, QMetaObject, Qt, QTimer, QByteArray, QAbstractListModel, QModelIndex
+from PyQt5.QtCore import QVariant, QObject, pyqtSignal, pyqtSlot, pyqtProperty
 from PyQt5.QtGui import QColor
-from PyQt5.QtQml import QJSValue
+
 
 import globalData as gd
 
@@ -31,6 +31,7 @@ class FormView(QObject):
     legendChanged = pyqtSignal()
     statusTextChanged = pyqtSignal()
     stateChanged = pyqtSignal()
+    shiftChanged = pyqtSignal(int)
 
     def __init__(self, parent=None, data=None, data2=None):
         QObject.__init__(self, parent)
@@ -45,6 +46,8 @@ class FormView(QObject):
         # secondary
         self.xFrom2 = 0
         self.xTo2 = 1
+        self._shiftX2 = 0
+        self._currentPiece = None
 
         # length of segment shown in the plots, initial limited
         self._length = 2000
@@ -72,7 +75,7 @@ class FormView(QObject):
         self._traces = None
 
         # for second session
-        self.stroketime = 100  # needed for when no piece is set
+        self.stroketime = 100  # also needed for when no piece is set
         # second session
         self.secondary = False
         self._data2 = data2
@@ -137,7 +140,7 @@ class FormView(QObject):
                 # button 3
                 if self.panon:
                     diff = (self.pandistance - event.x)
-                    self.traceCentre = self.panbase + diff*0.1
+                    self.traceCentre = self.panbase + diff*0.01
                     self.update_figure()
         except TypeError:
             pass
@@ -313,7 +316,7 @@ class FormView(QObject):
         for i in gd.data_model2.alldata():        
             if i.name() == name:
                 xFrom, xTo = i.data()
-                # we always begin at a strokes beginning
+                # we always begin with oars perpendicular to the boat.
                 tempi = gd.sessionInfo['Tempi']
                 # set cycle time for secondary session using 2 strokes
                 md = 0
@@ -542,6 +545,9 @@ class FormView(QObject):
 
         self._traces2 = gd.dataObject2
         self.secondary = True
+        self._shiftX2 = 0
+        self.shiftChanged.emit(self._shiftX2)
+        # dit werkt niet...
 
         self.set_data_traces(local=True)
         self.update_figure()
@@ -550,6 +556,7 @@ class FormView(QObject):
         
     @pyqtSlot(str)
     def set_2nd_piece(self, name):
+        self._currentPiece = name
         for i in gd.data_model5.alldata():        
             if i.name() == name:
                 xFrom2, xTo2 = i.data()
@@ -566,6 +573,11 @@ class FormView(QObject):
                     else:
                         stroketime_2nd = (t-xFrom2)/2
                         break
+
+                # shift secondary using the slider
+                xFrom2 = xFrom2 - self._shiftX2
+                xTo2 = xTo2 - self._shiftX2
+
                 self.xFrom2, self.xTo2 = xFrom2/Hz, xTo2/Hz
 
                 # normalize wrt current main piece
@@ -593,6 +605,16 @@ class FormView(QObject):
     @pyqtProperty(list, notify=stateChanged)
     def the_2nd_pieces(self):
         return [i.name() for i in gd.data_model5.alldata()]
+
+    @pyqtProperty(float, notify=shiftChanged)
+    def shift(self):
+        return self._shiftX2
+
+    @shift.setter
+    def shift(self, v):
+        self._shiftX2 = int(v)
+        self.shiftChanged.emit(self._shiftX2)
+        self.set_2nd_piece(self._currentPiece)
 
     # scaling
     @pyqtSlot(bool)
@@ -883,7 +905,7 @@ class CrewForm(QObject):
                     self.een = self.ax1.plot(gd.norm_arrays[gd.crewPiece, :, i], linewidth=0.6, label=f'R {r+1}')
                     self.twee = self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, j], linewidth=0.6, label=f'R {r+1}')
                     # self.drie = self.ax3.plot(gd.norm_arrays[gd.crewPiece, :, k], linewidth=0.6, label=gd.p_names[r])
-                    self.vier = self.ax4.plot(aa[0+r], linewidth=0.6, label='Power')
+                    self.vier = self.ax4.plot(aa[0+r], linewidth=0.6, label=f'R {r+1}')
 
                     self.ax1.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
                     self.ax1.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
@@ -922,12 +944,14 @@ class CrewForm(QObject):
                     self.ax1.plot(angle/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
                     self.ax2.plot(force/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
                     # self.ax3.plot(stetcherZ/nmbrpieces:, k], linewidth=0.6, label=gd.p_names[r])
-                    self.ax4.plot(power/nmbrpieces, linewidth=0.6, label='Power')
+                    self.ax4.plot(power/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
 
                     # no usefull markers here
                     
         if self.legend:
             self.ax1.legend(loc='upper left', prop=self.fontP)
+            self.ax2.legend(loc='upper left', prop=self.fontP)
+            self.ax4.legend(loc='upper left', prop=self.fontP)
 
         self.stateChanged.emit()
 
@@ -979,6 +1003,7 @@ class RowerForm(QObject):
     legendChanged = pyqtSignal()
     statusTextChanged = pyqtSignal()
     stateChanged = pyqtSignal()
+    rowerDataChanged = pyqtSignal(list)
 
     def __init__(self, rower, parent=None, data=None, traces=None):
         QObject.__init__(self, parent)
@@ -1100,7 +1125,7 @@ class RowerForm(QObject):
                     self.ax1.plot(scaleAngle*angle/6, linewidth=0.6, label='GateAngle')
                     self.ax1.plot(forceX/6, linewidth=0.6, label='GateForceX')
                     self.ax2.plot(accel/6, linewidth=0.6, label='Accel')
-                    self.ax3.plot(angle/6, forceX/6, linewidth=0.6)
+                    self.ax3.plot(angle/6, forceX/6, linewidth=0.6, label='FA')
                     self.ax4.plot(power/6, linewidth=0.6, label='Power')
                 else:
                     for i in range(len(gd.p_names)):
@@ -1112,7 +1137,7 @@ class RowerForm(QObject):
                     self.ax1.plot(scaleAngle*angle/6, linewidth=0.6, label='P GateAngle')
                     self.ax1.plot(forceX/6, linewidth=0.6, label='P GateForceX')
                     self.ax2.plot(accel/6, linewidth=0.6, label='Accel')
-                    self.ax3.plot(angle/6, forceX/6, linewidth=0.6)
+                    self.ax3.plot(angle/6, forceX/6, linewidth=0.6, label='FA')
                     self.ax4.plot(power/6, linewidth=0.6, label='Power')
 
             else:
@@ -1124,12 +1149,12 @@ class RowerForm(QObject):
                     self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
                     self.ax1.plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label='GateForceX')
                     self.ax3.plot(gd.norm_arrays[i, :, rsens['GateAngle']],
-                                  gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6)
+                                  gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label='FA')
                 else:
                     self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
                     self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label='GateForceX')
                     self.ax3.plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
-                                  gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6)
+                                  gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label='FA')
                 self.ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label='Accel')
 
                 d, aa = gd.out[i]
@@ -1148,6 +1173,7 @@ class RowerForm(QObject):
             self.ax4.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)
 
         self.stateChanged.emit()
+        self.rowerDataChanged.emit([[ 'een', '1'], ['twee', '2']])
 
     def del_all(self):
         if gd.profile_available:
@@ -1162,6 +1188,16 @@ class RowerForm(QObject):
         gd.rowerPiece[self.rower] = s
         self.update_figure()
         gd.stretcherPlots[self.rower].update_figure()
+
+    @pyqtProperty(list, notify=rowerDataChanged)
+    def rowerData(self):
+        names = []
+        if bool(gd.sessionInfo):
+            for i in range(gd.sessionInfo['RowerCnt']):
+                names.append(gd.metaData['Rowers'][i])
+        else:
+            names = [['empty', '0'], ['empty', '1']]            
+        return names
 
 # matplotlib plot in Rower Profile
 class StretcherForm(QObject):

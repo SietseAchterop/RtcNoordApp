@@ -46,10 +46,15 @@ def make_pdf_report():
     #   First page
     with doc.create(Section(f'Boat report {gd.metaData["CrewName"]}', numbering=False)):
 
-        doc.append('Rowers: ')
         r = gd.metaData["Rowers"]
-        for i in range(gd.sessionInfo['RowerCnt']):
-            doc.append(f'{r[i][0]}, ')
+        rwrcnt = gd.sessionInfo['RowerCnt']
+        if rwrcnt == 1:
+            doc.append('Rowers: ')
+            doc.append(f'{r[0][0]} ')
+        else:
+            doc.append('Rowers from bow: ')
+            for i in range(rwrcnt):
+                doc.append(f'{r[i][0]}, ')
         doc.append(NewLine())
         doc.append(f'Boattype: {gd.metaData["BoatType"]}\n')
         doc.append(f'Calibration: {gd.metaData["Calibration"]}\n')
@@ -265,7 +270,7 @@ def make_pdf_report():
 
     for rwr in range(rwrcnt):
         pcs = ['all'] + gd.p_names + ['average']
-        with doc.create(Section(f'Rower {rwr+1}, using piece "{pcs[gd.rowerPiece[rwr]]}"', numbering=False)):
+        with doc.create(Section(f'Rower: {gd.metaData["Rowers"][rwr][0]}, using piece "{pcs[gd.rowerPiece[rwr]]}"', numbering=False)):
 
             rows = gd.rowertablemodel[rwr].rowCount()
             columns = gd.rowertablemodel[rwr].columnCount()

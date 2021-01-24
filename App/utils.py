@@ -475,6 +475,12 @@ def makecache(file):
     csvdata = []
     h1, h2 = readCsvData(gd.config, csvdata)
     # metadata has been skipped
+
+    # bij skullen is een van de sensoren desnoods voldoende
+    #   hier door copieren de ontbrekende sensoren invullen
+    #   in session info tab melden.
+
+
     gd.sessionInfo['Header']   = h1
     gd.sessionInfo['Header2']  = h2
     gd.sessionInfo['ScalingFactors'] = factors()
@@ -499,7 +505,7 @@ def makecache(file):
     # impellor working?
     gd.sessionInfo['noDistance'] = False
     distsens = h1.index('Distance')
-    if np.sum(gd.dataObject[50, distsens]) == 0:  # we assume csv file is not too small
+    if np.sum(gd.dataObject[0:1000, distsens]) == 0:  # we assume csv file is not too small
         gd.sessionInfo['noDistance'] = True
 
     # use catapult data if available
@@ -513,14 +519,13 @@ def makecache(file):
     # use stroke rower to determine start of stroke and rating
     #   bow has rower number 1
     try:
-        h1.index('P GateAngle')
+        h1.index('P GateAngle')   # to trigger exception with sweep rowing
         gd.sessionInfo['ScullSweep'] = 'scull'
         indexes = [i for i, x in enumerate(h1) if x == "P GateAngle"]
         i = indexes[-1]
         indexes = [i for i, x in enumerate(h1) if x == "P GateForceX"]
         j = indexes[-1]
     except ValueError:
-        h1.index('GateAngle')
         gd.sessionInfo['ScullSweep'] = 'sweep'
         indexes = [i for i, x in enumerate(h1) if x == "GateAngle"]
         i = indexes[-1]
@@ -585,8 +590,7 @@ def tempi(gateAngle, gateForce):
        [(strokestart in seconds/Hz steps, rating)]
     """
 
-    # negative edge of a gateangle is the beginning of a cycle?
-    #   or in the recover: oars perpendicular on the boat
+    # oars perpendicular on the boat signifies the start of the stroke
     # only recognize tempi between 10 en 60
     tempoList = []
     i = 0
@@ -603,17 +607,17 @@ def tempi(gateAngle, gateForce):
                 state = 2
         elif state == 2:
             # zero crossing!
-            if gateAngle[i] < 0:
+            if gateAngle[i] <= 0:
                 strokestart = i
                 i += 2
                 state = 3
         elif state == 3:
             #
-            if gateAngle[i] < -3:
+            if gateAngle[i] < -5:
                 state = 4
         elif state == 4:
             # zero crossing to higher values
-            if gateAngle[i] > 0:
+            if gateAngle[i] >= 0:
                 i += 2
                 state = 5
         elif state == 5:
@@ -621,7 +625,7 @@ def tempi(gateAngle, gateForce):
                 state = 6
         elif state == 6:
             # end of cycle
-            if gateAngle[i] < 0:
+            if gateAngle[i] <= 0:
                 stroketime = (i - strokestart)
                 rating = 60*Hz/stroketime
                 if rating < 10 or rating > 60:

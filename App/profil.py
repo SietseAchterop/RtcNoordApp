@@ -70,12 +70,17 @@ def profile():
     # scull: gate angle and force:  average and add
     #        Use port side
     if gd.sessionInfo['ScullSweep'] == 'scull':
+        rwcnt = gd.sessionInfo['RowerCnt']
         for i, s in enumerate(sensors):
-            # note: assume S site is at next position!
+            # note: assume S site is rwcnt positions further!
             if s.find('P GateAngle') >= 0:
-                av_arrays[:, :, i] = (av_arrays[:, :, i] + av_arrays[:, :, i+1])/2
+                av_arrays[:, :, i] = (av_arrays[:, :, i] + av_arrays[:, :, i+rwcnt])/2
+                break
+        for i, s in enumerate(sensors):
+            # note: assume S site is rwcnt positions further!
             if s.find('P GateForce') >= 0:
-                av_arrays[:, :, i] =  av_arrays[:, :, i] + av_arrays[:, :, i+1]
+                av_arrays[:, :, i] =  av_arrays[:, :, i] + av_arrays[:, :, i+rwcnt]
+                break
 
     # test nan
     for i in range(len(pieces)):
@@ -141,7 +146,6 @@ def pieceCalculations(piece, idx, ststeps):
     profile_data: extra arrays per rower: power, ...
        sizes depend on boattype and number of rowers
     """
-
     a = gd.norm_arrays[idx, :, :]
 
     # will need filtering for some signals
@@ -323,6 +327,7 @@ def pieceCalculations(piece, idx, ststeps):
             rowerstats['Work'] = work
             rowerstats['PMean'] = Hz*work/ststeps
             rowerstats['PperKg'] = rowerstats['PMean']/int(gd.metaData['Rowers'][rwr][3])
+            rowerstats['Name'] = gd.metaData['Rowers'][rwr][0]
             
             # catch/finish angles
             rowerstats['CatchA'] = np.min(g_a)
@@ -340,7 +345,7 @@ def pieceCalculations(piece, idx, ststeps):
             #        uses gateAngleVel. from data or calculate? (peachCalc does both!
 
         else:   # scull
-
+            
             # we already added P and S together in P
             ind_gap = rsens["P GateAngle"]
             ind_fxp = rsens["P GateForceX"]
@@ -389,9 +394,13 @@ def pieceCalculations(piece, idx, ststeps):
             rowerstats['Wash'] = g_a[posmax] - g_a[washpos]
             rowerstats['EffAngle'] = g_a[washpos] - g_a[slippos]
 
-            # average between catch en finish
-            rowerstats['GFEff'] = np.mean(g_fx[posmin:posmax])
-
+            # average between catch en finish   (same as knrb)
+            if posmax > posmin:
+                rowerstats['GFEff'] = np.mean(g_fx[posmin:posmax])
+            else:
+                # bijv bij tubben
+                rowerstats['GFEff'] = 0
+                
             # power (both oars already merged)
             ga_rad          = math.pi * (a[:, ind_gap]) / 180
             pinForceTS   = (np.multiply(a[:, ind_fxp], np.cos(ga_rad)) -
@@ -405,7 +414,8 @@ def pieceCalculations(piece, idx, ststeps):
             work = np.trapz(power, dx=ststeps/(100*Hz))
             rowerstats['Work'] = work
             rowerstats['PMean'] = Hz*work/ststeps
-            rowerstats['PperKg'] = rowerstats['PMean']/int(gd.metaData['Rowers'][rwr][3])
+            rowerstats['PperKg'] = rowerstats['PMean']/float(gd.metaData['Rowers'][rwr][3])
+            rowerstats['Name'] = gd.metaData['Rowers'][rwr][0]
             
             # catch/finish angles
             rowerstats['CatchA'] = np.min(g_a)

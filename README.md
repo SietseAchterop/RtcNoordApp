@@ -88,7 +88,7 @@ There is some panning and zooming possible with the mouse-wheel and right button
 ### View Piece
 
 In this tab we study the traces in more detail.
-Some panning and zooming is also possible here.
+Panning and zooming is also possible here.
 Clicking on a line displays the sensors value.
 The next screenshot shows a number of sensors, where they are scaled in such a way that the individual graphs are more or less the same size.
 
@@ -97,8 +97,13 @@ The next screenshot shows a number of sensors, where they are scaled in such a w
 Using the "Secondary" button another session can be selected
 In this way it is possible to view 2 different sessions next to each other to compare traces from these sessions.
 
-Below two parts of the same session are shown one, with a stroke rate of 24 and the other with a rate of 30.
+Below two parts of the same session are shown, one with a stroke rate of 24 and the other with a rate of 32.
 The plots are "normalized" in a crude way so that they overlap even if the rates are different, this to better compare the strokes.
+This is only done by scaling the first two strokes of the secondary session to the first session.
+Also, using the slider, the secondary plot can movod a little bit with respect to the main session.
+To use the slider look at the first two strokes in the piece and select the (port) gate angles of the strokes.
+Then try to use the slider to make the strokes align better.
+
 
 ![Eerste](docs/ViewPiece2.png)
 

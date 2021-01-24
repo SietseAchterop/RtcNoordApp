@@ -21,19 +21,20 @@ Item {
     
 	    TableView {
 		id: boatTableView
-		columnWidthProvider: function (column) { if (column == 0)
+		function columnWidthProvider(column) { if (column == 0)
                                                            return 180;
                                                          else if (column == 1)
                                                                 return 100;
                                                              else return 70; }
-		rowHeightProvider: function (column) { return 20; }
+		function rowHeightProvider(column) { return 20; }
 		model: boatTableModel
 		height: 220
 		//width: 600  // dit moet anders... (groot genoeg voor het aantal pieces)
 		Layout.fillWidth: true
 		Layout.preferredWidth: 400
 		delegate: Rectangle {
-		    // implicitWidth: 100
+		    implicitWidth: 100
+		    implicitHeight: 20
 		    height: 50
 		    color: {(index%boatTableView.rows)%2 ? 'gainsboro' : 'aquamarine'}
 		    //  tableView rows en columns gebruiken: om en om andere kleuren

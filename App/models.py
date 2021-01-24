@@ -421,13 +421,11 @@ class RowerTableModel(QAbstractTableModel):
             DataSerie(2, ['Effective angle (\u00b0)'] + [f'{targ:.0f}'] + [f'{effan:.0f}'] + [f'{r["EffAngle"]:.0f}' for r in ri]))
         self._data.append(
             DataSerie(2, ['Gate force average'] + [''] + [''] + [ f'{r["GFEff"]:.0f}' for r in ri]) )
-        """
         self._data.append(
             DataSerie(2, ['Gate force max'] + [''] + [''] + [ f'{r["GFMax"]:.0f}' for r in ri]) )
         """
         self._data.append(
             DataSerie(2, ['Ratio avg/max Gate force'] + [''] + [''] + ['', '', '', '', '', '', '' , '' ]))
-        """
         self._data.append(
             DataSerie(2, ['Gate force max at'] + [''] + [''] + ['', '', '', '', '', '', '' , '' ]))
         self._data.append(
