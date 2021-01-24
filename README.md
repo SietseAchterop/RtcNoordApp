@@ -97,13 +97,13 @@ The next screenshot shows a number of sensors, where they are scaled in such a w
 Using the "Secondary" button another session can be selected
 In this way it is possible to view 2 different sessions next to each other to compare traces from these sessions.
 
-Below two parts of the same session are shown, one with a stroke rate of 24 and the other with a rate of 32.
 The plots are "normalized" in a crude way so that they overlap even if the rates are different, this to better compare the strokes.
 This is only done by scaling the first two strokes of the secondary session to the first session.
-Also, using the slider, the secondary plot can movod a little bit with respect to the main session.
+Also, using the slider on the right, the secondary plot can moved a little bit with respect to the main session.
 To use the slider look at the first two strokes in the piece and select the (port) gate angles of the strokes.
 Then try to use the slider to make the strokes align better.
 
+Below the main session is data from a pair where the force curve of the stroke is shown. The plot of the secondary session (dotted line) is of the same rower but now from a skiff session.
 
 ![Eerste](docs/ViewPiece2.png)
 
