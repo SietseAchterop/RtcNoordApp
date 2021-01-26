@@ -1,0 +1,48 @@
+
+Installing on linux (Ubuntu 20.04, debian bullseye)
+===================================================
+
+== already installed
+== install (with apt-get,  aptitude)
+mpv
+libmpv-dev
+git
+python3
+    -matplotlib  (voorlopig 3.1.3)
+    -numpy
+    -scipy
+    -pyqt5       (voorlopig 5.12.3)
+    -pyqt5.qtquick
+    -pip
+    -yaml
+    -openpyxl
+    -mplcursors
+libfreetype-dev
+qtdeclarative5-dev
+qt5-default
+qml-module-qtquick-layout
+                  -dialogs
+		  -controls
+		  -controls2
+qml-module-qt-labs-settings
+qml-module-qt-labs-folderlistmodel
+texlive
+texlive-latex-extra
+
+== install with pip3
+  pylatex
+  python-mpv
+
+  maybe pyqt5 and matplotlib need to be downgraded to the mentioned versions above.
+  
+== the versions should be fairly recent, otherwise there are warnings or errors.
+- Basic testing
+    - Command:  pdflatex tstlatex.tex
+       - yields a pdf file
+    - Command:  python tstqtquick.py
+       - yields a yellow window
+    - Command:  python tstmatplotlib.py
+       - a simple plot
+
+
+
