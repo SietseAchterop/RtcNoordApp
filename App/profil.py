@@ -75,18 +75,16 @@ def profile():
             # note: assume S site is rwcnt positions further!
             if s.find('P GateAngle') >= 0:
                 av_arrays[:, :, i] = (av_arrays[:, :, i] + av_arrays[:, :, i+rwcnt])/2
-                break
         for i, s in enumerate(sensors):
             # note: assume S site is rwcnt positions further!
             if s.find('P GateForce') >= 0:
                 av_arrays[:, :, i] =  av_arrays[:, :, i] + av_arrays[:, :, i+rwcnt]
-                break
 
     # test nan
     for i in range(len(pieces)):
         for j in range(len(sensors)-2):
             #  Stretcher RL en TB will always have nan values!
-            #  Speed Pos (Vel) can alos miss values.
+            #  Speed Pos (Vel) can also miss values.
             #  we will ignore them for the moment
             if 'Stretcher' not in sensors[j]:
                 printit = True
@@ -356,16 +354,18 @@ def pieceCalculations(piece, idx, ststeps):
 
             # only look in the first stroke
             g_fx = signal.filtfilt(B, A, a[:, ind_fxp])
+            g_fy = signal.filtfilt(B, A, a[:, ind_fyp])
             g_a = signal.filtfilt(B, A, a[:, ind_gap])
             if gd.filter:
                 # gate force and angle of all rowers
                 a[:, ind_fxp] = g_fx
+                a[:, ind_fyp] = g_fy
                 a[:, ind_gap] = g_a
 
             # time points of
             posmin = np.argmin(g_a)
             posmax = np.argmax(g_a)
-            fmax   = np.argmax(g_fx)
+            fmax   = np.argmax(g_fx)  # fy is almost zero here
 
             rowerstats['GFMax'] = np.amax(g_fx)
 

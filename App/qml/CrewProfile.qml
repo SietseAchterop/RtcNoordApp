@@ -25,9 +25,9 @@ Item {
 		id: crewtumbler
 		    
 		Layout.preferredWidth: 50
-		Layout.preferredHeight: 50
+		Layout.preferredHeight: 100
 		model: crew_mpl.allPieces
-		visibleItemCount: 3
+		visibleItemCount: 1
     
 		Component.onCompleted: { crewtumbler.currentIndex = 6 }
 		onCurrentIndexChanged: {

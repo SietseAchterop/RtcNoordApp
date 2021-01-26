@@ -49,14 +49,14 @@ Item {
 
 	Connections {
             target: sensorModel3
-            onDataChanged: {
+            function onDataChanged() {
                 piece_mpl.update_figure()
             }
 	}
 
 	Connections {
             target: sensorModel4
-            onDataChanged: {
+            function onDataChanged() {
                 piece_mpl.update_figure()
             }
 	}

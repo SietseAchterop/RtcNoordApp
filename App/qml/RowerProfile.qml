@@ -45,15 +45,6 @@ Item {
 	    objectName: 'rrow'
 	    TableView {
 		id: rowerTableView
-		function columnWidthProvider(column) { if (column == 0)
-							   return 180;
-							 else if (column == 1)
-							         return 70;
-   							 else if (column == 2)
-							         return 80;
-   						              else
-							         return 60;}
-		function rowHeightProvider(column) { return 20; }
 		model : modelname(rindex)  // this doesn't seem to work here:  'rowerTableModel' + roweritem.rindex
 
 		Layout.fillWidth: true
@@ -63,9 +54,8 @@ Item {
 		Layout.minimumHeight: 200
 
 		delegate: Rectangle {
-		    implicitWidth: rowerTableView.columnWidthProvider(column)
 		    implicitHeight: 20
-		    // implicitWidth: 100
+		    implicitWidth: if (index == 0) return 180; else return 65;
 		    //height: 50
 		    color: {(index%rowerTableView.rows)%2 ? 'gainsboro' : 'aquamarine'}
 		    //  tableView rows en columns gebruiken: om en om andere kleuren
@@ -107,7 +97,7 @@ Item {
 		    
 		    height: 80
 		    model: boat_mpl.allPieces
-		    visibleItemCount: 3
+		    visibleItemCount: 1
     
 		    Component.onCompleted: { rowertumbler.currentIndex = 1 }
 		    onCurrentIndexChanged: {

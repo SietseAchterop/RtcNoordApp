@@ -643,6 +643,8 @@ def tempi(gateAngle, gateForce):
 
     """
     Using gate force is not very accurate or robust
+    and why only gateForceX?
+
     # filter the signal a bit
     [B, A] = signal.butter(4, 2*5/Hz)
     # filtfilt cannot cope with Nans.

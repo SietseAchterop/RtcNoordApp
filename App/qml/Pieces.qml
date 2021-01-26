@@ -25,7 +25,7 @@ Item {
 
       Connections {
             target: sensorModel
-            onDataChanged: {
+          function onDataChanged() {
                 draw_mpl.update_figure()
             }
       }

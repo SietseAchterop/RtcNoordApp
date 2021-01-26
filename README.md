@@ -6,7 +6,7 @@ The app is attempt to get higher level data out of the raw data from this system
 
 ## Installation
 
-It basically works on linux, windows and mac. See the docs directory for a short description of the install process on the different platforms.
+It basically works on linux, windows and mac. See the appdocs directory for a short description of the install process on the different platforms.
 
 ## Usage
 
@@ -17,7 +17,8 @@ It basically works on linux, windows and mac. See the docs directory for a short
   - Save the file in the correct subdirectory, e.g. for the correct year in the csv_data directory.
   - Multiple csv-files can also be concatenated and used as the csv-file to create a session. There should be no empty lines between the parts.
   - A few csv-files are already included with the app.
-  - Start the RtcNoordApp program from the App directory with: "python main.py", or create a link or an Icon on the desktop and use that.
+  - Start the RtcNoordApp program from the App directory with: "python main.py", or create a link or an Icon on the desktop and use that. The advantage is the commandline is that there sometimes are warnings visible,
+    so when in doubt, do start it from the command line.
   - The very first time the program is started a system dependant configuration-file RtcApp will be created. It contains the "BaseDir" for where all rowing data is put and the name of the current session.
     The default value of BaseDir is RtcNoord in your home-directory.
     If that directory doesn't exist, it and a number of subdirectories will be created and filled with some data.
@@ -69,7 +70,7 @@ You can of course select a start in a piece, but most properties mentioned in th
 In such a case you probably will look more to the plots in the View piece tab.
 
 
-![Eerste](docs/SetupPieces.png)
+![Eerste](appdocs/SetupPieces.png)
 
 The plot in the bottom part gives an overview of the entire rowing session, it shows the rating.
 With it, the different parts of the session can be easily found.
@@ -92,7 +93,7 @@ Panning and zooming is also possible here.
 Clicking on a line displays the sensors value.
 The next screenshot shows a number of sensors, where they are scaled in such a way that the individual graphs are more or less the same size.
 
-![Eerste](docs/ViewPiece.png)
+![Eerste](appdocs/ViewPiece.png)
 
 Using the "Secondary" button another session can be selected
 In this way it is possible to view 2 different sessions next to each other to compare traces from these sessions.
@@ -105,7 +106,7 @@ Then try to use the slider to make the strokes align better.
 
 Below the main session is data from a pair where the force curve of the stroke is shown. The plot of the secondary session (dotted line) is of the same rower but now from a skiff session.
 
-![Eerste](docs/ViewPiece2.png)
+![Eerste](appdocs/ViewPiece2.png)
 
 ### Using video
 
@@ -128,13 +129,13 @@ Next click on the plot on the correct point in the data.
 Finally click the middle control button again. The blue line moves to that point and synchronisation is complete.
 
 
-![Eerste](docs/ViewVideo.png)
+![Eerste](appdocs/ViewVideo.png)
 
 ### Boat Profile
 
 If pieces are saved a table profiles the pieces.
 
-![Eerste](docs/BoatProfile.png)
+![Eerste](appdocs/BoatProfile.png)
 
 To create a profile the data from the first stroke of the piece is used, or the average of the strokes.
 Select averaging using the checkbox.
@@ -146,8 +147,8 @@ Using the tumble wheel we can select which pieces are shown in the plots.
 All pieces, the individual pieces or the average of them can be selected.
 
 The profile consists of this screen and the Crew- and Rower- screens, so creating a new profile will also affect those screens.
-The "Create report" creates a pdf version of the profile, see the docs directory for an [example report](docs/example_report.pdf).
-It also creates a spreadsheet that contains the tables for further processing, see [example sheet](docs/example_report.xlsx).
+The "Create report" creates a pdf version of the profile, see the appdocs directory for an [example report](appdocs/example_report.pdf).
+It also creates a spreadsheet that contains the tables for further processing, see [example sheet](appdocs/example_report.xlsx).
 
 The report uses the selected settings of checkboxes and tumble wheels.
 Also the view from "View piece" is shown in the report.
@@ -157,14 +158,14 @@ Also the view from "View piece" is shown in the report.
 A number of plots to compare rowers in a crew.
 The tumble wheel can be used to select the piece to look at, or the average can be used
 
-![Eerste](docs/CrewProfile.png)
+![Eerste](appdocs/CrewProfile.png)
 
 ### Rower Profiles
 
 Each rower has its own profile part.
 Again the tumble wheel can be used to select a single piece or the average.
 
-![Eerste](docs/RowerView.png)
+![Eerste](appdocs/RowerView.png)
 
 ### Session Info
 
@@ -174,7 +175,7 @@ Initially the boattype is inferred from the csvdata, but a custom type can be se
 Be sure to set the values the very first time the session is created from the csv-data.
 Note that an item only is really entered when the enter key is used after entering the value!
 
-![Eerste](docs/SessionInfo.png)
+![Eerste](appdocs/SessionInfo.png)
 
 
 ### Addition tabs

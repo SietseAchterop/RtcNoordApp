@@ -2,7 +2,9 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
+
 Item {
+
     RowLayout {
 	id: sessionId
 	anchors.fill: parent
@@ -16,9 +18,11 @@ Item {
 	property var venue: ([] )
 	Connections {
             target: crew_mpl
-            onSessionsig: {
-		sessionId.sinfo = sessig;
 
+	    // QML Connections: Implicitly defined onFoo properties in Connections are deprecated. Use this syntax instead: function onFoo(<arguments>) { ... }
+	    // How to get the code in that function? sessig is undefined then!   leave these warnings for the moment.
+            function onSessionsig(sessig) {
+		sessionId.sinfo = sessig;
 		crewname.placeholderText = sessig[0];
 		calib.placeholderText = sessig[1];
 		misc.placeholderText = sessig[2];

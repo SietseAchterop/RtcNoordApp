@@ -1,4 +1,8 @@
+"""Read gps location data from catapult file
 
+Not yet tested
+
+"""
 import os, sys, csv, time
 from stat import S_IREAD, S_IRGRP, S_IROTH
 from pathlib import Path, PureWindowsPath, PurePosixPath

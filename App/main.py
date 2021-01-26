@@ -3,6 +3,8 @@
 Process and use the Powerline logger data.
 Input is the csv_data that can be extracted from the Powerline software.
 
+This program can be used directly by starting it, or in an interactive mode in a python session.
+
 This program is a Qt program with a custom backend for use with QtQuick.
 Matplotlib is used for the graphs.
 
@@ -32,8 +34,12 @@ app = None
 def interactive(session=None):
     """For interactive use in python.
 
+    :param str session: Not used
+
+    :returns: Whether the are pieces in the session
+
     This function creates the global variables associated with the currently selected session.
-    To use this software from the python prompt do the following:
+    To use this, start python in the App source code directory and  do the following:
 
     import globalData as gd
     import main
@@ -96,7 +102,7 @@ def main():
     """The main entry point when used as a regular app
 
     It assumes a session is selected. When not, a dummy session None is used.
-    A real session can be created or selected from the menu.
+    The status line will tell that a real session  has to be created or selected from the menu.
     """
     global app
 
@@ -128,6 +134,7 @@ def main():
     qmlRegisterType(FigureCanvasQTAggToolbar, "Backend", 1, 0, "FigureToolbar")
     imgProvider = MatplotlibIconProvider()
 
+    # setup rootcontext to communicate with QML
     engine = QQmlApplicationEngine()
     engine.addImageProvider("mplIcons", imgProvider)
     gd.context = engine.rootContext()

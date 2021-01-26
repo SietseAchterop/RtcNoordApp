@@ -1,4 +1,5 @@
-"""Global data for the app."""
+"""Global data for the Rtc app.
+"""
 
 #
 orgname = 'RTC Noord'
@@ -13,36 +14,37 @@ config = None
 
 # csv dialect
 dialect = None
-# data from the GlobalSettings yaml file
+# data from the configs/GlobalSettings.yaml file
 globals     = {}
 
-# the primary data
-# data from the session yaml file
+# the primary data used throughout the app.
+# this data will be read/saved from/to the yaml file in the session_data directory
 sessionInfo = {}
 # metadata from the csv-file
 metaData = {}
 
+# dataObject contains the data from the csv-file
 # ESSENTIAL: sensors are in same order as in dataObject
 dataObject  = []
 
-# the secondary data
+# Data of the secondary session
 metaData2    = {}
 sessionInfo2 = {}
 dataObject2  = []
 
 # the models for:
-# the sensors in setup pieces
+#   sensors in setup pieces
 data_model = []
-# the pieces in setup pieces and view piece
+#   pieces in setup pieces and view piece
 data_model2 = []
-# the sensors in view pieces
+#   sensors in view pieces
 data_model3 = []
-# the secondary sensors in view pieces
+#   secondary sensors in view pieces
 data_model4 = []
-# the secondary pieces in view pieces
+#   secondary pieces in view pieces
 data_model5 = []
 
-# for the properties
+# for the QML properties
 context = None
 
 # for the plots
@@ -63,7 +65,6 @@ rowertablemodel = [None, None, None, None, None, None, None, None, None, None, N
 rowerPlots = [None, None, None, None, None, None, None, None, None, None, None, None]
 stretcherPlots = [None, None, None, None, None, None, None, None, None, None, None, None]
 rowerPiece = [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
-
 
 #
 # list of piece names from 'Pieces'

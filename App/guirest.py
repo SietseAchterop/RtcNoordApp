@@ -741,7 +741,7 @@ class BoatForm(QObject):
                 self.ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.6, label=gd.p_names[i])
 
 
-            # gate angle of the stroke (optional?)
+            # gate angle of the stroke (optional?) See markers in Rower pages.
             if False:
                 #  we use start piece when showing all
                 rsens = rowersensors(int(gd.sessionInfo['RowerCnt']) - 1)
@@ -762,8 +762,8 @@ class BoatForm(QObject):
             self.ax4.scatter(list(range(len(gd.p_names))), p, marker='H', color='green', label='Accel')  # Todo: labels zichtbaar maken
             self.ax4.scatter(list(range(len(gd.p_names))), pa[1], marker='H', color='blue', label='Tempo')
 
-        if self.legend:
-            self.ax1.legend(loc='lower right', prop=self.fontP)
+            if self.legend:
+                self.ax1.legend(loc='lower right', prop=self.fontP)
 
         self.stateChanged.emit()
 
@@ -948,10 +948,10 @@ class CrewForm(QObject):
 
                     # no usefull markers here
                     
-        if self.legend:
-            self.ax1.legend(loc='upper left', prop=self.fontP)
-            self.ax2.legend(loc='upper left', prop=self.fontP)
-            self.ax4.legend(loc='upper left', prop=self.fontP)
+            if self.legend:
+                self.ax1.legend(loc='upper left', prop=self.fontP)
+                self.ax2.legend(loc='upper left', prop=self.fontP)
+                self.ax4.legend(loc='upper left', prop=self.fontP)
 
         self.stateChanged.emit()
 
@@ -1100,7 +1100,7 @@ class RowerForm(QObject):
                         self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.6, label=f'{gd.p_names[i]} a')
                         self.ax1.plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]} fX')
                         self.ax3.plot(gd.norm_arrays[i, :, rsens['GateAngle']],
-                                      gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6)
+                                      gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]}')
                     else:
                         self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.6, label=f'{gd.p_names[i]} a')
                         self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]} fX')
@@ -1167,10 +1167,10 @@ class RowerForm(QObject):
                 self.ax4.plot([gd.gmin[i]], [0], marker='v', color='b')
                 self.ax4.plot([gd.gmax[i]], [0], marker='^', color='b')
 
-        if self.legend:
-            self.ax1.legend(prop=self.fontP, loc='upper right')
-            self.ax3.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)
-            self.ax4.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)
+            if self.legend:
+                self.ax1.legend(prop=self.fontP, loc='upper right')
+                self.ax3.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)
+                self.ax4.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)
 
         self.stateChanged.emit()
         self.rowerDataChanged.emit([[ 'een', '1'], ['twee', '2']])
@@ -1292,7 +1292,7 @@ class StretcherForm(QObject):
                 self.ax1.plot([gd.gmin[i]*f], [0], marker='v', color='b')
                 self.ax1.plot([gd.gmax[i]*f], [0], marker='^', color='b')
 
-        if self.legend:
-            self.ax1.legend()
+                if self.legend:
+                    self.ax1.legend()
 
         self.stateChanged.emit()

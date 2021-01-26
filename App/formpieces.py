@@ -26,8 +26,10 @@ from models import *
 import matplotlib.pyplot as plt
 
 
-# matplotlib plot in Setup pieces, and menu handling
 class FormPieces(QObject):
+    """
+    matplotlib plot in Setup pieces, including menu handling
+    """
 
     legendChanged = pyqtSignal()
     statusTextChanged = pyqtSignal()

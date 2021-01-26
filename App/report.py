@@ -348,7 +348,7 @@ def make_pdf_report():
                     rax1[rwr].plot(scaleAngle*angle/6, linewidth=0.5, label='GateAngle')
                     rax1[rwr].plot(forceX/6, linewidth=0.5, label='GateForceX')
                     rax2[rwr].plot(accel/6, linewidth=0.5, label='Accel')
-                    rax3[rwr].plot(angle/6, forceX/6, linewidth=0.5)
+                    rax3[rwr].plot(angle/6, forceX/6, linewidth=0.5, label='FA')
                     rax4[rwr].plot(power/6, linewidth=0.5, label='Power')
                 else:
                     for i in range(len(gd.p_names)):
@@ -357,10 +357,10 @@ def make_pdf_report():
                         accel += gd.norm_arrays[i, :, sensors.index('Accel')]
                         d, a = gd.out[i]
                         power += a[0+rwr]
-                    rax1[rwr].plot(scaleAngle*angle/6, linewidth=0.5, label='P GateAngle')
-                    rax1[rwr].plot(forceX/6, linewidth=0.5, label='P GateForceX')
+                    rax1[rwr].plot(scaleAngle*angle/6, linewidth=0.5, label='GateAngle')
+                    rax1[rwr].plot(forceX/6, linewidth=0.5, label='GateForceX')
                     rax2[rwr].plot(accel/6, linewidth=0.5, label='Accel')
-                    rax3[rwr].plot(angle/6, forceX/6, linewidth=0.5)
+                    rax3[rwr].plot(angle/6, forceX/6, linewidth=0.5, label='FA')
                     rax4[rwr].plot(power/6, linewidth=0.5, label='Power')
 
             else:
@@ -372,12 +372,12 @@ def make_pdf_report():
                     rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
                     rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label='GateForceX')
                     rax3[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
-                                   gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5)
+                                   gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label='FA')
                 else:
                     rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
                     rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label='GateForceX')
                     rax3[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
-                                   gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5)
+                                   gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label='FA')
                 rax2[rwr].plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.5, label='Accel')
 
                 d, a = gd.out[i]
@@ -395,17 +395,15 @@ def make_pdf_report():
             doc.append(NoEscape(r'\includegraphics[width=0.9\textwidth]{' + f'{tmpfig}'  + r'}'))
             plt.close(fig[rwr])
 
-            doc.append('\n')
+            if 'StretcherForceX' in sensors:
+                doc.append('\n')
 
-            # stretcher plot
-            fig[rwr], sax1[rwr] = plt.subplots()
-            sax1[rwr].set_title('Stretcher')
-            sax1[rwr].grid(True)
+                # stretcher plot
+                fig[rwr], sax1[rwr] = plt.subplots()
+                sax1[rwr].set_title('Stretcher')
+                sax1[rwr].grid(True)
 
-            rsens = rowersensors(rwr)
-            if 'StretcherForceX' not in sensors:
-                sax1[rwr].set_title('No Stretcher sensor')
-            else:
+                rsens = rowersensors(rwr)
                 if gd.rowerPiece[rwr] == 0:
                     # all DOEN WE NIET
                     pass
@@ -420,8 +418,8 @@ def make_pdf_report():
                     sax1[rwr].plot(10*gd.dataObject[sp[0]:sp[1], rsens['Stretcher RL']], linewidth=0.6, label='Stretcher RL')
                     sax1[rwr].plot(10*gd.dataObject[sp[0]:sp[1], rsens['Stretcher TB']], linewidth=0.6, label='Stretcher TB')
 
-            sax1[rwr].legend(loc='lower right', prop=fontP)
-            plt.tight_layout()
+                sax1[rwr].legend(loc='lower right', prop=fontP)
+                plt.tight_layout()
             
             tmpfig = tmpdir / (gd.config['Session'] + f'_{rwr}_s')
             plt.savefig(tmpfig)
