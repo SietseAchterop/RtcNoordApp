@@ -128,7 +128,6 @@ Then click the middle control button, it will turn red; the video position is se
 Next click on the plot on the correct point in the data.
 Finally click the middle control button again. The blue line moves to that point and synchronisation is complete.
 
-
 ![Eerste](appdocs/ViewVideo.png)
 
 ### Boat Profile
