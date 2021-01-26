@@ -195,7 +195,7 @@ def make_pdf_report():
 
         rcnt = gd.sessionInfo['RowerCnt']
         piece = gd.crewPiece
-        if piece < 6:
+        if piece < len(gd.out):
             d, a = gd.out[piece]
             for r in range(rcnt):
                 sns = rowersensors(r)
@@ -418,8 +418,8 @@ def make_pdf_report():
                     sax1[rwr].plot(10*gd.dataObject[sp[0]:sp[1], rsens['Stretcher RL']], linewidth=0.6, label='Stretcher RL')
                     sax1[rwr].plot(10*gd.dataObject[sp[0]:sp[1], rsens['Stretcher TB']], linewidth=0.6, label='Stretcher TB')
 
-                sax1[rwr].legend(loc='lower right', prop=fontP)
-                plt.tight_layout()
+                    sax1[rwr].legend(loc='lower right', prop=fontP)
+                    plt.tight_layout()
             
             tmpfig = tmpdir / (gd.config['Session'] + f'_{rwr}_s')
             plt.savefig(tmpfig)
