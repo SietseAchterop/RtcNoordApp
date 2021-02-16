@@ -24,7 +24,7 @@ from utils import *
 from models import *
 
 import matplotlib.pyplot as plt
-
+import pyperclip
 
 class FormPieces(QObject):
     """
@@ -216,9 +216,6 @@ class FormPieces(QObject):
 
         self.update_tempo_figure()
         
-    def asdf(self, t):
-        self.statusText(t)
-
     @pyqtProperty('QString', notify=statusTextChanged)
     def statusText(self):
         return self._status_text
@@ -459,9 +456,10 @@ class FormPieces(QObject):
             gd.context.setContextProperty("rowerTableModel"+str(i), gd.rowertablemodel[i])
 
 
-    @pyqtSlot(str)
-    def createSessionCsv(self, f):
+    @pyqtSlot(str, bool)
+    def createSessionCsv(self, f, clip):
         """Used from the menu when (re)creating a new session."""
+        print(f'file:   {f}   {Path(f)}')
         csv_file = re.sub('\Afile://', '', f)
 
         # Only accept files in csv_data dir
@@ -469,8 +467,31 @@ class FormPieces(QObject):
         csvbase = re.sub('\\\\', '/', csvbase)   # for windows, no backslash on linux
         if csvbase not in csv_file:
             # ignore
+            print('Csv-files should be inside the BaseDir, usually RtcNoord in your homedir!')
+            print('This command will be ignored.')
             return
 
+        # read clipboard and do a sanity check
+        if clip:
+            gd.clipdata = pyperclip.paste()
+            # first column: "Time"      (, x,  y, y+20)
+            if gd.clipdata[0:4] != 'Time':
+                # Not clipdata from powerline!
+                print('This is not correct clipboard data from the trace export of Powerline!')
+                print('This command will be ignored.')
+                return
+            gd.delimiter = gd.clipdata[4]
+            # file to use should not exist yet.
+            try:
+                b = os.path.basename(csv_file)
+                f = csvsDir() / b
+                with f.open() as fd:     # werkt dit ook bij windows?
+                    print(f"File {f} for clipboard data exists, should not happen")
+                    print("Command will be ignored.")
+                    return
+            except FileNotFoundError:
+                pass
+            
         # Update and use SubDir
         tail = re.sub(csvbase, '', csv_file)
         tail = re.sub('^/', '', tail)   # hack voor windows, no slash here on linux
@@ -543,7 +564,7 @@ class FormPieces(QObject):
 
         # create numpy data
         #  also add metadata to csv file if not yet present.
-        makecache(cache_file)
+        makecache(cache_file, clip)
 
     @pyqtSlot()
     def selectCurrent(self):
@@ -619,6 +640,10 @@ class FormPieces(QObject):
             fd.close()
             gd.dataObject = np.load(cache_file)
         except IOError:
+            print(f'Cannot read cachefile, should not happen  {cache_file}')
+            print("Repairing cache file,")
+            makecache(cache_file)
+        except FileNotFoundError:
             print(f'Cannot read cachefile, should not happen  {cache_file}')
             print("Repairing cache file,")
             makecache(cache_file)

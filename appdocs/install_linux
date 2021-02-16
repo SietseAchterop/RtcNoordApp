@@ -17,6 +17,7 @@ python3
     -yaml
     -openpyxl
     -mplcursors
+    -pyperclip
 libfreetype-dev
 qtdeclarative5-dev
 qt5-default

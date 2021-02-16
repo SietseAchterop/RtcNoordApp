@@ -23,6 +23,10 @@ sessionInfo = {}
 # metadata from the csv-file
 metaData = {}
 
+# will hold data from the clipboard
+clipdata = None
+delimiter = None
+
 # dataObject contains the data from the csv-file
 # ESSENTIAL: sensors are in same order as in dataObject
 dataObject  = []

@@ -70,7 +70,7 @@ Item {
 			TextField {
 			    selectByMouse: true   // is iets raars mee?
 			    implicitWidth: 120
-			    placeholderText: { sessionId.rowers[index][0] }
+			    placeholderText: { sessionId.rowers[index][0] }  // foutmelding bij startup als yaml file niet bestaat!
 			    onAccepted: {
 				sessionId.rowers[index] = [ text, sessionId.rowers[index][1], sessionId.rowers[index][2], sessionId.rowers[index][3]];
 				sessionId.sinfo[3][index] = sessionId.rowers[index];

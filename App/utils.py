@@ -16,6 +16,8 @@ except OSError:
 import globalData as gd
 from catapult import catapult
 
+from io import StringIO
+
 # sampling rate of the logger
 Hz = 50
 
@@ -286,25 +288,36 @@ def calibrate(secondary=False):
         i = gd.sessionInfo2['Header'].index('Distance')
         gd.dataObject2[:, i] = gd.dataObject2[:, i] * gd.cal_value2
 
-# csv and session file have same name
-def readCsvData(config, csvdata):
-    """Read data for a session from the csv-file.
+
+def readcreateCsvData(config, csvdata, clip):
+    """Read data for a session from the csv-file or the clipboard
+    Create csv-file from clipboard data.
 
     Csv data can use comma, semicolumn or tab as delimiter
 
-    After a first use metadata is present in the first rows, containing the SessionInfo data.
+    In a file the data can be prepended with some  metadata that will be added with first use.
+    This is the sessiondata 
 
-    In Session info tab, save knop voor update metadata in csvfile?
-    Nu moet je de enter niet vergeten bij iedere verandering.
+    In Session info tab, save knop to update metadata in csvfile?
+    Nu moet je de enter niet vergeten bij iedere verandering. Niet handig.
 
     sessioninfo splitsen in deel csv en deel sessioninfo, of dubbel in csv?
     
 
-    with statement gebruiken!
-
     """
 
     path = csvsDir() / (config['Session'] + '.csv')
+
+    if clip:
+        # create the csv-file
+        fin = StringIO(gd.clipdata)
+        reader = csv.reader(fin, delimiter=gd.delimiter)
+        with open(path, 'w', newline='') as fd:
+            writer = csv.writer(fd, delimiter=gd.delimiter)
+            for row in reader:
+                writer.writerow(row)
+    # csv file available. Not very efficient
+    gd.clipdata = None
 
     # Prepend metadata if not yet present (first time)
     with Path.open(path, newline='') as fd:
@@ -318,7 +331,9 @@ def readCsvData(config, csvdata):
         tmpfd = Path(tmpdir) / 'rtcapp'
         metadata = appconfigsDir() / 'metadata.csv'
         shutil.move(path, tmpfd)
+        # tmpfd now points to the data without metadata
         with open(path, 'w') as fd:
+            # first write meta data to csv-file
             with open(metadata) as infile:
                 count = 0
                 for line in infile:
@@ -329,6 +344,7 @@ def readCsvData(config, csvdata):
                         line = f'Metadata{gd.dialect.delimiter} {date.today().strftime("%d-%m-%Y")}\n'
                     count += 1
                     fd.write(line)
+            # no write the original data to the cvs-file
             with open(tmpfd) as infile:
                 for line in infile:
                     fd.write(line)
@@ -363,7 +379,6 @@ def readCsvData(config, csvdata):
                 skip = True
                 csvpieces.append(line/Hz)
                 continue
-            # we leave room for the sessioninfo metadata
             for i in range(lenheader):
                 if row[i] == '':
                     row[i] = float('NaN')
@@ -372,11 +387,6 @@ def readCsvData(config, csvdata):
             csvdata.append(row)
         gd.sessionInfo['CsvPieces'] = csvpieces
     
-    # if no metadata, then put defaults in
-    #  Metadata to be found in row 3 and column lenheader+2
-
-    # else, use it to fill sessioninfo
-
     return header, header2
 
 def getMetaData(interactive=False):
@@ -470,10 +480,10 @@ def getMetaData2():
         i = next(reader)
         gd.metaData2['Spare'] = i[1]
 
-def makecache(file):
+def makecache(file, clip):
     """Create and cache the data read from the csv-file in a .npy file """
     csvdata = []
-    h1, h2 = readCsvData(gd.config, csvdata)
+    h1, h2 = readcreateCsvData(gd.config, csvdata, clip)
     # metadata has been skipped
 
     # bij skullen is een van de sensoren desnoods voldoende

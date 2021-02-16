@@ -18,7 +18,7 @@ Installatie rtcapp op een Mac
        pip3 list
           
 - Install the following python modules using pip3 command
-    - matplotlib (3.1.x), PyYAML, pyqt5, scipy, pylatex, openpyxl, mplcursors
+    - matplotlib (3.1.x), PyYAML, pyqt5, scipy, pylatex, openpyxl, mplcursors, pyperclip
     - when a version is mentioned use the newest version from that series, e.g.
          pip3 install matplotlib==3.1.3
     - find a latest version using

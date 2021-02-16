@@ -18,7 +18,18 @@ ApplicationWindow {
         nameFilters: ["CSV files (*.csv)", "All Files (*.*)"]
 	folder: draw_mpl.csvDir
         onAccepted: {
-            draw_mpl.createSessionCsv(fileUrl);
+            draw_mpl.createSessionCsv(fileUrl, false);
+        }
+    } 
+
+    // Select the csv file for the clipboard data
+    FileDialog {
+        id: filedialogclip
+	selectExisting: false
+        nameFilters: ["CSV files (*.csv)", "All Files (*.*)"]
+	folder: draw_mpl.csvDir
+        onAccepted: {
+            draw_mpl.createSessionCsv(fileUrl, true);
         }
     } 
 
@@ -61,8 +72,12 @@ ApplicationWindow {
         Menu {
             title: qsTr("&Session")
             MenuItem {
-                text: qsTr("C&reate session (csv)")
+                text: qsTr("&Create session (csv)")
                 onTriggered: filedialog.open()
+            }
+            MenuItem {
+                text: qsTr("Create from c&lipboard (csv)")
+                onTriggered: filedialogclip.open()
             }
             MenuItem {
                 text: qsTr("S&elect session")
