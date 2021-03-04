@@ -158,6 +158,8 @@ Also the view from "View piece" is shown in the report.
 ### Crew Profile
 
 A number of plots to compare rowers in a crew.
+The most important plot is the angle versus force plot, X and Y.
+The black curve is a reference curve.
 The tumble wheel can be used to select the piece to look at, or the average can be used
 
 ![Eerste](appdocs/CrewProfile.png)
@@ -165,7 +167,7 @@ The tumble wheel can be used to select the piece to look at, or the average can 
 ### Rower Profiles
 
 Each rower has its own profile part.
-Again the tumble wheel can be used to select a single piece or the average.
+Again the tumble wheel can be used to select all piece, a single one or the average of them.
 
 ![Eerste](appdocs/RowerView.png)
 

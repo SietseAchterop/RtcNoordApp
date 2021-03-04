@@ -12,14 +12,12 @@ Item {
 	    anchors.fill: parent
             Layout.fillWidth: true
 
-	    spacing: 10
+	    spacing: 5
 	    Text {
 		text: 'Profile crew report'
 	    }
 
-	    Text {
-		text: ''
-	    }
+	    RowLayout {
 
 	    Tumbler {
 		id: crewtumbler
@@ -67,6 +65,7 @@ Item {
                 Layout.minimumWidth: 200
                 Layout.minimumHeight: 200
             }
+	    }
 	}
 }
     

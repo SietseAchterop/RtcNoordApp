@@ -244,7 +244,7 @@ class FormView(QObject):
                     else:
                         scaleY = 1
                     values = gd.view_tr2[:, i] * scaleY
-                    lines2 = self.ax1.plot(self.times, values, linewidth=0.7,  label=name, linestyle='--')
+                    lines2 = self.ax1.plot(self.times, values, linewidth=0.7,  label=name, linestyle=stippel)
                     secsenslist.append((i, name, scaleY))
                     mplcursors.cursor(lines2)
 
@@ -788,6 +788,7 @@ class BoatForm(QObject):
         else:
             return ['all'] + gd.p_names + ['average']
 
+
 # matplotlib plot in Crew Profile
 class CrewForm(QObject):
 
@@ -803,7 +804,6 @@ class CrewForm(QObject):
         self.ax1 = None
         self.ax2 = None
         self.ax3 = None
-        self.ax4 = None
 
         self.een = None
         self.twee = None
@@ -822,14 +822,11 @@ class CrewForm(QObject):
     def figure(self, fig):
         self._figure = fig
         self._figure.set_facecolor('white')
-        fig.subplots_adjust(hspace=0.4)
-        gs = self._figure.add_gridspec(3, 2)
-        self.ax1 = self._figure.add_subplot(gs[0, 0])
-        self.ax2 = self._figure.add_subplot(gs[0, 1])
-        self.ax3 = self._figure.add_subplot(gs[1, 0])
-        self.ax4 = self._figure.add_subplot(gs[1, 1])
-        self.ax5 = self._figure.add_subplot(gs[2, 0])
-        self.ax6 = self._figure.add_subplot(gs[2, 1])
+        fig.subplots_adjust(hspace=0.7)
+        gs = self._figure.add_gridspec(5, 2)
+        self.ax1 = self._figure.add_subplot(gs[0:3, :])
+        self.ax2 = self._figure.add_subplot(gs[3:, 0])
+        self.ax3 = self._figure.add_subplot(gs[3:, 1])
 
         self.fontP.set_size('xx-small')
 
@@ -865,22 +862,13 @@ class CrewForm(QObject):
 
         self.ax1.clear()
         self.ax1.grid(True)
-        self.ax1.set_title('Gate Angle')
+        self.ax1.set_title('GateAngle - GateForceX/Y')
         self.ax2.clear()
         self.ax2.grid(True)
-        self.ax2.set_title('Gate ForceX')
+        self.ax2.set_title('StretcherForceX')
         self.ax3.clear()
         self.ax3.grid(True)
-        self.ax3.set_title('StretcherForceX')
-        self.ax4.clear()
-        self.ax4.grid(True)
-        self.ax4.set_title('Power')
-        self.ax5.clear()
-        self.ax5.grid(True)
-        self.ax5.set_title('Power Leg')
-        self.ax6.clear()
-        self.ax6.grid(True)
-        self.ax6.set_title('Power Arm/Trunk')
+        self.ax3.set_title('Power')
 
         # do plotting of all rowers for the selected piece
         # speed, accel, pitch
@@ -888,31 +876,57 @@ class CrewForm(QObject):
             rcnt = gd.sessionInfo['RowerCnt']
             if gd.crewPiece < len(gd.p_names):
                 # a seperate piece, from the tumbler
-                d, aa = gd.out[gd.crewPiece]
+                cp = gd.crewPiece
+                d, aa = gd.out[cp]
+
                 for r in range(rcnt):
                     sns = rowersensors(r)
-                    # print(f'Create crewplot for {r}')
                     if gd.sessionInfo['ScullSweep'] == 'sweep':
                         i = sns['GateAngle']
                         j = sns['GateForceX']
+                        k = sns['GateForceY']
                     else:
                         i = sns['P GateAngle']
                         j = sns['P GateForceX']
+                        k = sns['P GateForceY']
+
                     # stretchers not always present!
                     # k = sns['Stretcher Z']
                     # todo: create switch to control working in this case
 
-                    self.een = self.ax1.plot(gd.norm_arrays[gd.crewPiece, :, i], linewidth=0.6, label=f'R {r+1}')
-                    self.twee = self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, j], linewidth=0.6, label=f'R {r+1}')
-                    # self.drie = self.ax3.plot(gd.norm_arrays[gd.crewPiece, :, k], linewidth=0.6, label=gd.p_names[r])
-                    self.vier = self.ax4.plot(aa[0+r], linewidth=0.6, label=f'R {r+1}')
+                    self.ax1.plot(gd.norm_arrays[cp, :, i],
+                                  gd.norm_arrays[cp, :, j], linewidth=0.6, label=f'R {r+1}')
+                    self.ax1.plot(gd.norm_arrays[cp, :, i],
+                                  gd.norm_arrays[cp, :, k], linestyle=stippel, linewidth=0.6, label=f'R {r+1}Y')
 
-                    self.ax1.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
-                    self.ax1.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
-                    self.ax2.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
-                    self.ax2.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
-                    self.ax4.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
-                    self.ax4.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
+                    #self.twee = self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, i], linewidth=0.6, label=f'R {r+1}')
+                    self.drie = self.ax3.plot(aa[0+r], linewidth=0.6, label=f'R {r+1}')
+
+                    self.ax3.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
+                    self.ax3.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
+
+                # reference curve derived from the stroke
+                sns = rowersensors(rcnt-1)
+                fmean = d[rcnt-1]['GFEff']
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
+                    i = sns['GateAngle']
+                    j = sns['GateForceX']
+                else:
+                    i = sns['P GateAngle']
+                    j = sns['P GateForceX']
+                minpos = min(gd.norm_arrays[cp, :, i])
+                maxpos = max(gd.norm_arrays[cp, :, i])
+                minarg = np.argmin(gd.norm_arrays[cp, :, i])
+                maxarg = np.argmax(gd.norm_arrays[cp, :, i])
+                fmin = gd.norm_arrays[cp, minarg, j]
+                fmax = gd.norm_arrays[cp, maxarg, j]
+                xref = np.array([minpos, minpos+2, minpos+10, minpos+40, maxpos-45, maxpos-15, maxpos])
+                yref = np.array([fmin, fmin+20, 1.00*fmean, 1.7*fmean, 1.6*fmean, 0.5*fmean, fmax])
+                curveref = interp1d(xref, yref, 'cubic', fill_value='extrapolate')
+                xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
+
+                self.ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=(0, (3, 6)))
+
             else:
                 # last item which is averageing all the pieces
                 for r in range(rcnt):
@@ -941,17 +955,15 @@ class CrewForm(QObject):
                         power  += a[0+r]
 
                     # plot
-                    self.ax1.plot(angle/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
-                    self.ax2.plot(force/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
-                    # self.ax3.plot(stetcherZ/nmbrpieces:, k], linewidth=0.6, label=gd.p_names[r])
-                    self.ax4.plot(power/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
+                    self.ax1.plot([0,0], linewidth=0.6, label=f'R {r+1}')   # dummy
+                    self.ax3.plot(power/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
 
                     # no usefull markers here
                     
             if self.legend:
-                self.ax1.legend(loc='upper left', prop=self.fontP)
-                self.ax2.legend(loc='upper left', prop=self.fontP)
-                self.ax4.legend(loc='upper left', prop=self.fontP)
+                self.ax1.legend(loc='upper right', prop=self.fontP)
+                #self.ax2.legend(loc='upper left', prop=self.fontP)
+                self.ax3.legend(loc='upper right', prop=self.fontP)
 
         self.stateChanged.emit()
 
@@ -1034,11 +1046,8 @@ class RowerForm(QObject):
         self._figure = fig
         self._figure.set_facecolor('white')
         fig.subplots_adjust(hspace=0.4, wspace=0.1)
-        gs = self._figure.add_gridspec(2, 2)
+        gs = self._figure.add_gridspec(1, 1)
         self.ax1 = self._figure.add_subplot(gs[0, 0])
-        self.ax2 = self._figure.add_subplot(gs[0, 1])
-        self.ax3 = self._figure.add_subplot(gs[1, 0])
-        self.ax4 = self._figure.add_subplot(gs[1, 1])
 
         self.fontP.set_size('xx-small')
 
@@ -1074,16 +1083,7 @@ class RowerForm(QObject):
     
         self.ax1.clear()
         self.ax1.grid(True)
-        self.ax1.set_title('GateForceX/GateAngle')
-        self.ax2.clear()
-        self.ax2.grid(True)
-        self.ax2.set_title('Acceleration')
-        self.ax3.clear()
-        self.ax3.grid(True)
-        self.ax3.set_title('GateAngle - GateForceX (X/Y)')
-        self.ax4.clear()
-        self.ax4.grid(True)
-        self.ax4.set_title('Power')
+        self.ax1.set_title('GateAngle - GateForceX/Y')
 
         # do the plotting
         # speed, accel, pitch
@@ -1097,80 +1097,78 @@ class RowerForm(QObject):
                 for i in range(len(gd.p_names)):
                     if gd.sessionInfo['ScullSweep'] == 'sweep':
                         # print(f'Create rowerplot for {self.rower}')
-                        self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.6, label=f'{gd.p_names[i]} a')
-                        self.ax1.plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]} fX')
-                        self.ax3.plot(gd.norm_arrays[i, :, rsens['GateAngle']],
+                        self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']],
                                       gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]}')
+                        self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']],
+                                      gd.norm_arrays[i, :, rsens['GateForceY']], linestyle=stippel, linewidth=0.6, label=f'{gd.p_names[i]}')
                     else:
-                        self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.6, label=f'{gd.p_names[i]} a')
-                        self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]} fX')
-                        self.ax3.plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
+                        self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
                                       gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]}')
-                    d, aa = gd.out[i]
-                    self.vijf = self.ax4.plot(aa[0+self.rower], linewidth=0.6, label=f'{gd.p_names[i]}')
-                self.ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label='Accel')
+                        self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
+                                      gd.norm_arrays[i, :, rsens['P GateForceY']], linestyle=stippel, linewidth=0.6, label=f'{gd.p_names[i]}')
             elif gd.rowerPiece[self.rower] == len(gd.p_names) + 1:
                 # average
                 angle = np.zeros((100,))
                 forceX = np.zeros((100,))
-                accel = np.zeros((100,))
-                power = np.zeros((100,))
+                forceY = np.zeros((100,))
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
                     for i in range(len(gd.p_names)):
                         angle += gd.norm_arrays[i, :, rsens['GateAngle']]
                         forceX += gd.norm_arrays[i, :, rsens['GateForceX']]
-                        accel += gd.norm_arrays[i, :, sensors.index('Accel')]
-                        d, aa = gd.out[i]
-                        power += aa[0+self.rower]
-                    self.ax1.plot(scaleAngle*angle/6, linewidth=0.6, label='GateAngle')
-                    self.ax1.plot(forceX/6, linewidth=0.6, label='GateForceX')
-                    self.ax2.plot(accel/6, linewidth=0.6, label='Accel')
-                    self.ax3.plot(angle/6, forceX/6, linewidth=0.6, label='FA')
-                    self.ax4.plot(power/6, linewidth=0.6, label='Power')
+                        forceY += gd.norm_arrays[i, :, rsens['GateForceY']]
+                    self.ax1.plot(angle/6, forceX/6, linewidth=0.6, label='FX')
+                    self.ax1.plot(angle/6, forceY/6, linestyle=stippel, linewidth=0.6, label='FY')
                 else:
                     for i in range(len(gd.p_names)):
                         angle += gd.norm_arrays[i, :, rsens['P GateAngle']]
                         forceX += gd.norm_arrays[i, :, rsens['P GateForceX']]
-                        accel += gd.norm_arrays[i, :, sensors.index('Accel')]
-                        d, aa = gd.out[i]
-                        power += aa[0+self.rower]
-                    self.ax1.plot(scaleAngle*angle/6, linewidth=0.6, label='P GateAngle')
-                    self.ax1.plot(forceX/6, linewidth=0.6, label='P GateForceX')
-                    self.ax2.plot(accel/6, linewidth=0.6, label='Accel')
-                    self.ax3.plot(angle/6, forceX/6, linewidth=0.6, label='FA')
-                    self.ax4.plot(power/6, linewidth=0.6, label='Power')
-
+                        forceY += gd.norm_arrays[i, :, rsens['P GateForceY']]
+                    self.ax1.plot(angle/6, forceX/6, linewidth=0.6, label='FX')
+                    self.ax1.plot(angle/6, forceY/6, linestyle=stippel, linewidth=0.6, label='FY')
             else:
-                i = gd.rowerPiece[self.rower] - 1
+                # normal pieces
+                rp = gd.rowerPiece[self.rower] - 1
+                sns = rowersensors(self.rower)
 
                 # ad hoc angle x 10. Bettet via (max-min). Scale is for force
+                # print(f'Create rowerplot for {self.rower}')
+                outboat = [ d for d, e in gd.out]
+                ri = [a[self.rower] for a in outboat]    # rower info per piece
+                fmean = ri[rp]['GFEff']
+
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
-                    # print(f'Create rowerplot for {self.rower}')
-                    self.ax1.plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
-                    self.ax1.plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label='GateForceX')
-                    self.ax3.plot(gd.norm_arrays[i, :, rsens['GateAngle']],
-                                  gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label='FA')
+                    i = sns['GateAngle']
+                    j = sns['GateForceX']
+                    k = sns['GateForceY']
                 else:
-                    self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.6, label='GateAngle')
-                    self.ax1.plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label='GateForceX')
-                    self.ax3.plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
-                                  gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label='FA')
-                self.ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label='Accel')
+                    i = sns['P GateAngle']
+                    j = sns['P GateForceX']
+                    k = sns['P GateForceY']
 
-                d, aa = gd.out[i]
-                self.vijf = self.ax4.plot(aa[0+self.rower], linewidth=0.6, label='Power')
+                
+                # TESTING referentie curve
+                # lengte uit tabel? Voorlopig 100, begin goed zetten
+                # scale with avarage force
+                minpos = min(gd.norm_arrays[rp, :, i])
+                maxpos = max(gd.norm_arrays[rp, :, i])
+                minarg = np.argmin(gd.norm_arrays[rp, :, i])
+                maxarg = np.argmax(gd.norm_arrays[rp, :, i])
+                fmin = gd.norm_arrays[rp, minarg, j]
+                fmax = gd.norm_arrays[rp, maxarg, j]
+                xref = np.array([minpos, minpos+2, minpos+10, minpos+40, maxpos-45, maxpos-15, maxpos])
+                yref = np.array([fmin, fmin+20, 1.00*fmean, 1.7*fmean, 1.6*fmean, 0.5*fmean, fmax])
 
-                self.ax1.plot([gd.gmin[i]], [0], marker='v', color='b')
-                self.ax1.plot([gd.gmax[i]], [0], marker='^', color='b')
-                self.ax2.plot([gd.gmin[i]], [0], marker='v', color='b')
-                self.ax2.plot([gd.gmax[i]], [0], marker='^', color='b')
-                self.ax4.plot([gd.gmin[i]], [0], marker='v', color='b')
-                self.ax4.plot([gd.gmax[i]], [0], marker='^', color='b')
+                curveref = interp1d(xref, yref, 'cubic', fill_value='extrapolate')
+                xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
+
+                self.ax1.plot(gd.norm_arrays[rp, :, i],
+                              gd.norm_arrays[rp, :, j], linewidth=0.6, label=f'{gd.p_names[rp]} FX')
+                self.ax1.plot(gd.norm_arrays[rp, :, i],
+                              gd.norm_arrays[rp, :, k], linestyle=stippel, linewidth=0.6, label=f'{gd.p_names[rp]} FY')
+                self.ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=(0, (3, 6)))
 
             if self.legend:
-                self.ax1.legend(prop=self.fontP, loc='upper right')
-                self.ax3.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)
-                self.ax4.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)
+                self.ax1.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)
 
         self.stateChanged.emit()
         self.rowerDataChanged.emit([[ 'een', '1'], ['twee', '2']])

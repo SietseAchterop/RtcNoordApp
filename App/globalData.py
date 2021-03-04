@@ -89,8 +89,51 @@ filter = False
 custom_report = False
 
 # the averaged data and normalized data (pieces, length, sensors)
-norm_arrays = None
+"""
+out will be the result of the profile function
+  It contains a list of piececalculations which contains tuple containing
+    1 dictionary containing
+        PieceName
+        Speedimp
+        Split
+        DistancePerStroke
+        StartingPoints
+        MaxAtP
+        MinAtP
+        YawMax
+        RowMax
+        PowerLoss
+        Rythmn
+        0
+        1
+        ..
+          Containing rowerstats for each rower, again a dictionary
+             GFMax
+             Slip
+             Wash
+             EffAngle
+             GFEff
+             PMax
+             Work
+             Pmean
+             PperKg
+             Name
+             CatchA
+             FinA
+             TotalA
+     2 a 2 dimentional array of shape 3,100 containing in the second dimention
+            power
+              ...
+              ...
+
+"""
 out = None
+
+"""
+
+"""
+norm_arrays = None
+
 
 # minimum and maximum of gate angle of the stroke, for markers
 # calculated for each piece

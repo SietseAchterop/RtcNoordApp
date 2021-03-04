@@ -11,6 +11,7 @@ from utils import *
 
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+from scipy.interpolate import interp1d
 
 from pylatex import Document, Section, Subsection, Command, Tabular, Figure, NewPage, TextColor, VerticalSpace, NewLine
 from pylatex.utils import italic, NoEscape
@@ -64,17 +65,6 @@ def make_pdf_report():
         doc.append(VerticalSpace("5pt"))
         doc.append(NewLine())
 
-        av = ''
-        filt = ''
-        if gd.averaging:
-            av = 'averaging'
-        if gd.filter:
-            filt = 'filtered'
-        pcs = ['all'] + gd.p_names + ['average']
-        doc.append(f'Piece "{pcs[gd.boatPiece]}" used: {av} {filt}\n')
-        doc.append(VerticalSpace("5pt"))
-        doc.append(NewLine())
-
         # get table from boat report
         rows = gd.boattablemodel.rowCount()
         columns = gd.boattablemodel.columnCount()
@@ -118,6 +108,17 @@ def make_pdf_report():
     # Second page
     with doc.create(Section(f'Boat report {gd.metaData["CrewName"]}', numbering=False)):
 
+        av = ''
+        filt = ''
+        if gd.averaging:
+            av = 'averaging'
+        if gd.filter:
+            filt = 'filtered'
+        pcs = ['all'] + gd.p_names + ['average']
+        doc.append(f'Using piece "{pcs[gd.boatPiece]}": {av} {filt}\n')
+        doc.append(VerticalSpace("5pt"))
+        doc.append(NewLine())
+
         sensors = gd.sessionInfo['Header']
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
 
@@ -133,9 +134,9 @@ def make_pdf_report():
         piece = gd.boatPiece
         if piece == 0:
             for i in range(len(gd.p_names)):
-                ax1.plot(gd.norm_arrays[i, :, sensors.index('Speed')], linewidth=0.5, label=gd.p_names[i])
-                ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.5, label=gd.p_names[i])
-                ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.5, label=gd.p_names[i])
+                ax1.plot(gd.norm_arrays[i, :, sensors.index('Speed')], linewidth=0.6, label=gd.p_names[i])
+                ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label=gd.p_names[i])
+                ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.6, label=gd.p_names[i])
         elif piece == 7:
             speed = np.zeros(gd.norm_arrays[0, :, 1].shape)
             accel = np.zeros(gd.norm_arrays[0, :, 1].shape)
@@ -144,14 +145,14 @@ def make_pdf_report():
                 speed += gd.norm_arrays[i, :, sensors.index('Speed')]
                 accel += gd.norm_arrays[i, :, sensors.index('Accel')]
                 pitch += gd.norm_arrays[i, :, sensors.index('Pitch Angle')]
-            ax1.plot(speed/6, linewidth=0.5, label=gd.p_names[i])
-            ax2.plot(accel/6, linewidth=0.5, label=gd.p_names[i])
-            ax3.plot(pitch/6, linewidth=0.5, label=gd.p_names[i])
+            ax1.plot(speed/6, linewidth=0.6, label=gd.p_names[i])
+            ax2.plot(accel/6, linewidth=0.6, label=gd.p_names[i])
+            ax3.plot(pitch/6, linewidth=0.6, label=gd.p_names[i])
         else:
             i = piece - 1
-            ax1.plot(gd.norm_arrays[i, :, sensors.index('Speed')], linewidth=0.5, label=gd.p_names[i])
-            ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.5, label=gd.p_names[i])
-            ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.5, label=gd.p_names[i])
+            ax1.plot(gd.norm_arrays[i, :, sensors.index('Speed')], linewidth=0.6, label=gd.p_names[i])
+            ax2.plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.6, label=gd.p_names[i])
+            ax3.plot(gd.norm_arrays[i, :, sensors.index('Pitch Angle')], linewidth=0.6, label=gd.p_names[i])
 
         pa = []
         for i in range(len(gd.p_names)):
@@ -179,41 +180,75 @@ def make_pdf_report():
         pcs = gd.p_names + ['average']
         doc.append(f'Piece "{pcs[gd.crewPiece]}" used.\n')
 
-        fig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(nrows=3, ncols=2)
-        ax1.set_title('Gate Angle')
+        fig = plt.figure()
+        fig.subplots_adjust(hspace=0.7)
+        gs = fig.add_gridspec(5, 2)
+        ax1 = fig.add_subplot(gs[0:3, :])
+        ax2 = fig.add_subplot(gs[3:, 0])
+        ax3 = fig.add_subplot(gs[3:, 1])
+
+        ax1.set_title('Gate Angle - GateForceX/Y')
         ax1.grid(True)
-        ax2.set_title('Gate ForceX')
+        ax2.set_title('Stretcher ForceX')
         ax2.grid(True)
-        ax3.set_title('Stretcher Force')
+        ax3.set_title('Power')
         ax3.grid(True)
-        ax4.set_title('Power')
-        ax4.grid(True)
-        ax5.set_title('Power Leg')
-        ax5.grid(True)
-        ax6.set_title('Power Arm/Trunk')
-        ax6.grid(True)
 
         rcnt = gd.sessionInfo['RowerCnt']
         piece = gd.crewPiece
         if piece < len(gd.out):
-            d, a = gd.out[piece]
+            # a seperate piece, from the tumbler
+            cp = gd.crewPiece
+            d, aa = gd.out[cp]
+
             for r in range(rcnt):
                 sns = rowersensors(r)
-                # print(f'Make crewplot for {r}')
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
+                    i = sns['GateAngle']
+                    j = sns['GateForceX']
+                    k = sns['GateForceY']
+                else:
+                    i = sns['P GateAngle']
+                    j = sns['P GateForceX']
+                    k = sns['P GateForceY']
+
+                # stretchers not always present!
+                # k = sns['Stretcher Z']
+                # todo: create switch to control working in this case
+
+                ax1.plot(gd.norm_arrays[cp, :, i],
+                         gd.norm_arrays[cp, :, j], linewidth=0.6, label=f'R {r+1}')
+                ax1.plot(gd.norm_arrays[cp, :, i],
+                         gd.norm_arrays[cp, :, k], linestyle=stippel, linewidth=0.6, label=f'R {r+1}Y')
+
+                #twee = self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, i], linewidth=0.6, label=f'R {r+1}')
+                ax3.plot(aa[0+r], linewidth=0.6, label=f'R {r+1}')
+
+                ax3.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
+                ax3.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
+
+                # reference curve derived from the stroke
+                sns = rowersensors(rcnt-1)
+                fmean = d[rcnt-1]['GFEff']
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
                     i = sns['GateAngle']
                     j = sns['GateForceX']
                 else:
                     i = sns['P GateAngle']
                     j = sns['P GateForceX']
-                # stretchers not always available!
-                # k = sns['Stretcher Z']
-                    
-                een  = ax1.plot(gd.norm_arrays[piece, :, i], linewidth=0.5, label=f'R {r+1}')
-                twee = ax2.plot(gd.norm_arrays[piece, :, j], linewidth=0.5, label=f'R {r+1}')
-                # drie = ax3.plot(gd.norm_arrays[piece, :, k], linewidth=0.5, label=gd.p_names[r])
+                minpos = min(gd.norm_arrays[cp, :, i])
+                maxpos = max(gd.norm_arrays[cp, :, i])
+                minarg = np.argmin(gd.norm_arrays[cp, :, i])
+                maxarg = np.argmax(gd.norm_arrays[cp, :, i])
+                fmin = gd.norm_arrays[cp, minarg, j]
+                fmax = gd.norm_arrays[cp, maxarg, j]
+                xref = np.array([minpos, minpos+2, minpos+10, minpos+40, maxpos-45, maxpos-15, maxpos])
+                yref = np.array([fmin, fmin+20, 1.00*fmean, 1.7*fmean, 1.6*fmean, 0.5*fmean, fmax])
+                curveref = interp1d(xref, yref, 'cubic', fill_value='extrapolate')
+                xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
 
-                vier = ax4.plot( a[0+r], linewidth=0.5, label='Power')
+                ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=(0, (3, 6)))
+                ax3.plot( a[0+r], linewidth=0.6, label='Power')
         else:
             # average
             for r in range(rcnt):
@@ -240,13 +275,12 @@ def make_pdf_report():
                     power  += a[0+r]
 
                 # plot
-                ax1.plot(angle/nmbrpieces, linewidth=0.5, label=f'R {r+1}')
-                ax2.plot(force/nmbrpieces, linewidth=0.5, label=f'R {r+1}')
-                # self.ax3.plot(stetcherZ/nmbrpieces:, k], linewidth=0.5, label=gd.p_names[r])
+                #ax1.plot(angle/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
+                #ax2.plot(force/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
 
-                ax4.plot(power/nmbrpieces, linewidth=0.5, label='Power')
+                ax3.plot(power/nmbrpieces, linewidth=0.6, label='Power')
 
-        ax1.legend(loc='lower right', prop=fontP)
+        #ax1.legend(loc='lower right', prop=fontP)
         plt.tight_layout()
 
         # we keep using the same name
@@ -263,9 +297,6 @@ def make_pdf_report():
     rwrcnt = gd.sessionInfo['RowerCnt']
     fig  = [ None for i in range(rwrcnt)]
     rax1  = [ None for i in range(rwrcnt)]
-    rax2  = [ None for i in range(rwrcnt)]
-    rax3  = [ None for i in range(rwrcnt)]
-    rax4  = [ None for i in range(rwrcnt)]
     sax1  = [ None for i in range(rwrcnt)]
 
     for rwr in range(rwrcnt):
@@ -301,15 +332,9 @@ def make_pdf_report():
 
             doc.append('\n')
 
-            fig[rwr], ((rax1[rwr], rax2[rwr]), (rax3[rwr], rax4[rwr])) = plt.subplots(nrows=2, ncols=2)
-            rax1[rwr].set_title('GateForceX/GateAngle')
+            fig[rwr], ((rax1[rwr])) = plt.subplots(nrows=1, ncols=1)
+            rax1[rwr].set_title('GateAngle - GateForceX/Y')
             rax1[rwr].grid(True)
-            rax2[rwr].set_title('Acceleration')
-            rax2[rwr].grid(True)
-            rax3[rwr].set_title('GateForceX - GateAngle')
-            rax3[rwr].grid(True)
-            rax4[rwr].set_title('Power')
-            rax4[rwr].grid(True)
 
             rsens = rowersensors(rwr)
             piece = gd.rowerPiece[rwr]
@@ -320,73 +345,75 @@ def make_pdf_report():
                 for i in range(len(gd.p_names)):
                     if gd.sessionInfo['ScullSweep'] == 'sweep':
                         # print(f'Make rowerplot for {self.rower}')
-                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.5, label=f'{gd.p_names[i]} A')
-                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label=f'{gd.p_names[i]} FX')
-                        rax3[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
-                                       gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label=f'{gd.p_names[i]}')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
+                                       gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]}')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
+                                       gd.norm_arrays[i, :, rsens['GateForceY']], linestyle=(0, (7, 10)), linewidth=0.6, label=f'{gd.p_names[i]}')
                     else:
-                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.5, label=f'{gd.p_names[i]} A')
-                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label=f'{gd.p_names[i]} FX')
-                        rax3[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
-                                       gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label=f'{gd.p_names[i]}')
-                    d, aa = gd.out[i]
-                    rax4[rwr].plot(aa[0+rwr], linewidth=0.5, label=f'{gd.p_names[i]}')
-                rax2[rwr].plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.5, label='Accel')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
+                                       gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.6, label=f'{gd.p_names[i]}')
+                        rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
+                                       gd.norm_arrays[i, :, rsens['P GateForceY']], linestyle=(0, (7, 10)), linewidth=0.6, label=f'{gd.p_names[i]}')
             elif gd.rowerPiece[rwr] == 7:
                 # average
                 angle = np.zeros((100,))
                 forceX = np.zeros((100,))
-                accel = np.zeros((100,))
-                power = np.zeros((100,))
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
                     for i in range(len(gd.p_names)):
                         angle += gd.norm_arrays[i, :, rsens['GateAngle']]
                         forceX += gd.norm_arrays[i, :, rsens['GateForceX']]
-                        accel += gd.norm_arrays[i, :, sensors.index('Accel')]
-                        d, a = gd.out[i]
-                        power += a[0+rwr]
-                    rax1[rwr].plot(scaleAngle*angle/6, linewidth=0.5, label='GateAngle')
-                    rax1[rwr].plot(forceX/6, linewidth=0.5, label='GateForceX')
-                    rax2[rwr].plot(accel/6, linewidth=0.5, label='Accel')
-                    rax3[rwr].plot(angle/6, forceX/6, linewidth=0.5, label='FA')
-                    rax4[rwr].plot(power/6, linewidth=0.5, label='Power')
+                        forceY += gd.norm_arrays[i, :, rsens['GateForceY']]
+                    rax1[rwr].plot(angle/6, forceX/6, linewidth=0.6, label='FX')
+                    rax1[rwr].plot(angle/6, forceY/6, linestyle=(0, (7, 10)), linewidth=0.6, label='FY')
                 else:
                     for i in range(len(gd.p_names)):
                         angle += gd.norm_arrays[i, :, rsens['P GateAngle']]
                         forceX += gd.norm_arrays[i, :, rsens['P GateForceX']]
-                        accel += gd.norm_arrays[i, :, sensors.index('Accel')]
-                        d, a = gd.out[i]
-                        power += a[0+rwr]
-                    rax1[rwr].plot(scaleAngle*angle/6, linewidth=0.5, label='GateAngle')
-                    rax1[rwr].plot(forceX/6, linewidth=0.5, label='GateForceX')
-                    rax2[rwr].plot(accel/6, linewidth=0.5, label='Accel')
-                    rax3[rwr].plot(angle/6, forceX/6, linewidth=0.5, label='FA')
-                    rax4[rwr].plot(power/6, linewidth=0.5, label='Power')
-
+                        forceY += gd.norm_arrays[i, :, rsens['P GateForceY']]
+                    rax1[rwr].plot(angle/6, forceX/6, linewidth=0.6, label='FX')
+                    rax1[rwr].plot(angle/6, forceY/6, linestyle=(0, (7, 10)), linewidth=0.6, label='FY')
             else:
-                i = gd.rowerPiece[rwr] - 1
+                rp = gd.rowerPiece[rwr] - 1
+                sns = rowersensors(rwr)
 
-                # ad hoc angle x 10. Better via (max-min).
+                # ad hoc angle x 10. Bettet via (max-min). Scale is for force
+                # print(f'Create rowerplot for {self.rower}')
+                outboat = [ d for d, e in gd.out]
+                ri = [a[rwr] for a in outboat]    # rower info per piece
+                fmean = ri[rp]['GFEff']
+
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
-                    # print(f'Make rowerplot for {self.rower}')
-                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
-                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label='GateForceX')
-                    rax3[rwr].plot(gd.norm_arrays[i, :, rsens['GateAngle']],
-                                   gd.norm_arrays[i, :, rsens['GateForceX']], linewidth=0.5, label='FA')
+                    i = sns['GateAngle']
+                    j = sns['GateForceX']
+                    k = sns['GateForceY']
                 else:
-                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']]*scaleAngle, linewidth=0.5, label='GateAngle')
-                    rax1[rwr].plot(gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label='GateForceX')
-                    rax3[rwr].plot(gd.norm_arrays[i, :, rsens['P GateAngle']],
-                                   gd.norm_arrays[i, :, rsens['P GateForceX']], linewidth=0.5, label='FA')
-                rax2[rwr].plot(gd.norm_arrays[i, :, sensors.index('Accel')], linewidth=0.5, label='Accel')
+                    i = sns['P GateAngle']
+                    j = sns['P GateForceX']
+                    k = sns['P GateForceY']
 
-                d, a = gd.out[i]
-                rax4[rwr].plot( a[0+rwr], linewidth=0.5, label='Power')
+                # TESTING referentie curve
+                # lengte uit tabel? Voorlopig 100, begin goed zetten
+                # scale with avarage force
+                minpos = min(gd.norm_arrays[rp, :, i])
+                maxpos = max(gd.norm_arrays[rp, :, i])
+                minarg = np.argmin(gd.norm_arrays[rp, :, i])
+                maxarg = np.argmax(gd.norm_arrays[rp, :, i])
+                fmin = gd.norm_arrays[rp, minarg, j]
+                fmax = gd.norm_arrays[rp, maxarg, j]
+                xref = np.array([minpos, minpos+2, minpos+10, minpos+40, maxpos-45, maxpos-15, maxpos])
+                yref = np.array([fmin, fmin+20, 1.00*fmean, 1.7*fmean, 1.6*fmean, 0.5*fmean, fmax])
+
+                curveref = interp1d(xref, yref, 'cubic', fill_value='extrapolate')
+                xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
+
+                rax1[rwr].plot(gd.norm_arrays[rp, :, i],
+                               gd.norm_arrays[rp, :, j], linewidth=0.6, label=f'{gd.p_names[rp]} FX')
+                rax1[rwr].plot(gd.norm_arrays[rp, :, i],
+                               gd.norm_arrays[rp, :, k], linestyle=stippel, linewidth=0.6, label=f'{gd.p_names[rp]} FY')
+                rax1[rwr].plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=(0, (3, 6)))
 
             # rax1[rwr].legend(loc='lower right', prop=fontP, bbox_to_anchor=(1.05, 1))
-            rax1[rwr].legend(loc='lower right', prop=fontP)
-            rax3[rwr].legend(loc='lower right', prop=fontP)
-            rax4[rwr].legend(loc='lower right', prop=fontP)
+            rax1[rwr].legend(loc='upper right', prop=fontP)
             plt.tight_layout()
             
             tmpfig = tmpdir / (gd.config['Session'] + f'_{rwr}')
@@ -448,9 +475,9 @@ def make_pdf_report():
         times = list(map( lambda x: x/Hz, list(range(gd.view_tr.shape[0]))))
 
         for i, name, scaley in slist:
-            extr.plot(times, gd.view_tr[:, i]*scaley, linewidth=0.5, label=name)
+            extr.plot(times, gd.view_tr[:, i]*scaley, linewidth=0.6, label=name)
         for i, name, scale in secslist:
-            extr.plot(times, gd.view_tr2[:, i]*scaley, linewidth=0.5, label=name, linestyle='--')
+            extr.plot(times, gd.view_tr2[:, i]*scaley, linewidth=0.6, label=name, linestyle='--')
 
         dist = (end - strt)
         xFrom = center - scalex*dist/2

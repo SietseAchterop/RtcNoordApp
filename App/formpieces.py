@@ -11,7 +11,6 @@ import traceback
 
 from pathlib import Path, PureWindowsPath, PurePosixPath
 import numpy as np
-from scipy.interpolate import interp1d
 
 from PyQt5.QtCore import QVariant, QObject, pyqtSignal, pyqtSlot, pyqtProperty, QMetaObject, Qt, QTimer, QByteArray, QAbstractListModel, QModelIndex
 from PyQt5.QtGui import QColor

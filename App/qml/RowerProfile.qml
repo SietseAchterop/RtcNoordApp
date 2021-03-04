@@ -99,7 +99,7 @@ Item {
 		    model: boat_mpl.allPieces
 		    visibleItemCount: 1
     
-		    Component.onCompleted: { rowertumbler.currentIndex = 1 }
+		    Component.onCompleted: { rowertumbler.currentIndex = 0 }
 		    onCurrentIndexChanged: {
 			// ugly
 			switch (roweritem.rindex) {

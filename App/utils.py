@@ -21,6 +21,9 @@ from io import StringIO
 # sampling rate of the logger
 Hz = 50
 
+# onze stippel lijn
+stippel = (0, (7, 10))
+
 def startup():
     """Determine platform we are on.
 Load the config file to find the data and session to use.
