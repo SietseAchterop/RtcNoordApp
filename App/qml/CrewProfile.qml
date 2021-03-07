@@ -23,9 +23,9 @@ Item {
 		id: crewtumbler
 		    
 		Layout.preferredWidth: 50
-		Layout.preferredHeight: 100
+		Layout.preferredHeight: 200
 		model: crew_mpl.allPieces
-		visibleItemCount: 1
+		visibleItemCount: 3
     
 		Component.onCompleted: { crewtumbler.currentIndex = 6 }
 		onCurrentIndexChanged: {
@@ -45,7 +45,7 @@ Item {
 		}
 		background: Item {
 		    Rectangle {
-			opacity: 0.3
+			opacity: 0.8
 			border.color: "black"
 			color: "aquamarine"
 			width: parent.width

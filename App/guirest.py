@@ -9,7 +9,7 @@ import traceback
 from shutil import copyfile, move
 from pathlib import Path
 import numpy as np
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, make_interp_spline
 
 from PyQt5.QtCore import QVariant, QObject, pyqtSignal, pyqtSlot, pyqtProperty
 from PyQt5.QtGui import QColor
@@ -47,7 +47,6 @@ class FormView(QObject):
         self.xFrom2 = 0
         self.xTo2 = 1
         self._shiftX2 = 0
-        self._currentPiece = None
 
         # length of segment shown in the plots, initial limited
         self._length = 2000
@@ -70,6 +69,7 @@ class FormView(QObject):
         self.scaling = False
         # with legends it becomes slow
         self._legend = True
+        self.fontP = FontProperties()
 
         self._data = data
         self._traces = None
@@ -95,6 +95,18 @@ class FormView(QObject):
             """
             if event.inaxes == self.ax1:
                 if event.button == 1:
+                    """ find tempo at this point
+                    st = (self._starttime + event.xdata) * Hz
+                    tempo = 0
+                    for s, t in gd.sessionInfo['Tempi']:
+                        if s < st:
+                            start = s
+                            tempo = t
+                            continue
+                        break
+                    print(f'tempo {tempo:.1f} at cursor')
+                    """
+
                     if gd.runningvideo:
                         if self.inSync:
                             self.videoNewStart = event.xdata
@@ -219,7 +231,9 @@ class FormView(QObject):
                     scaleY = 1
                 values = gd.view_tr[:, i] * scaleY
                 lines1 = self.ax1.plot(self.times, values, linewidth=0.6,  label=name)
-                mplcursors.cursor(lines1)
+                cursor = mplcursors.cursor(lines1)
+                #cursor.connect(
+                #    "add", lambda sel: sel.annotation.set_text("labels[sel.target.index]"))
 
                 senslist.append((i, name, scaleY))
 
@@ -261,7 +275,7 @@ class FormView(QObject):
         self.ax1.set_xticklabels(ticks)
 
         if has_series and self.legend:
-            self.ax1.legend()
+            self.ax1.legend(loc='upper right', prop=self.fontP)
 
         # set values for custom plot in report
         if senslist != [] or secsenslist != []:
@@ -313,6 +327,7 @@ class FormView(QObject):
 
     @pyqtSlot(str)
     def set_piece(self, name):
+        gd.selPiece = name
         for i in gd.data_model2.alldata():        
             if i.name() == name:
                 xFrom, xTo = i.data()
@@ -545,9 +560,9 @@ class FormView(QObject):
 
         self._traces2 = gd.dataObject2
         self.secondary = True
-        self._shiftX2 = 0
-        self.shiftChanged.emit(self._shiftX2)
-        # dit werkt niet...
+        # reset slider
+        xxx = gd.win.findChild(QObject, "slider")
+        xxx.setProperty("value", 0)
 
         self.set_data_traces(local=True)
         self.update_figure()
@@ -556,7 +571,7 @@ class FormView(QObject):
         
     @pyqtSlot(str)
     def set_2nd_piece(self, name):
-        self._currentPiece = name
+        gd.sd_selPiece = name
         for i in gd.data_model5.alldata():        
             if i.name() == name:
                 xFrom2, xTo2 = i.data()
@@ -614,7 +629,7 @@ class FormView(QObject):
     def shift(self, v):
         self._shiftX2 = int(v)
         self.shiftChanged.emit(self._shiftX2)
-        self.set_2nd_piece(self._currentPiece)
+        self.set_2nd_piece(gd.sd_selPiece)
 
     # scaling
     @pyqtSlot(bool)
@@ -755,7 +770,7 @@ class BoatForm(QObject):
             pa = []
             for i in range(len(gd.p_names)):
                 # accel and tempo per piece
-                d, aa = gd.out[i]
+                d, aa = gd.prof_data[i]
                 pa.append((d['Speed'], cntrating[i][1]))
             pa = list(zip(*pa))
             p = [ 10*x for x in pa[0]]  # ad hoc scaling, speed in decimeters/second
@@ -877,7 +892,7 @@ class CrewForm(QObject):
             if gd.crewPiece < len(gd.p_names):
                 # a seperate piece, from the tumbler
                 cp = gd.crewPiece
-                d, aa = gd.out[cp]
+                d, aa = gd.prof_data[cp]
 
                 for r in range(rcnt):
                     sns = rowersensors(r)
@@ -899,8 +914,8 @@ class CrewForm(QObject):
                     self.ax1.plot(gd.norm_arrays[cp, :, i],
                                   gd.norm_arrays[cp, :, k], linestyle=stippel, linewidth=0.6, label=f'R {r+1}Y')
 
-                    #self.twee = self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, i], linewidth=0.6, label=f'R {r+1}')
-                    self.drie = self.ax3.plot(aa[0+r], linewidth=0.6, label=f'R {r+1}')
+                    #self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, k], linewidth=0.6, label=f'R {r+1}')
+                    self.ax3.plot(aa[0+r], linewidth=0.6, label=f'R {r+1}')
 
                     self.ax3.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
                     self.ax3.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
@@ -920,9 +935,17 @@ class CrewForm(QObject):
                 maxarg = np.argmax(gd.norm_arrays[cp, :, i])
                 fmin = gd.norm_arrays[cp, minarg, j]
                 fmax = gd.norm_arrays[cp, maxarg, j]
-                xref = np.array([minpos, minpos+2, minpos+10, minpos+40, maxpos-45, maxpos-15, maxpos])
-                yref = np.array([fmin, fmin+20, 1.00*fmean, 1.7*fmean, 1.6*fmean, 0.5*fmean, fmax])
-                curveref = interp1d(xref, yref, 'cubic', fill_value='extrapolate')
+                xstep = (maxpos - minpos)/20
+                ystep = (fmin - fmax)/20   # assume fmin > fmax
+                # is dit nodig? (totale hoek veel kleiner bij sweep (86 en 110)
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
+                    xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
+                    yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+                else:
+                    xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
+                    yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+
+                curveref = make_interp_spline(xref, yref, 2)
                 xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
 
                 self.ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=(0, (3, 6)))
@@ -951,7 +974,7 @@ class CrewForm(QObject):
                         angle  += gd.norm_arrays[p, :, i]
                         force  += gd.norm_arrays[p, :, j]
                         # stretcherZ = gd.norm_arrays[p, :, k]
-                        d, a = gd.out[p]
+                        d, a = gd.prof_data[p]
                         power  += a[0+r]
 
                     # plot
@@ -1132,7 +1155,7 @@ class RowerForm(QObject):
 
                 # ad hoc angle x 10. Bettet via (max-min). Scale is for force
                 # print(f'Create rowerplot for {self.rower}')
-                outboat = [ d for d, e in gd.out]
+                outboat = [ d for d, e in gd.prof_data]
                 ri = [a[self.rower] for a in outboat]    # rower info per piece
                 fmean = ri[rp]['GFEff']
 
@@ -1155,10 +1178,18 @@ class RowerForm(QObject):
                 maxarg = np.argmax(gd.norm_arrays[rp, :, i])
                 fmin = gd.norm_arrays[rp, minarg, j]
                 fmax = gd.norm_arrays[rp, maxarg, j]
-                xref = np.array([minpos, minpos+2, minpos+10, minpos+40, maxpos-45, maxpos-15, maxpos])
-                yref = np.array([fmin, fmin+20, 1.00*fmean, 1.7*fmean, 1.6*fmean, 0.5*fmean, fmax])
+                xstep = (maxpos - minpos)/20
+                ystep = (fmin - fmax)/20   # assume fmin > fmax
+                # sweep en scull versies?
 
-                curveref = interp1d(xref, yref, 'cubic', fill_value='extrapolate')
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
+                    xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
+                    yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+                else:
+                    xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
+                    yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+
+                curveref = make_interp_spline(xref, yref, 2)
                 xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
 
                 self.ax1.plot(gd.norm_arrays[rp, :, i],

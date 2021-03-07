@@ -3,6 +3,7 @@ import sys, os, math, time, csv, yaml, re
 import numpy as np
 
 from openpyxl import Workbook
+import tempfile
 
 from PyQt5.QtCore import QAbstractTableModel
 
@@ -11,7 +12,8 @@ from utils import *
 
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, make_interp_spline
+
 
 from pylatex import Document, Section, Subsection, Command, Tabular, Figure, NewPage, TextColor, VerticalSpace, NewLine
 from pylatex.utils import italic, NoEscape
@@ -24,7 +26,7 @@ def make_pdf_report():
     cntrating = [cr for nm, x, cr, tl in pieces]
 
     # we need a (single) temp dir for intermediates.
-    tmpdir = Path.home() / gd.config['BaseDir'] / 'reports' / 'tmp'
+    tmpdir = Path(tempfile.gettempdir()) / 'RtcApp'
     if not tmpdir.is_dir():
         tmpdir.mkdir()
     # subdir
@@ -157,7 +159,7 @@ def make_pdf_report():
         pa = []
         for i in range(len(gd.p_names)):
             # accel and tempo per piece
-            d, a = gd.out[i]
+            d, a = gd.prof_data[i]
             pa.append((d['Speed'], cntrating[i][1]))
         pa = list(zip(*pa))
         p = [ 10*x for x in pa[0]]  # ad hoc scaling
@@ -196,10 +198,10 @@ def make_pdf_report():
 
         rcnt = gd.sessionInfo['RowerCnt']
         piece = gd.crewPiece
-        if piece < len(gd.out):
+        if piece < len(gd.prof_data):
             # a seperate piece, from the tumbler
             cp = gd.crewPiece
-            d, aa = gd.out[cp]
+            d, aa = gd.prof_data[cp]
 
             for r in range(rcnt):
                 sns = rowersensors(r)
@@ -242,9 +244,17 @@ def make_pdf_report():
                 maxarg = np.argmax(gd.norm_arrays[cp, :, i])
                 fmin = gd.norm_arrays[cp, minarg, j]
                 fmax = gd.norm_arrays[cp, maxarg, j]
-                xref = np.array([minpos, minpos+2, minpos+10, minpos+40, maxpos-45, maxpos-15, maxpos])
-                yref = np.array([fmin, fmin+20, 1.00*fmean, 1.7*fmean, 1.6*fmean, 0.5*fmean, fmax])
-                curveref = interp1d(xref, yref, 'cubic', fill_value='extrapolate')
+                xstep = (maxpos - minpos)/20
+                ystep = (fmin - fmax)/20   # assume fmin > fmax
+
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
+                    xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
+                    yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+                else:
+                    xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
+                    yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+
+                curveref = make_interp_spline(xref, yref, 2)
                 xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
 
                 ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=(0, (3, 6)))
@@ -271,7 +281,7 @@ def make_pdf_report():
                     angle  += gd.norm_arrays[p, :, i]
                     force  += gd.norm_arrays[p, :, j]
                     # stretcherZ = gd.norm_arrays[p, :, k]
-                    d, a = gd.out[p]
+                    d, a = gd.prof_data[p]
                     power  += a[0+r]
 
                 # plot
@@ -378,7 +388,7 @@ def make_pdf_report():
 
                 # ad hoc angle x 10. Bettet via (max-min). Scale is for force
                 # print(f'Create rowerplot for {self.rower}')
-                outboat = [ d for d, e in gd.out]
+                outboat = [ d for d, e in gd.prof_data]
                 ri = [a[rwr] for a in outboat]    # rower info per piece
                 fmean = ri[rp]['GFEff']
 
@@ -400,10 +410,17 @@ def make_pdf_report():
                 maxarg = np.argmax(gd.norm_arrays[rp, :, i])
                 fmin = gd.norm_arrays[rp, minarg, j]
                 fmax = gd.norm_arrays[rp, maxarg, j]
-                xref = np.array([minpos, minpos+2, minpos+10, minpos+40, maxpos-45, maxpos-15, maxpos])
-                yref = np.array([fmin, fmin+20, 1.00*fmean, 1.7*fmean, 1.6*fmean, 0.5*fmean, fmax])
+                xstep = (maxpos - minpos)/20
+                ystep = (fmin - fmax)/20   # assume fmin > fmax
 
-                curveref = interp1d(xref, yref, 'cubic', fill_value='extrapolate')
+                if gd.sessionInfo['ScullSweep'] == 'sweep':
+                    xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
+                    yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+                else:
+                    xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
+                    yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+
+                curveref = make_interp_spline(xref, yref, 2)
                 xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
 
                 rax1[rwr].plot(gd.norm_arrays[rp, :, i],
@@ -477,7 +494,7 @@ def make_pdf_report():
         for i, name, scaley in slist:
             extr.plot(times, gd.view_tr[:, i]*scaley, linewidth=0.6, label=name)
         for i, name, scale in secslist:
-            extr.plot(times, gd.view_tr2[:, i]*scaley, linewidth=0.6, label=name, linestyle='--')
+            extr.plot(times, gd.view_tr2[:, i]*scaley, linewidth=0.6, label=name, linestyle=stippel)
 
         dist = (end - strt)
         xFrom = center - scalex*dist/2
@@ -497,6 +514,14 @@ def make_pdf_report():
         tmpfig = re.sub('\\\\', '/', str(tmpfig))   # for windows
         doc.append(NoEscape(r'\includegraphics[width=1.0\textwidth]{' + f'{tmpfig}'  + r'}'))
         plt.close(fig)
+
+        doc.append(NewLine())
+        doc.append(VerticalSpace("10pt"))
+        doc.append(f' Piece: {gd.selPiece}')
+        if gd.sd_selPiece != '':
+            doc.append(NewLine())
+            doc.append(VerticalSpace("5pt"))
+            doc.append(f'Secondary piece: {gd.sd_selPiece}')
 
     # generate report
     doc.generate_pdf(reportfile, clean_tex=True)

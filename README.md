@@ -88,13 +88,16 @@ The buttons next to the pieces can be used to remove a piece.
 The "save sessioninfo" button saves the pieces for use.
 
 There is some panning and zooming possible with the mouse-wheel and right button.
+Clicking in the Traces plot shows the tempo at that point in the lower right of the window.
 
 ### View Piece
 
 In this tab we study the traces in more detail.
 Panning and zooming is also possible here.
 Clicking on a line displays the sensors value.
-The next screenshot shows a number of sensors, where they are scaled in such a way that the individual graphs are more or less the same size.
+The next screenshot shows a number of selected sensors.
+If the magnitude of the different signals differ alot, they cannot be seen properly.
+Using the Scaled button changes the scales of the different signals so that each signal can be seen better.
 
 ![Eerste](appdocs/ViewPiece.png)
 

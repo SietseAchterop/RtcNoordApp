@@ -32,6 +32,7 @@ class FormPieces(QObject):
 
     legendChanged = pyqtSignal()
     statusTextChanged = pyqtSignal()
+    tcursChanged = pyqtSignal()
     btColorChanged = pyqtSignal()
     stateChanged = pyqtSignal()
 
@@ -44,6 +45,7 @@ class FormPieces(QObject):
         else:
             self._status_text = s
 
+        self._tcurs_text = ''
         self._figure = None
         self.ax1 = None
         self.ax2 = None
@@ -97,6 +99,18 @@ class FormPieces(QObject):
                 # ax1 processing
                 #   set pieces (button 1)
                 if event.button == 1:
+                    # find tempo at this point
+                    st = (self._starttime + event.xdata) * Hz
+                    tempo = 0
+                    for s, t in gd.sessionInfo['Tempi']:
+                        if s < st:
+                            start = s
+                            tempo = t
+                            continue
+                        break
+                    self._tcurs_text = f'{tempo:.1f}'
+                    self.tcursChanged.emit()
+
                     if self.pmode == 1:
                         b = int(event.xdata*Hz)
                         # we start a piece 2/5 second before the catch, better for displaying
@@ -225,6 +239,10 @@ class FormPieces(QObject):
             self._status_text = text
             self.statusTextChanged.emit()
 
+    @pyqtProperty('QString', notify=tcursChanged)
+    def tcurs(self):
+        return self._tcurs_text
+    
     @pyqtProperty('QString', notify=btColorChanged)
     def btColor(self):
         return self._btcolor
@@ -458,7 +476,6 @@ class FormPieces(QObject):
     @pyqtSlot(str, bool)
     def createSessionCsv(self, f, clip):
         """Used from the menu when (re)creating a new session."""
-        print(f'file:   {f}   {Path(f)}')
         csv_file = re.sub('\Afile://', '', f)
 
         # Only accept files in csv_data dir
@@ -491,6 +508,9 @@ class FormPieces(QObject):
             except FileNotFoundError:
                 pass
             
+        # 
+        self.cleanup_global_data()
+
         # Update and use SubDir
         tail = re.sub(csvbase, '', csv_file)
         tail = re.sub('^/', '', tail)   # hack voor windows, no slash here on linux
@@ -553,13 +573,14 @@ class FormPieces(QObject):
         except IOError:
             pass
 
-        self.cleanup_global_data()
         gd.config['Session'] = session
         saveConfig(gd.config)
 
         # create sessionfile
         shutil.copyfile(appconfigsDir() / 'session_template.yaml', session_file)
         gd.sessionInfo = loadSession()
+
+        gd.mainPieces.update_the_models(gd.config['Session'])
 
         # create numpy data
         #  also add metadata to csv file if not yet present.
@@ -641,11 +662,13 @@ class FormPieces(QObject):
         except IOError:
             print(f'Cannot read cachefile, should not happen  {cache_file}')
             print("Repairing cache file,")
-            makecache(cache_file)
+            makecache(cache_file, False)
         except FileNotFoundError:
             print(f'Cannot read cachefile, should not happen  {cache_file}')
             print("Repairing cache file,")
-            makecache(cache_file)
+            makecache(cache_file, False)
+        except s:
+            print(f'except  {s}')
 
         getMetaData()
         gd.mainPieces.update_the_models(gd.config['Session'])

@@ -42,9 +42,7 @@ Item {
 
 	    Column {
 		Layout.fillWidth: true
-		Row {
 
-		    Column {
 			CheckBox {
 			    // Also set averaging in globalData to the same value!
 			    checked: true
@@ -63,9 +61,8 @@ Item {
 				boatTableView.forceLayout();
 			    }
 			}
-		    }
 
-		    Column {
+
 			Button {
 			    text: 'Create report'
 			    onPressed: {
@@ -82,53 +79,57 @@ Item {
 			    }
 			}
 			*/
-		    }
-		}
-		Tumbler {
-		    id: tumbler
-		    
-		    height: 80
-		    model: boat_mpl.allPieces
-		    visibleItemCount: 3
-    
-		    onCurrentIndexChanged: {
-			boat_mpl.showPiece(tumbler.currentIndex);
-		    }
-
-		    contentItem: ListView {
-			model: tumbler.model
-			delegate: tumbler.delegate
-			
-			snapMode: ListView.SnapToItem
-			highlightRangeMode: ListView.StrictlyEnforceRange
-			preferredHighlightBegin: height / 2 - (height / tumbler.visibleItemCount / 2)
-			preferredHighlightEnd: height / 2 + (height / tumbler.visibleItemCount / 2)
-			clip: true
-
-		    }
-		    background: Item {
-			Rectangle {
-			    opacity: 0.3
-			    border.color: "black"
-			    color: "aquamarine"
-			    width: parent.width
-			    height: parent.height
-			}
-		    }
-		}
 	    }
 	}
 
-	// plots in the boat profile
-        FigureToolbar {
-            id: boatView
-            objectName : "viewboat"
-                            
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+	RowLayout {
+	    
+	    Tumbler {
+		id: tumbler
+		    
+		Layout.preferredWidth: 50
+		Layout.preferredHeight: 200
+		model: boat_mpl.allPieces
+		visibleItemCount: 3
+    
+		onCurrentIndexChanged: {
+		    boat_mpl.showPiece(tumbler.currentIndex);
+		}
+
+		contentItem: ListView {
+		    model: tumbler.model
+		    delegate: tumbler.delegate
+			
+		    snapMode: ListView.SnapToItem
+		    highlightRangeMode: ListView.StrictlyEnforceRange
+		    preferredHighlightBegin: height / 2 - (height / tumbler.visibleItemCount / 2)
+		    preferredHighlightEnd: height / 2 + (height / tumbler.visibleItemCount / 2)
+		    clip: true
+
+		}
+		background: Item {
+		    Rectangle {
+			opacity: 0.8
+			border.color: "black"
+			color: "aquamarine"
+			width: parent.width
+			height: parent.height
+		    }
+		}
+	    }
+
+	    // plots in the boat profile
+            FigureToolbar {
+		id: boatView
+		objectName : "viewboat"
                 
-            Layout.minimumWidth: 200
-            Layout.minimumHeight: 200
-        }
+		Layout.fillWidth: true
+		Layout.fillHeight: true
+                
+		Layout.minimumWidth: 200
+		Layout.minimumHeight: 200
+            }
+	}
     }
 }
+

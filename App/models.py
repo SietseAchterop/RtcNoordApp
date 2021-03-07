@@ -295,11 +295,12 @@ class BoatTableModel(QAbstractTableModel):
             self.del_all()   # nodig?
             return False
         gd.p_names = [ nm for nm, be, cr, tl in gd.sessionInfo['Pieces']]
-        gd.out = profile()
+        gd.prof_data = profile()
+        # gd.norm_arrays are also created
 
-        self.fillBoatTable(gd.out)
+        self.fillBoatTable(gd.prof_data)
         for i in range(gd.sessionInfo['RowerCnt']):
-            gd.rowertablemodel[i].fillRowerTable(gd.out)
+            gd.rowertablemodel[i].fillRowerTable(gd.prof_data)
             
     def make_profile(self):
         self.prepareData()

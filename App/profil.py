@@ -11,7 +11,7 @@ This file contains the following functions:
 import sys, os, math, time, csv, yaml
 import numpy as np
 from scipy import signal
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, make_interp_spline
 
 import globalData as gd
 from utils import *
@@ -71,10 +71,13 @@ def profile():
     #        Use port side
     if gd.sessionInfo['ScullSweep'] == 'scull':
         rwcnt = gd.sessionInfo['RowerCnt']
+        """ not using starboard makes it a bit more robust (with errors in startboard angle)
         for i, s in enumerate(sensors):
             # note: assume S site is rwcnt positions further!
+            #
             if s.find('P GateAngle') >= 0:
                 av_arrays[:, :, i] = (av_arrays[:, :, i] + av_arrays[:, :, i+rwcnt])/2
+        """
         for i, s in enumerate(sensors):
             # note: assume S site is rwcnt positions further!
             if s.find('P GateForce') >= 0:
@@ -117,6 +120,9 @@ def profile():
             x = np.arange(ststeps)
             # wry wrong when ststeps = 105? fill_value helps
             g = interp1d(x, av_arrays[i, 0:ststeps, k], kind='cubic', fill_value="extrapolate")
+            # met deze gedoe met laatste kolom, met NaN's
+            #g = make_interp_spline(x, av_arrays[i, 0:ststeps, k], 2)
+
             xnew = np.arange(100)*((ststeps-1)/(100-1))
 
             gd.norm_arrays[i, :, k] = g(xnew)

@@ -166,6 +166,7 @@ Item {
 
 		    Slider {
 			id: slider
+			objectName: "slider"
 			from: -20
 			to: 20
 			value: 0

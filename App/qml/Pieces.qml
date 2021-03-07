@@ -120,6 +120,14 @@ Item {
 		    text: 'save sessionInfo'
 		    onClicked: draw_mpl.savepieces();
 		}
+
+		Text {
+		    text: ''
+		}
+		Text {
+		    text: 'Tempo in Traces: ' + draw_mpl.tcurs
+		}
+
 	    }
 	}
     }

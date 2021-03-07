@@ -493,7 +493,6 @@ def makecache(file, clip):
     #   hier door copieren de ontbrekende sensoren invullen
     #   in session info tab melden.
 
-
     gd.sessionInfo['Header']   = h1
     gd.sessionInfo['Header2']  = h2
     gd.sessionInfo['ScalingFactors'] = factors()

@@ -97,7 +97,7 @@ Item {
 		    
 		    height: 80
 		    model: boat_mpl.allPieces
-		    visibleItemCount: 1
+		    visibleItemCount: 3
     
 		    Component.onCompleted: { rowertumbler.currentIndex = 0 }
 		    onCurrentIndexChanged: {
@@ -141,13 +141,13 @@ Item {
 			preferredHighlightBegin: height / 2 - (height / rowertumbler.visibleItemCount / 2)
 			preferredHighlightEnd: height / 2 + (height / rowertumbler.visibleItemCount / 2)
 			clip: true
-			opacity: 1.0 - 2* (Math.abs(Tumbler.displacement))
+			opacity: 1.0 - 1* (Math.abs(Tumbler.displacement))
 
 			// 0.4 + Math.max(0, 1 - Math.abs(Tumbler.displacement)) * 0.6
 		    }
 		    background: Item {
 			Rectangle {
-			    opacity: 0.3
+			    opacity: 0.8
 			    border.color: "black"
 			    color: "aquamarine"
 			    width: parent.width

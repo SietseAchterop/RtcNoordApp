@@ -24,7 +24,7 @@ sessionInfo = {}
 metaData = {}
 
 # will hold data from the clipboard
-clipdata = None
+clipdata = False
 delimiter = None
 
 # dataObject contains the data from the csv-file
@@ -70,6 +70,10 @@ rowerPlots = [None, None, None, None, None, None, None, None, None, None, None, 
 stretcherPlots = [None, None, None, None, None, None, None, None, None, None, None, None]
 rowerPiece = [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
 
+# currently selected pieces, for report
+selPiece = ''
+sd_selPiece = ''
+
 #
 # list of piece names from 'Pieces'
 p_names = []
@@ -90,7 +94,7 @@ custom_report = False
 
 # the averaged data and normalized data (pieces, length, sensors)
 """
-out will be the result of the profile function
+prof_data will be the result of the profile function
   It contains a list of piececalculations which contains tuple containing
     1 dictionary containing
         PieceName
@@ -127,10 +131,10 @@ out will be the result of the profile function
               ...
 
 """
-out = None
+prof_data = None
 
 """
-
+Normalized data, created in profile()
 """
 norm_arrays = None
 

@@ -95,7 +95,7 @@ def interactive(session=None):
             gd.boatPlots.del_all()
         return False
 
-    gd.out = profile()
+    gd.prof_data = profile()
     return True
 
 def main():
