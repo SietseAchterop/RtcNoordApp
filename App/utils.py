@@ -172,6 +172,7 @@ def loadSession():
     Use session None if the selected one does not exist
     """
 
+    # test voor lege string als session. Zinnig?
     if not gd.config['Session']:
         print('No session set, should not happen')
 
@@ -395,37 +396,45 @@ def readcreateCsvData(config, csvdata, clip):
 def getMetaData(interactive=False):
     path = csvsDir() / (gd.config['Session'] + '.csv')
 
-    with Path.open(path, newline='') as fd:
-        gd.dialect = csv.Sniffer().sniff(fd.readline())
-        fd.seek(0)  # waarom ook al weer?
-        reader = csv.reader(fd, gd.dialect)    
+    try:
+        with Path.open(path, newline='') as fd:
+            gd.dialect = csv.Sniffer().sniff(fd.readline())
+            fd.seek(0)  # waarom ook al weer?
+            reader = csv.reader(fd, gd.dialect)    
 
-        # voorlopig vaste volgorde in metadata!!
-        i = next(reader)
-        gd.metaData['Sessiontime'] = i[1]
-        i = next(reader)
-        gd.metaData['CrewName'] = i[1]
-        i = next(reader)
-        gd.metaData['BoatType'] = i[1]
-        i = next(reader)
-        gd.metaData['Calibration'] = i[1]
-        i = next(reader)
-        gd.metaData['Venue'] = i[1]
-
-        rwrs = []
-        for k in range(8):
+            # voorlopig vaste volgorde in metadata!!
             i = next(reader)
-            rwrs.append([i[1], i[2], i[3], i[4]])
-        gd.metaData['Rowers'] = rwrs
+            gd.metaData['Sessiontime'] = i[1]
+            i = next(reader)
+            gd.metaData['CrewName'] = i[1]
+            i = next(reader)
+            gd.metaData['BoatType'] = i[1]
+            i = next(reader)
+            gd.metaData['Calibration'] = i[1]
+            i = next(reader)
+            gd.metaData['Venue'] = i[1]
 
-        i = next(reader)
-        gd.metaData['Misc'] = i[1]
-        i = next(reader)
-        gd.metaData['Video'] = i[1]
-        i = next(reader)
-        gd.metaData['PowerLine'] = i[1]
-        i = next(reader)
-        gd.metaData['Spare'] = i[1]
+            rwrs = []
+            for k in range(8):
+                i = next(reader)
+                rwrs.append([i[1], i[2], i[3], i[4]])
+            gd.metaData['Rowers'] = rwrs
+
+            i = next(reader)
+            gd.metaData['Misc'] = i[1]
+            i = next(reader)
+            gd.metaData['Video'] = i[1]
+            i = next(reader)
+            gd.metaData['PowerLine'] = i[1]
+            i = next(reader)
+            gd.metaData['Spare'] = i[1]
+    except FileNotFoundError:
+        print(f'Csv-file {path} not found, should not happen!')
+        print('Change session to None.')
+        gd.config['Session'] = 'None'
+        saveConfig(gd.config)
+        # make cleaner solution. gracefully exit Qt!
+        exit()
 
     # voorlopig dubbelop
     gd.sessionInfo['Video'][0] = gd.metaData['Video']
@@ -487,6 +496,7 @@ def makecache(file, clip):
     """Create and cache the data read from the csv-file in a .npy file """
     csvdata = []
     h1, h2 = readcreateCsvData(gd.config, csvdata, clip)
+
     # metadata has been skipped
 
     # bij skullen is een van de sensoren desnoods voldoende

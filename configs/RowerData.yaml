@@ -1,5 +1,7 @@
 # List of Rowers 
 #    name: full name, length weight, year of birth, category, 2k score
+#
+# eventually in a proper database
 
 Rowers:
   {
@@ -28,7 +30,7 @@ Crews:
   {
   Single: [ R1 ],
   Double: [ R1, R2 ],
-  Four:   [ R1, R2, R3, R4 ]'
+  Four:   [ R1, R2, R3, R4 ]
   Eight:  [ R1, R2, R3, R4, R5, R6, R7, R8 ]
 
   }

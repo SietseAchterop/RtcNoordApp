@@ -37,35 +37,36 @@ Standards:
   # 6:34.0
   M1x  : { time : 396.0, tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
            seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
-  # 6:04.0
-  M2x  : { time : 364.0, tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
-           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
-  # 5:34.0
-  M4x  : { time : 334.0, tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
-           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
-  # 6:12.0
-  M2-  : { time : 372.0, tempo : 36,  type : sweep, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
-           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
-  # 5:40.0
-  M4-  : { time : 340.0, tempo : 36,  type : sweep, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
-           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
-  # 5:20.0
-  M8+  : { time : 320.0, tempo : 36,  type : sweep, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
-           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 540.0 },
-  # 7:12.0
-  W1x  : { time : 432.0, tempo : 36,  type : scull, driveTime : 0.70, angleIn : -62.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
-           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 350.0 },
   # 6:46.0
   LM1x : { time : 406.0, tempo : 36,  type : scull, driveTime : 0.70, angleIn : -62.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
-           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 460.0 },
+           seatDist : 56.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 460.0 },
+  # 6:04.0
+  M2x  : { time : 364.0, tempo : 36,  type : scull, driveTime : 0.67, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.35, PowerUp70 : 12.0, PowerDown70 : 35.0, power : 540.0 },
+  # 5:34.0
+  M4x  : { time : 334.0, tempo : 38,  type : scull, driveTime : 0.65, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.32, PowerUp70 : 12.0, PowerDown70 : 38.0, power : 540.0 },
+  # 6:12.0
+  M2-  : { time : 372.0, tempo : 36,  type : sweep, driveTime : 0.70, angleIn : -54.0, angleOut : 36.0, slipIn : 9.0, slipOut :  9.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.35, PowerUp70 : 10.0, PowerDown70 : 26.0, power : 540.0 },
+  # 5:40.0
+  M4-  : { time : 340.0, tempo : 38,  type : sweep, driveTime : 0.67, angleIn : -54.0, angleOut : 36.0, slipIn : 9.0, slipOut :  9.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.35, PowerUp70 : 10.0, PowerDown70 : 29.0, power : 540.0 },
+  # 5:20.0
+  M8+  : { time : 320.0, tempo : 38,  type : sweep, driveTime : 0.63, angleIn : -54.0, angleOut : 36.0, slipIn : 9.0, slipOut :  9.0,
+           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.32, PowerUp70 : 10.0, PowerDown70 : 32.0, power : 540.0 },
+  # 7:12.0
+  W1x  : { time : 432.0, tempo : 34,  type : scull, driveTime : 0.70, angleIn : -62.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 54.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 350.0 },
   # 7:28.0
-  LW1x : { time : 448.0, tempo : 36,  type : scull, driveTime : 0.70, angleIn : -60.0, angleOut : 42.0, slipIn : 6.0, slipOut : 12.0,
-           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 350.0 },
+  LW1x : { time : 448.0, tempo : 34,  type : scull, driveTime : 0.70, angleIn : -60.0, angleOut : 42.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 50.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 290.0 },
+  # a guess for juniors
   # 7:34.0
-  JW1x : { time : 454.0, tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
-           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 350.0 },
+  JW1x : { time : 454.0, tempo : 32,  type : scull, driveTime : 0.70, angleIn : -62.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 52.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 300.0 },
   # 7:04.0
-  JM1x : { time : 424.0, tempo : 36,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
-           seatDist : 60.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 400.0 },
+  JM1x : { time : 424.0, tempo : 34,  type : scull, driveTime : 0.70, angleIn : -66.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
+           seatDist : 58.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 420.0 },
 
   }

@@ -580,8 +580,6 @@ class FormPieces(QObject):
         shutil.copyfile(appconfigsDir() / 'session_template.yaml', session_file)
         gd.sessionInfo = loadSession()
 
-        gd.mainPieces.update_the_models(gd.config['Session'])
-
         # create numpy data
         #  also add metadata to csv file if not yet present.
         makecache(cache_file, clip)
