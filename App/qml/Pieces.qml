@@ -117,7 +117,7 @@ Item {
 		    }
                 }
 		Button {
-		    text: 'save sessionInfo'
+		    text: 'Save sessionInfo'
 		    onClicked: draw_mpl.savepieces();
 		}
 

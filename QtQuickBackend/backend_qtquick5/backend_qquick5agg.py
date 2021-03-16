@@ -221,6 +221,7 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
         t = b + h
         #self.repaint(l, self.renderer.height-t, w, h)
         # waar is repaint?  Dit werkt, maar verplaatsen van de mplcursors niet.
+        #   maar gebruik ik nu niet in RtcApp?
         self.draw()
 
     def geometryChanged(self, new_geometry, old_geometry):

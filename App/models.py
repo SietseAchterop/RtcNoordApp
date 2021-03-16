@@ -310,7 +310,6 @@ class BoatTableModel(QAbstractTableModel):
             gd.rowerPlots[i].update_figure()
             gd.stretcherPlots[i].update_figure()
         
-
     @pyqtSlot()
     def make_report(self):
         self.prepareData()    # maybe already done!

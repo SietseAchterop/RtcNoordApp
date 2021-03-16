@@ -110,7 +110,7 @@ Item {
 		TextField {
 		    id: misc
 		    selectByMouse: true   // is iets raars mee?
-		    implicitWidth: 300
+		    implicitWidth: 500
 		    placeholderText: qsTr("Name")
 		    onAccepted: {
 			sessionId.sinfo[2] = text;
@@ -120,9 +120,10 @@ Item {
 		Text {
 		    text: 'Misc'
 		}
-	    }
 
+	    }
 	}
+
 
 	ColumnLayout {
 

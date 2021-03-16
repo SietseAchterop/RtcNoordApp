@@ -948,7 +948,7 @@ class CrewForm(QObject):
                 curveref = make_interp_spline(xref, yref, 2)
                 xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
 
-                self.ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=(0, (3, 6)))
+                self.ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=stippel)
 
             else:
                 # last item which is averageing all the pieces
@@ -1196,7 +1196,7 @@ class RowerForm(QObject):
                               gd.norm_arrays[rp, :, j], linewidth=0.6, label=f'{gd.p_names[rp]} FX')
                 self.ax1.plot(gd.norm_arrays[rp, :, i],
                               gd.norm_arrays[rp, :, k], linestyle=stippel, linewidth=0.6, label=f'{gd.p_names[rp]} FY')
-                self.ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=(0, (3, 6)))
+                self.ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=stippel)
 
             if self.legend:
                 self.ax1.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)

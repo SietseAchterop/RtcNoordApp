@@ -475,7 +475,7 @@ class FormPieces(QObject):
 
     @pyqtSlot(str, bool)
     def createSessionCsv(self, f, clip):
-        """Used from the menu when (re)creating a new session."""
+        """Used from the menu when (re)creating a new session from file or clipboard."""
         csv_file = re.sub('\Afile://', '', f)
 
         # Only accept files in csv_data dir

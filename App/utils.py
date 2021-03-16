@@ -22,7 +22,7 @@ from io import StringIO
 Hz = 50
 
 # onze stippel lijn
-stippel = (0, (7, 10))
+stippel = (0, (10, 6))
 
 def startup():
     """Determine platform we are on.
@@ -234,7 +234,7 @@ def saveMetaData(metadata, savetime=False):
     path = csvsDir() / (gd.config['Session'] + '.csv')
     #
     tmpdir = tempfile.gettempdir()
-    tmpfd = Path(tmpdir) / 'rtcapp'
+    tmpfd = Path(tmpdir) / 'rtcapp-metadata'
     shutil.move(path, tmpfd)
 
     d = date.today()
@@ -332,7 +332,7 @@ def readcreateCsvData(config, csvdata, clip):
 
     if header[0] == 'Time':
         tmpdir = tempfile.gettempdir()
-        tmpfd = Path(tmpdir) / 'rtcapp'
+        tmpfd = Path(tmpdir) / 'rtcapp-metadata'
         metadata = appconfigsDir() / 'metadata.csv'
         shutil.move(path, tmpfd)
         # tmpfd now points to the data without metadata
@@ -404,6 +404,8 @@ def getMetaData(interactive=False):
 
             # voorlopig vaste volgorde in metadata!!
             i = next(reader)
+            if i[0] != 'Metadata':
+                print(f'No metadata found in csv-file for session {gd.config["Session"]}, should not happen!')
             gd.metaData['Sessiontime'] = i[1]
             i = next(reader)
             gd.metaData['CrewName'] = i[1]
