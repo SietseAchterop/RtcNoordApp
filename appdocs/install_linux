@@ -45,5 +45,10 @@ texlive-latex-extra
     - Command:  python tstmatplotlib.py
        - a simple plot
 
+=== pip
+    - find available versions using
+         pip install matplotlib==rubbish
+      with the newest version of pip you have to use:
+         pip install matplotlib== --use-deprecated=legacy-resolver
 
 
