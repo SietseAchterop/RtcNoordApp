@@ -37,6 +37,7 @@ def profile():
         return []
     
     # allocate array for the average arrays, we need at least one cycle
+    #   room for 1.5 times the lowest rating
     length = int(1.5*Hz*60/min([r for name, (a, b), (cnt, r), tl in pieces]))
     sensors = gd.sessionInfo['Header']
     uniqsens = gd.sessionInfo['uniqHeader']
@@ -183,6 +184,7 @@ def pieceCalculations(piece, idx, ststeps):
     bb = gd.dataObject[sp[0], distsens]
     ee = gd.dataObject[sp[-1], distsens]
     speedimp =  (ee - bb)/(float(sp[-1] - sp[0])/Hz)
+    # is ook de afstand bij GPS.
     out['Speedimp'] = speedimp
     
     if gd.sessionInfo['noDistance']:
@@ -190,7 +192,6 @@ def pieceCalculations(piece, idx, ststeps):
         out['Split'] = 0
     else:
         out['Split'] = 500/speedimp
-    # print(f'Split {speedimp}   {out["Split"]} in {nm}')
 
     # distance per stroke: 60*speed/rating
     out['DistancePerStroke'] = 60 * speedimp / r
@@ -253,10 +254,10 @@ def pieceCalculations(piece, idx, ststeps):
 
     scullsweep = gd.sessionInfo['ScullSweep']
     boattype = gd.metaData['BoatType']
-    inboard = gd.globals['Boats'][boattype]['inboard']
+    inboard = gd.globals['Boats'][boattype]['inboard'] - 0.07    # 7 cm for end of the handle  (more for sweep?)
     outboard = gd.globals['Boats'][boattype]['outboard']
-    # rename IOratio?
-    IOratio = inboard * outboard/(inboard+outboard)
+    # conversion factor to calculate force at the handle
+    FpintoFhandle = outboard/(inboard+outboard)
     
     for rwr in range(rwcnt):
         rsens = rowersensors(rwr)
@@ -315,11 +316,11 @@ def pieceCalculations(piece, idx, ststeps):
             rowerstats['GFEff'] = np.mean(g_fx[posmin: posmax])
 
             # power
-            ga_rad          = math.pi * a[:, ind_ga] / 180
+            ga_rad      = math.pi * a[:, ind_ga] / 180
             # force in forward direction:
-            pinForceTS      = (np.multiply(a[:, ind_fx], np.cos(ga_rad)) -
+            pinForceTS  = (np.multiply(a[:, ind_fx], np.cos(ga_rad)) -
                                np.multiply(a[:, ind_fy], np.sin(ga_rad)))
-            moment          = IOratio * pinForceTS
+            moment      = inboard * FpintoFhandle * pinForceTS
             # speed in radians per second:
             gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)
             power = moment * gateAngleVel
@@ -408,10 +409,10 @@ def pieceCalculations(piece, idx, ststeps):
                 rowerstats['GFEff'] = 0
                 
             # power (both oars already merged)
-            ga_rad          = math.pi * (a[:, ind_gap]) / 180
+            ga_rad       = math.pi * (a[:, ind_gap]) / 180
             pinForceTS   = (np.multiply(a[:, ind_fxp], np.cos(ga_rad)) -
                             np.multiply(a[:, ind_fyp], np.sin(ga_rad)))
-            moment       = IOratio * pinForceTS
+            moment       = inboard * FpintoFhandle * pinForceTS
             gateAngleVel = np.gradient(math.pi*g_a/180, 1/Hz)
             power = moment * gateAngleVel
             prof_data[0+rwr]   = power

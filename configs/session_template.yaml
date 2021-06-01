@@ -31,7 +31,7 @@ Tempi :
   - [1680, 13]
   
 
-# Marked pieces: list of name, (start, end) , (cnt, average rating), startlist
+# Marked pieces: list of: (name, (start, end) , (cnt, average rating), startlist)
 Pieces: []
 
 # Video info:

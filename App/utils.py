@@ -386,6 +386,9 @@ def readcreateCsvData(config, csvdata, clip):
             for i in range(lenheader):
                 if row[i] == '':
                     row[i] = float('NaN')
+                    if i == header.index('Speed') or i == header.index('Distance'):
+                        # when using GPS, speed and distance are not immediately available.
+                        row[i] = 0.0
                 else:
                     row[i] = float(row[i])
             csvdata.append(row)
@@ -529,7 +532,9 @@ def makecache(file, clip):
     # impellor working?
     gd.sessionInfo['noDistance'] = False
     distsens = h1.index('Distance')
-    if np.sum(gd.dataObject[0:1000, distsens]) == 0:  # we assume csv file is not too small
+    if np.sum(gd.dataObject[0:1000, distsens]) == 0:
+        # we assume csv file is not too small.
+        # and gps has had time so start
         gd.sessionInfo['noDistance'] = True
 
     # use catapult data if available
@@ -637,7 +642,7 @@ def tempi(gateAngle, gateForce):
                 state = 3
         elif state == 3:
             #
-            if gateAngle[i] < -5:
+            if gateAngle[i] < -10:
                 state = 4
         elif state == 4:
             # zero crossing to higher values
@@ -645,7 +650,7 @@ def tempi(gateAngle, gateForce):
                 i += 2
                 state = 5
         elif state == 5:
-            if gateAngle[i] > 5:
+            if gateAngle[i] > 10:
                 state = 6
         elif state == 6:
             # end of cycle
@@ -662,6 +667,8 @@ def tempi(gateAngle, gateForce):
                 state = 3
         i += 1
 
+    print(f'Lengte {len(tempoList)}')
+    
     # we use the turning point in the gate force at the catch as the starting point
     return tempoList
 

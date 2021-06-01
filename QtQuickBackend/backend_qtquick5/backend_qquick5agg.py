@@ -27,7 +27,7 @@ class MatplotlibIconProvider(QtQuick.QQuickImageProvider):
     """
 
     def __init__(self, img_type = QtQuick.QQuickImageProvider.Pixmap):
-        self.basedir = os.path.join(matplotlib.rcParams['datapath'], 'images')
+        self.basedir = os.path.join(matplotlib.get_data_path(), 'images')
         QtQuick.QQuickImageProvider.__init__(self, img_type)
 
     def requestImage(self, id, size):

@@ -371,7 +371,7 @@ class RowerTableModel(QAbstractTableModel):
         cntrating = [cr for nm, x, cr, tl  in pieces]
 
         # target values
-        targets = gd.globals['Standards'][gd.metaData['BoatType']]
+        targets = gd.globals['Boats'][gd.metaData['BoatType']]
 
         # First header line
         n = 1
@@ -420,10 +420,10 @@ class RowerTableModel(QAbstractTableModel):
         self._data.append(
             DataSerie(2, ['Effective angle (\u00b0)'] + [f'{targ:.0f}'] + [f'{effan:.0f}'] + [f'{r["EffAngle"]:.0f}' for r in ri]))
         self._data.append(
+            DataSerie(2, ['Gate force max'] + [''] + [''] + [ f'{r["GFMax"]:.0f}' for r in ri]) )
+        self._data.append(
             DataSerie(2, ['Gate force average'] + [''] + [''] + [ f'{r["GFEff"]:.0f}' for r in ri]) )
         """
-        self._data.append(
-            DataSerie(2, ['Gate force max'] + [''] + [''] + [ f'{r["GFMax"]:.0f}' for r in ri]) )
         self._data.append(
             DataSerie(2, ['Ratio avg/max Gate force'] + [''] + [''] + ['', '', '', '', '', '', '' , '' ]))
         self._data.append(
