@@ -36,7 +36,7 @@ Boats:
   # 7:12.0
            time : 432.0, tempo : 34,  type : scull, driveTime : 0.70, angleIn : -62.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
            seatDist : 54.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 350.0 },
-  LW1x : { span : 1.6,  inboard : 0.88, outboard : 2.0,
+  LW1x : { span : 1.6,  inboard : 0.86, outboard : 2.0,
   # 7:28.0
            time : 448.0, tempo : 34,  type : scull, driveTime : 0.70, angleIn : -60.0, angleOut : 42.0, slipIn : 6.0, slipOut : 12.0,
            seatDist : 50.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 290.0 },
@@ -81,7 +81,7 @@ Boats:
            seatDist : 50.0, ratioF : 0.55, peakPower@ : 0.35, PowerUp70 : 12.0, PowerDown70 : 35.0, power : 290.0 },
 
 # experiment met korte riemen/span
-  KL1x : { basetype : KL1x, span : 1.5,  inboard : 0.80, outboard : 1.8,
+  KL1x : { span : 1.4,  inboard : 0.78, outboard : 1.72,
   # 7:34.0
            time : 454.0, tempo : 32,  type : scull, driveTime : 0.70, angleIn : -62.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
            seatDist : 52.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 300.0 },

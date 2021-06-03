@@ -331,7 +331,7 @@ def pieceCalculations(piece, idx, ststeps):
             work = np.trapz(power, dx=ststeps/(100*Hz))
             rowerstats['Work'] = work
             rowerstats['PMean'] = Hz*work/ststeps
-            rowerstats['PperKg'] = rowerstats['PMean']/int(gd.metaData['Rowers'][rwr][3])
+            rowerstats['PperKg'] = rowerstats['PMean']/float(gd.metaData['Rowers'][rwr][3])
             rowerstats['Name'] = gd.metaData['Rowers'][rwr][0]
             
             # catch/finish angles

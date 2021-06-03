@@ -667,8 +667,6 @@ def tempi(gateAngle, gateForce):
                 state = 3
         i += 1
 
-    print(f'Lengte {len(tempoList)}')
-    
     # we use the turning point in the gate force at the catch as the starting point
     return tempoList
 
