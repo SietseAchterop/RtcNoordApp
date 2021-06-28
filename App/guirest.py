@@ -51,15 +51,18 @@ class FormView(QObject):
         # length of segment shown in the plots, initial limited
         self._length = 2000
         self._starttime = 0
-        #
+
+        # Video stuff
         self.inSync = False
-        # synchronisation position for video
-        self.videoPos = 0
-        self.videoNewStart = 0
-        # current position of frame in data
+        # start position in video (0.02 is the first frame)
+        self.videoStart = 0.02
+        # start position in data  (red line)
+        self.dataStart = 0
+        # current position of frame in data (blue line)
         self.dataPos = 0
+
         self.traceCentre = 30
-        
+
         self.scaleX = 1
         self.panon = False
         self.pandistance = 0
@@ -109,8 +112,8 @@ class FormView(QObject):
 
                     if gd.runningvideo:
                         if self.inSync:
-                            self.videoNewStart = event.xdata
-                            print(f'vs {self.videoNewStart}')
+                            self.dataStart = event.xdata
+                            print(f'vs {self.dataStart}')
                         else:
                             gd.player.seek(event.xdata - self.dataPos)
                             self.dataPos = event.xdata
@@ -238,7 +241,7 @@ class FormView(QObject):
                 senslist.append((i, name, scaleY))
 
         if gd.runningvideo:
-            self.ax1.vlines(self.videoPos, 0, 20, transform=self.ax1.get_xaxis_transform(), colors='r')
+            self.ax1.vlines(self.dataStart, 0, 20, transform=self.ax1.get_xaxis_transform(), colors='r')
             self.ax1.vlines(self.dataPos, 0, 20, transform=self.ax1.get_xaxis_transform(), colors='b')
 
         # secondary plots
@@ -403,18 +406,16 @@ class FormView(QObject):
             if not file.is_file():
                 print(f'{file} does not exist, ignored')
                 return
-            self.videoPos = float(v[1])
-            self.dataPos = float(v[2])
+            self.videoStart = float(v[1])
+            self.dataStart = float(v[2])
             print(f'started with {v[1]}  {v[2]}')
             startVideo()
-            gd.player.window_scale = 0.5
-            gd.player.pause= True
-            gd.hr_seek = 'yes'
+            gd.player.hr_seek = 'yes'
             gd.player.loadfile(file.as_uri())
             time.sleep(0.1)  # why needed?
 
-            gd.player.seek(self.videoPos)
-            self.videoPos = self.dataPos  # now videostart marker ok
+            gd.player.seek(self.videoStart)
+            self.dataPos = self.dataStart  # now videostart marker ok
             self.vid_state = 1
         else:
             stopVideo()
@@ -431,46 +432,54 @@ class FormView(QObject):
         if gd.runningvideo:
             if on:
                 # fix start in video (a)
-                self.nieuw_vid = float(gd.sessionInfo['Video'][1]) + self.dataPos - self.videoPos
-                print(f'nv {self.nieuw_vid}')
-                
+                #   self.videoPos could be wrong, should use real position in video!
+                # put blue line on red one.
+                change = round((self.dataPos - self.dataStart)*50)
+                self.videoStart = self.videoStart + change/50
+                print(f'nv {self.videoStart}')
                 self.inSync = True
                 # left button places red line
             else:
                 # fix data wrt video start (b)
+                # do not move video!
                 file = gd.metaData['Video']
-                gd.sessionInfo['Video'] = [ file,  str(self.nieuw_vid), str(self.videoNewStart) ]
-                # gd.sessionInfo['Video'][2] = self.videoNewStart
-                print(f'saved as {gd.metaData["Video"]}')
+                gd.sessionInfo['Video'] = [ file,  str(self.videoStart), str(self.dataStart) ]
                 saveSessionInfo(gd.sessionInfo)
-                # put blue line on red one.
-                self.dataPos = self.videoNewStart
+                self.dataPos = self.dataStart
                 self.inSync = False
-                self.update_figure()
+            self.update_figure()
             
     @pyqtSlot()
     def frame_step(self):
         if gd.novideo:
             return
-        gd.player.frame_step()
-        self.dataPos += 0.02
+        if self.inSync:
+            self.dataStart = self.dataStart + 0.02
+        else:
+            gd.player.frame_step()
+            self.dataPos += 0.02
         self.update_figure()
 
     @pyqtSlot()
     def frame_back_step(self):
         if gd.novideo:
             return
-        gd.player.frame_back_step()
-        self.dataPos -= 0.02
+        if self.inSync:
+            self.dataStart = self.dataStart - 0.02
+        else:
+            self.dataPos -= 0.02
+            gd.player.frame_back_step()
         self.update_figure()
 
     @pyqtSlot(float)
     def frame_seek(self, s):
         if gd.novideo:
             return
-        gd.player.seek(s)
-        self.dataPos += s
-        print(f'frame pos {self.dataPos}')
+        if self.inSync:
+            self.dataStart = self.dataStart + s
+        else:
+            gd.player.seek(s)
+            self.dataPos += s
         self.update_figure()
 
     # handling of second session

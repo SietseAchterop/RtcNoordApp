@@ -230,7 +230,7 @@ Item {
 		    Button {
 			id: syncbutton
 			width: 40
-			property color plotColor : "lightblue"  // '#add8e6'
+			property color plotColor : "lightblue"  // '#add8e6'  (use plotColor to test state of button.)
 			icon.name: "niet"
 			icon.source: "images/media-playback-stop"
 			onClicked: {

@@ -313,13 +313,17 @@ def pieceCalculations(piece, idx, ststeps):
             rowerstats['Wash'] = g_a[posmax] - g_a[washpos]
             rowerstats['EffAngle'] = g_a[washpos] - g_a[slippos]
 
-            rowerstats['GFEff'] = np.mean(g_fx[posmin: posmax])
+            if posmax > posmin:
+                rowerstats['GFEff'] = np.mean(g_fx[posmin:posmax])
+            else:
+                # bijv bij tubben
+                rowerstats['GFEff'] = 0
 
             # power
             ga_rad      = math.pi * a[:, ind_ga] / 180
             # force in forward direction:
             pinForceTS  = (np.multiply(a[:, ind_fx], np.cos(ga_rad)) -
-                               np.multiply(a[:, ind_fy], np.sin(ga_rad)))
+                           np.multiply(a[:, ind_fy], np.sin(ga_rad)))
             moment      = inboard * FpintoFhandle * pinForceTS
             # speed in radians per second:
             gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)

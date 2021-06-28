@@ -120,9 +120,10 @@ When a video is made during the session it is possible to show the video (frames
 This is done in the View piece tab.
 
 To use this a video file name has to be selected in the Session info tab.
+Be sure that the proper piece is selected when doing this.
 The file should reside in the RtcNoord/videos directory.
 Then clicking on the Video button in the View page tab will show the video frame with the associated data frame.
-The video can be controlled with the video control buttons to more a single or a larger number of frames.
+The video can be controlled with the video control buttons to move a single or a larger number of frames.
 Clicking in the plot also positions the video.
 A red line is the initial position of the video upon start and a blue line shows the place in the data of which the video frame is shown.
 
@@ -131,7 +132,7 @@ First position the video to a point of which you know the place in the data.
 E.g. the first turning point of the oars at the intake after a start.
 Note that the blue line follows the video.
 Then click the middle control button, it will turn red; the video position is set.
-Next click on the plot on the correct point in the data.
+Next click on the plot on the correct point in the data. Now the red line is positioned.
 Finally click the middle control button again. The blue line moves to that point and synchronisation is complete.
 
 ![Eerste](appdocs/ViewVideo.png)

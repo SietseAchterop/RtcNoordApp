@@ -3,6 +3,12 @@ import sys, os, math, time, csv, yaml, re
 import numpy as np
 
 from openpyxl import Workbook
+from openpyxl.chart import (
+    ScatterChart,
+    Reference,
+    Series,
+)
+
 import tempfile
 
 from PyQt5.QtCore import QAbstractTableModel
@@ -527,7 +533,7 @@ def make_pdf_report():
 
 
 def make_csv_report():
-    """ assume profile available """
+    """ assume profile available (not used anymore) """
 
     pieces = gd.sessionInfo['Pieces']
     cntrating = [cr for nm, x, cr, tl in pieces]
@@ -589,9 +595,6 @@ def make_csv_report():
 def make_xlsx_report():
     """ assume profile available """
 
-    pieces = gd.sessionInfo['Pieces']
-    cntrating = [cr for nm, x, cr, tl in pieces]
-
     # subdir
     if not reportsDir().is_dir():
         reportsDir().mkdir()
@@ -626,9 +629,9 @@ def make_xlsx_report():
             row.append(str(gd.boattablemodel.data(index)))
         ws.append(row)
 
-    rcount = gd.sessionInfo['RowerCnt']
-    for i in range(rcount):
-        name = gd.metaData['Rowers'][i][0]
+    rwrcnt = gd.sessionInfo['RowerCnt']
+    for rwr in range(rwrcnt):
+        name = gd.metaData['Rowers'][rwr][0]
 
         ws = wb.create_sheet(title=f"Rower report {name}")
         ws.column_dimensions['A'].width = 30
@@ -638,19 +641,70 @@ def make_xlsx_report():
         ws.append([f'Rower report {name} '])
         ws.append([''])
 
-        rows = gd.rowertablemodel[i].rowCount()
-        columns = gd.rowertablemodel[i].columnCount()
+        rows = gd.rowertablemodel[rwr].rowCount()
+        columns = gd.rowertablemodel[rwr].columnCount()
 
         for r in range(rows):
             row = []
             for j in range(columns):
-                index = QAbstractTableModel.index(gd.rowertablemodel[i], r, j)
-                row.append(str(gd.rowertablemodel[i].data(index)))
+                index = QAbstractTableModel.index(gd.rowertablemodel[rwr], r, j)
+                row.append(str(gd.rowertablemodel[rwr].data(index)))
             ws.append(row)
+
+        # GateAngle - GateForceX/Y data voor deze rower in de spreadsheet
+        ws.append([''])
+        ws.append(["", "", "Normalized stroke (100 steps) data for each piece."])
+        ws.append([''])
+        pieces = gd.sessionInfo['Pieces']
+        row = ['Piece:']
+        for i in range(len(pieces)):
+            row.append(f'{gd.p_names[i]}'); row.append(''); row.append('')
+        ws.append(row)
+        ws.append([''])
+        fdata = formatforcedata(rwr)
+        row = ['Sensor:']
+        for i in range(len(pieces)):
+            row.append('Angle')
+            row.append('ForceX')
+            row.append('ForceY')
+        ws.append(row)
+        for i in range(100):
+            row = fdata[i].tolist()
+            row.insert(0, '')
+            ws.append(row)
+        # evt meteen een chart maken
 
     #
     wb.save(reportfile.as_posix() + '.xlsx')
 
     #
     #del wb
-    
+
+
+def formatforcedata(rwr):
+    """ create the array to be embedded in the xlsx file (rower rwr tab)
+        in correct format   """
+
+    rsens = rowersensors(rwr)
+    pieces = gd.sessionInfo['Pieces']
+    farray = np.zeros((3*len(pieces), 100))
+
+    i = 0
+    if gd.sessionInfo['ScullSweep'] == 'sweep':
+        for p in range(len(pieces)):
+            #print(f"ddsds  {p}   {farray[i].shape}   {gd.norm_arrays[p, :, rsens['GateAngle']].shape}  {rsens['GateForceX']}")
+            farray[i] = gd.norm_arrays[p, :, rsens['GateAngle']]
+            farray[i+1] = gd.norm_arrays[p, :, rsens['GateForceX']]
+            farray[i+2] = gd.norm_arrays[p, :, rsens['GateForceY']]
+            i = i+3
+    else:
+        for p in range(len(pieces)):
+            #print(f"ddsds  {p}   {farray[i].shape}   {gd.norm_arrays[p, :, rsens['P GateAngle']].shape}  {rsens['P GateForceX']}")
+            farray[i] = gd.norm_arrays[p, :, rsens['P GateAngle']]
+            farray[i+1] = gd.norm_arrays[p, :, rsens['P GateForceX']]
+            farray[i+2] = gd.norm_arrays[p, :, rsens['P GateForceY']]
+            i = i+3
+
+    # nu ombouwen voor sheet, dus rij voor rij.
+    return farray.transpose()
+

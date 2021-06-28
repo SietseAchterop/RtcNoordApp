@@ -4,6 +4,8 @@ Installation rtcapp starting from a freshly installed windows 10
 
 - install (64bit) python3 from
     https://www.python.org/downloads/windows/
+  Use python 3.8 for the moment!
+    (otherwise matplotlib wil have to be created from source)
 
 - To test python, start a simple main.py program via the Idle IDE.
 
