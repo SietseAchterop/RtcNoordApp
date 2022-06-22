@@ -58,12 +58,9 @@ Installation rtcapp starting from a freshly installed windows 10
 - start via python Idle IDE
 
 - start via desktop
-    Create a shortcut on the Desktop to the pythonw.exe program. Note, NOT python.exe.
-    Open the properties of the shortcut.
-    Add the parameter main.py to the Target. In my case it became:
-         C:\Users\rtc\AppData\Local\Microsoft\WindowsApps\pythonw.exe main.py
-    Set the "Start in" value to the App directory where main.py resides.
-    Now the App can be started directly from the desktop.
+    Create a shortcat from main.py.
+    Move that to the desktop and set properties "Run" on minimized.
+    Then the command window will not show.
 
 Using video (optional)
 ======================

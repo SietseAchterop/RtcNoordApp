@@ -195,7 +195,7 @@ def make_pdf_report():
         ax2 = fig.add_subplot(gs[3:, 0])
         ax3 = fig.add_subplot(gs[3:, 1])
 
-        ax1.set_title('Gate Angle - GateForceX/Y')
+        ax1.set_title('Gate Angle - GateForceX')
         ax1.grid(True)
         ax2.set_title('Stretcher ForceX')
         ax2.grid(True)
@@ -214,11 +214,9 @@ def make_pdf_report():
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
                     i = sns['GateAngle']
                     j = sns['GateForceX']
-                    k = sns['GateForceY']
                 else:
                     i = sns['P GateAngle']
                     j = sns['P GateForceX']
-                    k = sns['P GateForceY']
 
                 # stretchers not always present!
                 # k = sns['Stretcher Z']
@@ -226,8 +224,6 @@ def make_pdf_report():
 
                 ax1.plot(gd.norm_arrays[cp, :, i],
                          gd.norm_arrays[cp, :, j], linewidth=0.6, label=f'R {r+1}')
-                ax1.plot(gd.norm_arrays[cp, :, i],
-                         gd.norm_arrays[cp, :, k], linestyle=stippel, linewidth=0.6, label=f'R {r+1}Y')
 
                 #twee = self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, i], linewidth=0.6, label=f'R {r+1}')
 
@@ -259,7 +255,7 @@ def make_pdf_report():
                     xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
                     yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
 
-                curveref = make_interp_spline(xref, yref, 2)
+                curveref = make_interp_spline(xref, yref)
                 xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
 
                 ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=(0, (3, 6)))
@@ -425,7 +421,7 @@ def make_pdf_report():
                     xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
                     yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
 
-                curveref = make_interp_spline(xref, yref, 2)
+                curveref = make_interp_spline(xref, yref)
                 xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
 
                 rax1[rwr].plot(gd.norm_arrays[rp, :, i],
