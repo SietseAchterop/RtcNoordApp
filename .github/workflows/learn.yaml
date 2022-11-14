@@ -11,4 +11,9 @@ jobs:
           node-version: '14'
       - run: npm install -g bats
       - run: bats -v
+      - uses: actions/setup-python@v4
+        with:
+           python-version: '3.10' 
+      - run: python my_script.py
+      
       
