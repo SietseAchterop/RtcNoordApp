@@ -1,5 +1,5 @@
 
-import os, sys, time, yaml, shlex
+import os, sys, time, shlex
 
 def main():
     print("Main was here!")
