@@ -156,8 +156,9 @@ The profile consists of this screen and the Crew- and Rower- screens, so creatin
 The "Create report" creates a pdf version of the profile, see the appdocs directory for an [example report](appdocs/example_report.pdf).
 It also creates a spreadsheet that contains the tables for further processing, see [example sheet](appdocs/example_report.xlsx).
 
-The report uses the selected settings of checkboxes and tumble wheels.
-Also the view from "View piece" is shown in the report.
+It is important to note that the report uses the selected settings of checkboxes and tumble wheels.
+So beware what is the most interesting piece for the report.
+Also, if set, the view from "View piece" is shown in the report.
 
 ### Crew Profile
 
