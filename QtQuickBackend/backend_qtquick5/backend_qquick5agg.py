@@ -133,8 +133,9 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
             refcnt = sys.getrefcount(stringBuffer)
 
             # convert the Agg rendered image -> qImage
-            qImage = QtGui.QImage(stringBuffer, self.renderer.width,
-                                  self.renderer.height,
+            #  on ubuntu 22.04 the int's are needed...
+            qImage = QtGui.QImage(stringBuffer, int(self.renderer.width),
+                                  int(self.renderer.height),
                                   QtGui.QImage.Format_RGBA8888)
             # get the rectangle for the image
             rect = qImage.rect()

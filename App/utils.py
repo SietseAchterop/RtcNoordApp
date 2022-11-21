@@ -69,6 +69,12 @@ Load the config file to find the data and session to use.
         config = yaml.load(rtcnoordconfig, Loader=yaml.UnsafeLoader)
         fd.close
         
+    # hack to recover from error
+    if len(sys.argv) == 2:
+        if sys.argv[1] == "clean":
+            config['Session'] = 'None'
+            saveConfig(config)
+
     # we now have a configfile, now the base dir
     base_dir = Path.home() / config['BaseDir']
     if not base_dir.is_dir():

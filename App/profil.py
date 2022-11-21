@@ -122,7 +122,7 @@ def profile():
             # wry wrong when ststeps = 105? fill_value helps
             g = interp1d(x, av_arrays[i, 0:ststeps, k], kind='cubic', fill_value="extrapolate")
             # met deze gedoe met laatste kolom, met NaN's
-            #g = make_interp_spline(x, av_arrays[i, 0:ststeps, k], 2)
+            #g = make_interp_spline(x, av_arrays[i, 0:ststeps, k])
 
             xnew = np.arange(100)*((ststeps-1)/(100-1))
 
@@ -402,6 +402,7 @@ def pieceCalculations(piece, idx, ststeps):
             rowerstats['Slip'] = g_a[slippos] - g_a[posmin]
             if slippos < posmin:
                 rowerstats['Slip'] = -rowerstats['Slip']
+            rowerstats['Test'] = slippos
             rowerstats['Wash'] = g_a[posmax] - g_a[washpos]
             rowerstats['EffAngle'] = g_a[washpos] - g_a[slippos]
 

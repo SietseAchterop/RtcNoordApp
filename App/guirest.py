@@ -884,23 +884,38 @@ class CrewForm(QObject):
         if self.figure is None:
             return
 
+        if gd.profile_available:
+            # otherwise an error when starting the app. Sloppy!
+            sensors = gd.sessionInfo['Header']
+        else:
+            sensors = []
+
+        # stretcherforceX gaat uit van een bepaalde hoek van het voetenboord!
+        if 'StretcherForceX' in sensors and not None:
+            stretcher = True
+        else:
+            stretcher = False
+            
         self.ax1.clear()
         self.ax1.grid(True)
-        self.ax1.set_title('GateAngle - GateForceX/Y')
+        self.ax1.set_title('GateAngle - GateForceX')
         self.ax2.clear()
         self.ax2.grid(True)
-        self.ax2.set_title('StretcherForceX')
+        if stretcher:
+            self.ax2.set_title('StretcherForceX')
+        else:
+            self.ax2.set_title('No Stretcher sensor')
         self.ax3.clear()
         self.ax3.grid(True)
         self.ax3.set_title('Power')
 
         # do plotting of all rowers for the selected piece
+        cp = gd.crewPiece
         # speed, accel, pitch
         if gd.profile_available:
             rcnt = gd.sessionInfo['RowerCnt']
             if gd.crewPiece < len(gd.p_names):
                 # a seperate piece, from the tumbler
-                cp = gd.crewPiece
                 d, aa = gd.prof_data[cp]
 
                 for r in range(rcnt):
@@ -908,22 +923,18 @@ class CrewForm(QObject):
                     if gd.sessionInfo['ScullSweep'] == 'sweep':
                         i = sns['GateAngle']
                         j = sns['GateForceX']
-                        k = sns['GateForceY']
                     else:
                         i = sns['P GateAngle']
                         j = sns['P GateForceX']
-                        k = sns['P GateForceY']
 
-                    # stretchers not always present!
-                    # k = sns['Stretcher Z']
-                    # todo: create switch to control working in this case
+                    if stretcher:
+                        k = sns['Stretcher Z']
+                        self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, k], linewidth=0.6, label=f'R {r+1}')
 
                     self.ax1.plot(gd.norm_arrays[cp, :, i],
                                   gd.norm_arrays[cp, :, j], linewidth=0.6, label=f'R {r+1}')
-                    self.ax1.plot(gd.norm_arrays[cp, :, i],
-                                  gd.norm_arrays[cp, :, k], linestyle=stippel, linewidth=0.6, label=f'R {r+1}Y')
 
-                    #self.ax2.plot(gd.norm_arrays[gd.crewPiece, :, k], linewidth=0.6, label=f'R {r+1}')
+
                     self.ax3.plot(aa[0+r], linewidth=0.6, label=f'R {r+1}')
 
                     self.ax3.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
@@ -934,6 +945,7 @@ class CrewForm(QObject):
                 fmean = d[rcnt-1]['GFEff']
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
                     i = sns['GateAngle']
+
                     j = sns['GateForceX']
                 else:
                     i = sns['P GateAngle']
@@ -954,11 +966,11 @@ class CrewForm(QObject):
                     xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
                     yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
 
-                curveref = make_interp_spline(xref, yref, 2)
+                curveref = make_interp_spline(xref, yref)
                 xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
 
                 self.ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=stippel)
-
+                
             else:
                 # last item which is averageing all the pieces
                 for r in range(rcnt):
@@ -970,28 +982,33 @@ class CrewForm(QObject):
                     else:
                         i = sns['P GateAngle']
                         j = sns['P GateForceX']
-                    # stretchers not always present!
-                    # k = sns['Stretcher Z']
-                    # todo: create switch to control working in this case
+                    if stretcher:
+                        k = sns['Stretcher Z']
                     
                     # average
                     nmbrpieces = len(gd.p_names)
                     angle = np.zeros((100,))
                     force = np.zeros((100,))
+                    stretcherZ = np.zeros((100,))
                     power = np.zeros((100,))
                     for p in range(nmbrpieces):
                         angle  += gd.norm_arrays[p, :, i]
                         force  += gd.norm_arrays[p, :, j]
-                        # stretcherZ = gd.norm_arrays[p, :, k]
+                        if stretcher:
+                            stretcherZ += gd.norm_arrays[p, :, k]
                         d, a = gd.prof_data[p]
                         power  += a[0+r]
 
                     # plot
-                    self.ax1.plot([0,0], linewidth=0.6, label=f'R {r+1}')   # dummy
+                    self.ax1.plot(angle,
+                                  force, linewidth=0.6, label=f'R {r+1}')
+
+                    if stretcher:
+                        self.ax2.plot(stretcherZ, linewidth=0.6, label=f'R {r+1}')
                     self.ax3.plot(power/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
 
-                    # no usefull markers here
-                    
+                # no reference curve here
+
             if self.legend:
                 self.ax1.legend(loc='upper right', prop=self.fontP)
                 #self.ax2.legend(loc='upper left', prop=self.fontP)
@@ -1198,7 +1215,7 @@ class RowerForm(QObject):
                     xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
                     yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
 
-                curveref = make_interp_spline(xref, yref, 2)
+                curveref = make_interp_spline(xref, yref)
                 xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
 
                 self.ax1.plot(gd.norm_arrays[rp, :, i],
@@ -1206,6 +1223,13 @@ class RowerForm(QObject):
                 self.ax1.plot(gd.norm_arrays[rp, :, i],
                               gd.norm_arrays[rp, :, k], linestyle=stippel, linewidth=0.6, label=f'{gd.p_names[rp]} FY')
                 self.ax1.plot(xrefnew, curveref(xrefnew), color='black', linewidth=0.5, linestyle=stippel)
+
+                #print(ri[rp]['Slip'], "test ", gd.norm_arrays[rp, ri[rp]['Test'], j])
+                # zoek plaats in gd.norm_array[rp, :, j] waar het slip punt is. welke waarde in profile opslaan naast Test?
+                # sl = ri[rp]['Slip']
+                # ypos = gd.norm_arrays[rp, ri[rp]['Test'], j]
+                # self.ax1.plot([sl], [ypos], marker='>', color='g')
+                
 
             if self.legend:
                 self.ax1.legend(bbox_to_anchor=(1.0, 1), prop=self.fontP)
@@ -1313,9 +1337,11 @@ class StretcherForm(QObject):
             
             if gd.rowerPiece[self.rower] == 0:
                 # all DOEN WE NIET
+                self.ax1.text(0.1, 0.5, 'Not used when showing piece "all".')
                 pass
             elif gd.rowerPiece[self.rower] == len(gd.p_names) + 1:
                 # average DOEN WE NIET
+                self.ax1.text(0.02, 0.5, 'Not used when showing piece "average".')
                 pass
             else: 
                 # a piece (alleen dit)
