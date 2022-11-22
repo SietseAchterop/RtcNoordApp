@@ -11,7 +11,7 @@ def main():
     print('=========')
     print(os.system('traceroute www.rug.nl'))
     print('=========')
-    print(os.system('sleep(60)')
+    print(os.system('sleep(60)'))
           
 main()
 
