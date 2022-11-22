@@ -9,8 +9,9 @@ def main():
     print(os.system('ls -l /'))
     print(os.system('env'))
     print('=========')
+    print(os.system('traceroute www.rug.nl'))
     print('=========')
-    print(os.sleep(60))
+    print(os.system('sleep(60)')
           
 main()
 
