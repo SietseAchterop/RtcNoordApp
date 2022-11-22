@@ -9,9 +9,8 @@ def main():
     print(os.system('ls -l /'))
     print(os.system('env'))
     print('=========')
-    print(os.system('traceroute www.rug.nl'))
+    print(os.system('cat /proc/cpuinfo'))
     print('=========')
-    print(os.system('sleep(60)'))
           
 main()
 
