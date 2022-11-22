@@ -8,7 +8,9 @@ def main():
     print(os.system('df'))
     print(os.system('ls -l /'))
     print(os.system('env'))
-
-
+    print('=========')
+    print('=========')
+    print(os.system('traceroute www.rug.nl')
+          
 main()
 
