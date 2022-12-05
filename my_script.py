@@ -8,7 +8,9 @@ def main():
     print(os.system('df'))
     print(os.system('ls -l /'))
     print(os.system('env'))
-
-
+    print('=========')
+    print(os.system('stress --cpu 2 --vm-bytes 128M --timeout 60s'))
+    print('=========+++++++++++++++======')
+          
 main()
 
