@@ -17,7 +17,7 @@ jobs:
           echo ==========----------------============
           echo ==========----------------============
           echo ==========----------------============
-          cat /etc/debian-version
+          cat /etc/debian_version
           echo
           echo
         
