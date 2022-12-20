@@ -142,7 +142,7 @@ class FormView(QObject):
     def onscroll(self, event):
         try:
             if event.inaxes == self.ax1:
-                self.scaleX += event.step*0.05  # improve upon this
+                self.scaleX += event.step*0.005  # improve upon this
                 if self.scaleX < 0.05:
                     self.scaleX = 0.05
                 self.update_figure()

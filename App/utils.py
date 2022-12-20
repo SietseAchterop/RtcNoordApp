@@ -326,8 +326,8 @@ def readcreateCsvData(config, csvdata, clip):
             writer = csv.writer(fd, delimiter=gd.delimiter)
             for row in reader:
                 writer.writerow(row)
+        gd.clipdata = None
     # csv file available. Not very efficient
-    gd.clipdata = None
 
     # Prepend metadata if not yet present (first time)
     with Path.open(path, newline='') as fd:
@@ -358,6 +358,12 @@ def readcreateCsvData(config, csvdata, clip):
             with open(tmpfd) as infile:
                 for line in infile:
                     fd.write(line)
+        # extra data voor afwezige skulldollen toevoegen?
+        #   en noteren in metadata
+        #   deze data alleen in de numpy data en file?
+        # bijv. lijst met namen in return?
+        # PAS OP: de header moet ook aangepast worden!
+        #  voorlopig maar met de hand doen.
 
     #  now for real
     csvpieces = []   # for when the csv file is made up from multiple pieces from the peach data.
@@ -517,6 +523,9 @@ def makecache(file, clip):
     gd.sessionInfo['Header']   = h1
     gd.sessionInfo['Header2']  = h2
     gd.sessionInfo['ScalingFactors'] = factors()
+
+    # hoe extra data toevoegen?
+    # hoe is access tot de data? Alleen met naam, of index?
 
     gd.dataObject = np.asarray(csvdata)
 

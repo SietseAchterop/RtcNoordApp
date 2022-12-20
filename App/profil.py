@@ -328,6 +328,8 @@ def pieceCalculations(piece, idx, ststeps):
             # speed in radians per second:
             gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)
             power = moment * gateAngleVel
+            # Adding estimation of power from footplate (Hofmijster)
+            power = 1.14 * power
             prof_data[0+rwr]   = power
             # 0 being the first, add rwcnt and 2*rwcnt to the index for the next
 
@@ -420,6 +422,8 @@ def pieceCalculations(piece, idx, ststeps):
             moment       = inboard * FpintoFhandle * pinForceTS
             gateAngleVel = np.gradient(math.pi*g_a/180, 1/Hz)
             power = moment * gateAngleVel
+            # Adding estimation of power from footplate (Hofmijster)
+            power = 1.14 * power
             prof_data[0+rwr]   = power
 
             rowerstats['PMax']  = np.max(power)

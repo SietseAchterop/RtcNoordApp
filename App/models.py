@@ -439,7 +439,7 @@ class RowerTableModel(QAbstractTableModel):
         """
         targ = targets['power']
         self._data.append(
-            DataSerie(2, ['Power average (W)'] + [f'{targ:.0f}'] + [''] + [ f'{r["PMean"]:.0f}' for r in ri]) )
+            DataSerie(2, ['Total Power (est.)'] + [f'{targ:.0f}'] + [''] + [ f'{r["PMean"]:.0f}' for r in ri]) )
         self._data.append(
             DataSerie(2, ['Power/weight'] + [''] + [''] + [ f'{r["PperKg"]:.2f}' for r in ri]) )
         self._data.append(

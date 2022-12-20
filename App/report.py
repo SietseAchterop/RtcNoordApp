@@ -136,7 +136,7 @@ def make_pdf_report():
         ax2.grid(True)
         ax3.set_title('Pitch')
         ax3.grid(True)
-        ax4.set_title('Accel-Tempo per Piece')
+        ax4.set_title('Accell-Tempo per Piece')
         ax4.grid(True)
 
         piece = gd.boatPiece

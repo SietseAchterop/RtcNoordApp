@@ -20,7 +20,7 @@ python3
     -pyperclip
 libfreetype-dev
 qtdeclarative5-dev
-qt5-default
+qt5-default    (niet meer op debian 12)
 qml-module-qtquick-layout
                   -dialogs
 		  -controls
