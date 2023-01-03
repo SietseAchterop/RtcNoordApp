@@ -159,7 +159,7 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
             t = int(b) + h
             reg = self.copy_from_bbox(bbox)
             stringBuffer = reg.to_string_argb()
-            qImage = QtGui.QImage(stringBuffer, w, h,
+            qImage = QtGui.QImage(stringBuffer, int(w), int(h),
                                   QtGui.QImage.Format_RGBA8888)
 
             pixmap = QtGui.QPixmap.fromImage(qImage)

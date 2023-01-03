@@ -943,6 +943,8 @@ class CrewForm(QObject):
                 # reference curve derived from the stroke
                 sns = rowersensors(rcnt-1)
                 fmean = d[rcnt-1]['GFEff']
+                # just to make the curve better for our purpose.....
+                fmean = 1.2*fmean
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
                     i = sns['GateAngle']
 
@@ -1184,7 +1186,8 @@ class RowerForm(QObject):
                 outboat = [ d for d, e in gd.prof_data]
                 ri = [a[self.rower] for a in outboat]    # rower info per piece
                 fmean = ri[rp]['GFEff']
-
+                # just to make the curve better for our purpose.....
+                fmean = 1.2*fmean
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
                     i = sns['GateAngle']
                     j = sns['GateForceX']
