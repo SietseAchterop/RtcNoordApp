@@ -167,9 +167,9 @@ class FormPieces(QObject):
     def onscroll(self, event):
         try:
             if event.inaxes == self.ax1:
-                self.scale += event.step*0.05
-                if self.scale < 0.05:
-                    self.scale = 0.05
+                self.scale += event.step*0.0002
+                if self.scale < 0.005:
+                    self.scale = 0.005
                 self.update_figure()
             elif event.inaxes == self.ax2:
                 pass

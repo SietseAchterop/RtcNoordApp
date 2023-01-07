@@ -234,6 +234,7 @@ def make_pdf_report():
             # reference curve derived from the stroke
             sns = rowersensors(rcnt-1)
             fmean = d[rcnt-1]['GFEff']
+            fmean = 1.15*fmean
             if gd.sessionInfo['ScullSweep'] == 'sweep':
                 i = sns['GateAngle']
                 j = sns['GateForceX']
@@ -251,10 +252,10 @@ def make_pdf_report():
 
             if gd.sessionInfo['ScullSweep'] == 'sweep':
                 xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
-                yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+                yref = np.array([fmin  , fmin+50,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.65*fmean,      1.6*fmean,       1.3*fmean,       0.9*fmean,       fmax])
             else:
                 xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
-                yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+                yref = np.array([fmin  , fmin+50,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.65*fmean,      1.6*fmean,       1.3*fmean,       0.9*fmean,       fmax])
 
             curveref = make_interp_spline(xref, yref)
             xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
@@ -397,7 +398,7 @@ def make_pdf_report():
                 outboat = [ d for d, e in gd.prof_data]
                 ri = [a[rwr] for a in outboat]    # rower info per piece
                 fmean = ri[rp]['GFEff']
-
+                fmean = 1.15*fmean
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
                     i = sns['GateAngle']
                     j = sns['GateForceX']
@@ -421,10 +422,10 @@ def make_pdf_report():
 
                 if gd.sessionInfo['ScullSweep'] == 'sweep':
                     xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
-                    yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+                    yref = np.array([fmin  , fmin+50,          1.05*fmean,     1.6*fmean,      1.65*fmean,      1.65*fmean,      1.6*fmean,       1.3*fmean,       0.9*fmean,       fmax])
                 else:
                     xref = np.array([minpos, minpos+0.4*xstep, minpos+2*xstep, minpos+5*xstep, minpos+7*xstep, minpos+9*xstep, minpos+11*xstep, minpos+14*xstep, minpos+16*xstep, minpos+20*xstep])
-                    yref = np.array([fmin  , fmin+20,          1.1*fmean,     1.6*fmean,      1.65*fmean,      1.7*fmean,      1.6*fmean,       1.25*fmean,       0.8*fmean,       fmax])
+                    yref = np.array([fmin  , fmin+50,          1.05*fmean,     1.6*fmean,      1.65*fmean,      1.65*fmean,      1.6*fmean,       1.3*fmean,       0.9*fmean,       fmax])
 
                 curveref = make_interp_spline(xref, yref)
                 xrefnew =  np.linspace(min(xref), max(xref), int(maxpos-minpos))
