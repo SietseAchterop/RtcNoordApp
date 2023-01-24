@@ -205,7 +205,7 @@ class FormPieces(QObject):
         self.ax2 = self._figure.add_subplot(gs[-1, :])
 
         self.ax1.set_title('Traces')
-        self.ax2.set_title('Rating')
+        self.ax2.set_title('Tempo')
 
         self.tempoline = self.ax2.vlines(7, -10, 10, transform=self.ax2.get_xaxis_transform(), colors='r')
 
@@ -283,7 +283,7 @@ class FormPieces(QObject):
     
         self.ax2.clear()
         self.ax2.grid(True)
-        self.ax2.set_title('Rating')
+        self.ax2.set_title('Tempo')
         
         q = [list(t) for t in zip(*self._tempi)]
         if len(q) !=  0:
