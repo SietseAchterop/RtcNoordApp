@@ -59,28 +59,20 @@ def profile():
             av_arrays[i, :, :] += gd.dataObject[st[j]:r, :]
     av_arrays = av_arrays/n
 
-    # filter some signals: speed, power, position. But not stretcher RL or TB
+    # Calculate filter parameters for: speed, power, position. But not stretcher RL or TB
     [B, A] = signal.butter(4, 2*5/Hz)
     #   before or after averaging?
     if gd.filter:
         # here the general signals
         i = sensors.index('Accel')
         av_arrays[:, :, i] = signal.filtfilt(B, A, av_arrays[:, :, i])
-        # angle and force later when we distinguish between scull and sweep
+        # angle and force later when we distinguished between scull and sweep
 
-    # scull: gate angle and force:  average and add
-    #        Use port side
+    # scull: gate angle and force:  add into port side
     if gd.sessionInfo['ScullSweep'] == 'scull':
         rwcnt = gd.sessionInfo['RowerCnt']
-        """ not using starboard makes it a bit more robust (with errors in startboard angle)
         for i, s in enumerate(sensors):
-            # note: assume S site is rwcnt positions further!
-            #
-            if s.find('P GateAngle') >= 0:
-                av_arrays[:, :, i] = (av_arrays[:, :, i] + av_arrays[:, :, i+rwcnt])/2
-        """
-        for i, s in enumerate(sensors):
-            # note: assume S site is rwcnt positions further!
+            # Note: assume S site is rwcnt positions further!
             if s.find('P GateForce') >= 0:
                 av_arrays[:, :, i] =  av_arrays[:, :, i] + av_arrays[:, :, i+rwcnt]
 
@@ -105,6 +97,7 @@ def profile():
 
     #
     outcome = []
+    # to mark begin and end of stroke
     gd.gmin = [0]*len(pieces)
     gd.gmax = [100]*len(pieces)
 
@@ -254,8 +247,12 @@ def pieceCalculations(piece, idx, ststeps):
 
     scullsweep = gd.sessionInfo['ScullSweep']
     boattype = gd.metaData['BoatType']
-    inboard = gd.globals['Boats'][boattype]['inboard'] - 0.07    # 7 cm for end of the handle  (more for sweep?)
-    outboard = gd.globals['Boats'][boattype]['outboard']
+    # corrections to roughly get the effective lenght
+    inboard = gd.globals['Boats'][boattype]['inboard'] - 0.07
+    if scullsweep == 'sweep':
+        outboard = gd.globals['Boats'][boattype]['outboard'] - 0.2
+    else:
+        outboard = gd.globals['Boats'][boattype]['outboard'] - 0.15
     # conversion factor to calculate force at the handle
     FpintoFhandle = outboard/(inboard+outboard)
     
@@ -263,191 +260,104 @@ def pieceCalculations(piece, idx, ststeps):
         rsens = rowersensors(rwr)
         rowerstats = {}
         if scullsweep == 'sweep':
-
             ind_ga = rsens['GateAngle']
             ind_fx = rsens['GateForceX']
             ind_fy = rsens['GateForceY']
-
-            if rwr == rwcnt-1:
-                ga_ind = ind_ga
-
-            g_fx = signal.filtfilt(B, A, a[:, ind_fx])
-            g_a = signal.filtfilt(B, A, a[:, ind_ga])
-            if gd.filter:
-                # gate force and angle of all rowers
-                a[:, ind_fx] = g_fx
-                a[:, ind_ga] = g_a
-
-            # time points of
-            posmin = np.argmin(g_a)
-            posmax = np.argmax(g_a)
-            fmax   = np.argmax(g_fx)
-
-            rowerstats['GFMax'] = np.amax(g_fx)   # also use g_fy?
-
-            """
-            # gate force up/down at 70% at
-            threshold = 0.7*rowerstats['GFMax']
-            upat70 = np.argmax(g_fx > threshold)
-            downat70 = fmax + np.argmax(g_fx[fmax: ] < threshold)
-            rowerstats['UpAt70'] = g_a[upat70] - g_a[posmin]
-            rowerstats['DownAt70'] = g_a[posmax] - g_a[downat70]
-            """
-            # slip: number of degrees after the turning point in the angle the force is above the threshold
-            # threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
-            # threshold = 0.4*rowerstats['GFMax']
-            # voorlopig als bij knrb, een vaste kracht
-            threshold = 30*9.81
-            
-            slippos = np.argmax(g_fx > threshold)
-            # threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
-            # start looking at after posmax
-            threshold = 15*9.81
-            washpos = fmax + np.argmax(g_fx[fmax: ] < threshold)
-
-            # degrees from beginning of stroke
-            rowerstats['Slip'] = g_a[slippos] - g_a[posmin]
-            if slippos < posmin:
-                rowerstats['Slip'] = -rowerstats['Slip']
-            # degrees wrt end of stroke
-            rowerstats['Wash'] = g_a[posmax] - g_a[washpos]
-            rowerstats['EffAngle'] = g_a[washpos] - g_a[slippos]
-
-            if posmax > posmin:
-                rowerstats['GFEff'] = np.mean(g_fx[posmin:posmax])
-            else:
-                # bijv bij tubben
-                rowerstats['GFEff'] = 0
-
-            # power
-            ga_rad      = math.pi * a[:, ind_ga] / 180
-            # force in forward direction:
-            pinForceTS  = (np.multiply(a[:, ind_fx], np.cos(ga_rad)) -
-                           np.multiply(a[:, ind_fy], np.sin(ga_rad)))
-            moment      = inboard * FpintoFhandle * pinForceTS
-            # speed in radians per second:
-            gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)
-            power = moment * gateAngleVel
-            # Adding estimation of power from footplate (Hofmijster)
-            power = 1.14 * power
-            prof_data[0+rwr]   = power
-            # 0 being the first, add rwcnt and 2*rwcnt to the index for the next
-
-            rowerstats['PMax']  = np.max(power)
-            work = np.trapz(power, dx=ststeps/(100*Hz))
-            rowerstats['Work'] = work
-            rowerstats['PMean'] = Hz*work/ststeps
-            rowerstats['PperKg'] = rowerstats['PMean']/float(gd.metaData['Rowers'][rwr][3])
-            rowerstats['Name'] = gd.metaData['Rowers'][rwr][0]
-            
-            # catch/finish angles
-            rowerstats['CatchA'] = np.min(g_a)
-            rowerstats['FinA'] = np.max(g_a)
-            rowerstats['TotalA'] = rowerstats['FinA'] - rowerstats['CatchA']
-
-            # only for stroke rower
-            if rwr == 0:
-                # rhythm: stroketime/cycletime in %
-                out['Rhythm'] = float(posmax-posmin)
-
-            # TODO: PowerLegs, PowerTruncArms
-
-            # TODO: HandleVel, HandleVDSSeat
-            #        uses gateAngleVel. from data or calculate? (peachCalc does both!
-
+            iinn   = rsens['GateAngleVel']
         else:   # scull
-            
             # we already added P and S together in P
-            ind_gap = rsens["P GateAngle"]
-            ind_fxp = rsens["P GateForceX"]
-            ind_fyp = rsens["P GateForceY"]
+            ind_ga = rsens["P GateAngle"]
+            ind_fx = rsens["P GateForceX"]
+            ind_fy = rsens["P GateForceY"]
+            iinn   = rsens['P GateAngleVel']
 
-            if rwr == rwcnt-1:
-                ga_ind = ind_gap
-
-            # only look in the first stroke
-            g_fx = signal.filtfilt(B, A, a[:, ind_fxp])
-            g_fy = signal.filtfilt(B, A, a[:, ind_fyp])
-            g_a = signal.filtfilt(B, A, a[:, ind_gap])
-            if gd.filter:
-                # gate force and angle of all rowers
-                a[:, ind_fxp] = g_fx
-                a[:, ind_fyp] = g_fy
-                a[:, ind_gap] = g_a
-
-            # time points of
-            posmin = np.argmin(g_a)
-            posmax = np.argmax(g_a)
-            fmax   = np.argmax(g_fx)  # fy is almost zero here
-
-            rowerstats['GFMax'] = np.amax(g_fx)
-
-            """
-            # gate force up/down at 70% at
-            threshold = 0.7*rowerstats['GFMax']
-            upat70 = np.argmax(gate_fx > threshold)
-            downat70 = fmax + np.argmax(gate_fx[fmax: ] < threshold)
-            rowerstats['UpAt70'] = g_a[upat70] - g_a[posmin]
-            rowerstats['DownAt70'] = g_a[posmax] - g_a[downat70]
-            """
-            # slip: number of degrees after the turning point in the angle the force is above the threshold
-            # threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
-            # threshold = 0.4*rowerstats['GFMax']
-            # voorlopig als bij knrb, een vaste kracht
-            threshold = 30*9.81
-            slippos = np.argmax(g_fx > threshold)
-            # threshold = 9.81*int(gd.globals['Parameters']['threshFinSweep'])
-            # start looking at posmax/2
-            threshold = 15*9.81
-            washpos = fmax + np.argmax(g_fx[fmax: ] < threshold)
-
-            rowerstats['Slip'] = g_a[slippos] - g_a[posmin]
-            if slippos < posmin:
-                rowerstats['Slip'] = -rowerstats['Slip']
-            rowerstats['Test'] = slippos
-            rowerstats['Wash'] = g_a[posmax] - g_a[washpos]
-            rowerstats['EffAngle'] = g_a[washpos] - g_a[slippos]
-
-            # average between catch en finish   (same as knrb)
-            if posmax > posmin:
-                rowerstats['GFEff'] = np.mean(g_fx[posmin:posmax])
-            else:
-                # bijv bij tubben
-                rowerstats['GFEff'] = 0
-                
-            # power (both oars already merged)
-            ga_rad       = math.pi * (a[:, ind_gap]) / 180
-            pinForceTS   = (np.multiply(a[:, ind_fxp], np.cos(ga_rad)) -
-                            np.multiply(a[:, ind_fyp], np.sin(ga_rad)))
-            moment       = inboard * FpintoFhandle * pinForceTS
-            gateAngleVel = np.gradient(math.pi*g_a/180, 1/Hz)
-            power = moment * gateAngleVel
-            # Adding estimation of power from footplate (Hofmijster)
-            power = 1.14 * power
-            prof_data[0+rwr]   = power
-
-            rowerstats['PMax']  = np.max(power)
-            work = np.trapz(power, dx=ststeps/(100*Hz))
-            rowerstats['Work'] = work
-            rowerstats['PMean'] = Hz*work/ststeps
-            rowerstats['PperKg'] = rowerstats['PMean']/float(gd.metaData['Rowers'][rwr][3])
-            rowerstats['Name'] = gd.metaData['Rowers'][rwr][0]
+        g_fx = signal.filtfilt(B, A, a[:, ind_fx])
+        g_fy = signal.filtfilt(B, A, a[:, ind_fy])
+        g_a = signal.filtfilt(B, A, a[:, ind_ga])
+        if gd.filter:
+            # gate force and angle of all rowers
+            a[:, ind_fx] = g_fx
+            a[:, ind_fy] = g_fy
+            a[:, ind_ga] = g_a
             
-            # catch/finish angles
-            rowerstats['CatchA'] = np.min(g_a)
-            rowerstats['FinA'] = np.max(g_a)
-            rowerstats['TotalA'] = rowerstats['FinA'] - rowerstats['CatchA']
+        # power
+        ga_rad      = math.pi * a[:, ind_ga] / 180
+        # pinForce: force in forward direction.
+        pinForce  = (np.multiply(a[:, ind_fx], np.cos(ga_rad)) -
+                     np.multiply(a[:, ind_fy], np.sin(ga_rad)))
+        moment      = inboard * FpintoFhandle * pinForce
+        # speed in radians per second:
+        gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)
+        # of deze?
+        gateAngleVel2 = math.pi*a[:, iinn]/180
+        #print(f"Rower {rwr}  Gateanglevel  {gateAngleVel[10]} en  {gateAngleVel2[10]}  verschil {gateAngleVel2[10:15]/gateAngleVel[10:15]}")
+        #gateAngleVel = gateAngleVel2
 
-            # only for stroke rower
-            if rwr == 0:
-                # rhythm: stroketime/cycletime in %
-                out['Rhythm'] = float(posmax-posmin)
+        power = moment * gateAngleVel
+        # Add estimation of power from footplate (Hofmijster)
+        power = 1.14 * power
+        prof_data[0+rwr]   = power
+        # 0 being the first, add rwcnt and 2*rwcnt to the index for the next
 
-            # TODO: PowerLegs, PowerTruncArms
+        work = np.trapz(power, dx=ststeps/(100*Hz))
+        rowerstats['Work'] = work
+        rowerstats['PMean'] = Hz*work/ststeps
+        rowerstats['PperKg'] = rowerstats['PMean']/float(gd.metaData['Rowers'][rwr][3])
 
-            # TODO: HandleVel, HandleVDSSeat
+        rowerstats['GFMax'] = np.amax(pinForce)
+        rowerstats['PMax']  = np.max(power)
+        rowerstats['Name'] = gd.metaData['Rowers'][rwr][0]
+        rowerstats['CatchA'] = np.min(g_a)
+        rowerstats['FinA'] = np.max(g_a)
+        rowerstats['TotalA'] = rowerstats['FinA'] - rowerstats['CatchA']
 
-        #
+        # time points of
+        posmin = np.argmin(g_a)
+        posmax = np.argmax(g_a)
+        fmax   = np.argmax(pinForce)
+
+        """
+        # gate force up/down at 70% at
+        threshold = 0.7*rowerstats['GFMax']
+        upat70 = np.argmax(g_fx > threshold)
+        downat70 = fmax + np.argmax(pinForce[fmax: ] < threshold)
+        rowerstats['UpAt70'] = g_a[upat70] - g_a[posmin]
+        rowerstats['DownAt70'] = g_a[posmax] - g_a[downat70]
+        """
+        # kgf to newton = 9.81
+        # slip: number of degrees after the turning point in the angle the force is above the threshold
+        # threshold = 9.81*int(gd.globals['Parameters']['threshCatchSweep'])
+        # threshold = 0.4*rowerstats['GFMax']
+        # voorlopig als bij knrb, een vaste kracht
+        threshold = 30*9.81
+        slippos = np.argmax(pinForce > threshold)
+        # start looking at after posmax
+        threshold = 15*9.81
+        washpos = fmax + np.argmax(pinForce[fmax: ] < threshold)
+
+        # degrees from beginning of stroke
+        rowerstats['Slip'] = g_a[slippos] - g_a[posmin]
+        if slippos < posmin:
+            rowerstats['Slip'] = -rowerstats['Slip']
+        # degrees wrt end of stroke
+        rowerstats['Wash'] = g_a[posmax] - g_a[washpos]
+        rowerstats['EffAngle'] = g_a[washpos] - g_a[slippos]
+
+        if posmax > posmin:
+            rowerstats['GFEff'] = np.mean(pinForce[posmin:posmax])
+        else:
+            # bijv bij tubben
+            rowerstats['GFEff'] = 0
+    
+        if rwr == rwcnt-1:  # stroke rower
+            ga_ind = ind_ga
+            # rhythm: stroketime/cycletime in %
+            out['Rhythm'] = float(posmax-posmin)
+
+        # TODO: PowerLegs, PowerTruncArms
+        # TODO: HandleVel, HandleVDSSeat
+        #        uses gateAngleVel. from data or calculate? (peachCalc does both!)
+
         out[rwr] = rowerstats
 
     # calculate marker positions

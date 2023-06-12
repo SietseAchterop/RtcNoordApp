@@ -7,6 +7,8 @@
 #  waar komt het vermogen vandaan? Ergo? 540 Watt zou 5:46 opleveren.
 #    maar we vergelijken het met vermogen uit de boot!
 #
+#  riemen: hier complete lengte gebruiken. In profile.py omrekenen naar effectieve lengte!
+#
 Boats:
   {
 # men

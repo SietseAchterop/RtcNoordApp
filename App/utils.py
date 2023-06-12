@@ -359,6 +359,7 @@ def readcreateCsvData(config, csvdata, clip):
                 for line in infile:
                     fd.write(line)
         # extra data voor afwezige skulldollen toevoegen?
+        #     bijvoorbeeld om een 4x te meten met slechts 1 dol per roeiersplaats
         #   en noteren in metadata
         #   deze data alleen in de numpy data en file?
         # bijv. lijst met namen in return?
