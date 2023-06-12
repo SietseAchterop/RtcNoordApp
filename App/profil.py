@@ -263,13 +263,13 @@ def pieceCalculations(piece, idx, ststeps):
             ind_ga = rsens['GateAngle']
             ind_fx = rsens['GateForceX']
             ind_fy = rsens['GateForceY']
-            iinn   = rsens['GateAngleVel']
+            ind_gav   = rsens['GateAngleVel']
         else:   # scull
             # we already added P and S together in P
             ind_ga = rsens["P GateAngle"]
             ind_fx = rsens["P GateForceX"]
             ind_fy = rsens["P GateForceY"]
-            iinn   = rsens['P GateAngleVel']
+            ind_gav   = rsens['P GateAngleVel']
 
         g_fx = signal.filtfilt(B, A, a[:, ind_fx])
         g_fy = signal.filtfilt(B, A, a[:, ind_fy])
@@ -289,7 +289,7 @@ def pieceCalculations(piece, idx, ststeps):
         # speed in radians per second:
         gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)
         # of deze?
-        gateAngleVel2 = math.pi*a[:, iinn]/180
+        gateAngleVel2 = math.pi*a[:, ind_gav]/180
         #print(f"Rower {rwr}  Gateanglevel  {gateAngleVel[10]} en  {gateAngleVel2[10]}  verschil {gateAngleVel2[10:15]/gateAngleVel[10:15]}")
         #gateAngleVel = gateAngleVel2
 
