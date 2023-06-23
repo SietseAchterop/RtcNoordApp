@@ -74,6 +74,8 @@ Load the config file to find the data and session to use.
         if sys.argv[1] == "clean":
             config['Session'] = 'None'
             saveConfig(config)
+        if sys.argv[1] == "cleanall":
+            print("\nDe sessie weggooien kan door hem uit session_data te verwijderen.\n")
 
     # we now have a configfile, now the base dir
     base_dir = Path.home() / config['BaseDir']

@@ -52,12 +52,29 @@ def profile():
     # average the data
     #  make offset possible when n == 1?
     #  how to cope with too much variation in tempo?
+    #  make sure we don't go past the end of the dataObject!
+
+    # ad hoc, reset status message.
+    if gd.mainPieces is not None:
+        # no Qt stuff in interactive mode
+        gd.mainPieces.statusText = f"Current session: {gd.config['SubDir']}{gd.config['Session']}"
+
+    m = n
     for i, p in enumerate(pieces):
         nm, be, c, st = p
         for j in range(n):
             r = st[j] + length
-            av_arrays[i, :, :] += gd.dataObject[st[j]:r, :]
-    av_arrays = av_arrays/n
+            # print(f'Size {np.shape(gd.dataObject)[0] - r}')
+            if np.shape(gd.dataObject)[0] - r > 0:
+                av_arrays[i, :, :] += gd.dataObject[st[j]:r, :]
+            else:
+                m -= 1
+                # don't use this stroke
+                if gd.mainPieces is not None:
+                    # no Qt stuff in interactive mode
+                    pass  # not needed anymore
+                    #gd.mainPieces.statusText = f"Current session: {gd.config['SubDir']}{gd.config['Session']}: Piece extends beyond the end: REMOVE IT. "
+    av_arrays = av_arrays/m
 
     # Calculate filter parameters for: speed, power, position. But not stretcher RL or TB
     [B, A] = signal.butter(4, 2*5/Hz)
@@ -90,10 +107,10 @@ def profile():
                         if printit:
                             if gd.mainPieces is not None:
                                 # no Qt stuff in interactive mode
-                                gd.mainPieces.statusText = "Profile error: " + f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}'
+                                pass
+                                # gd.mainPieces.statusText = f"Current session: {gd.config['SubDir']}{gd.config['Session']}: Profile error: " + f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}'
                             printit = False
                             print("Profile error: " + f'NaN in piece {i} in {uniqsens[j]} sensor at pos {k}')
-
 
     #
     outcome = []

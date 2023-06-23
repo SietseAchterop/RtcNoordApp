@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Script to start rtc
+# In python virtual environment ivm matplotlib mpv en pylatex modules
+# Gemaakt met:
+#     python3 -m venv --system-site-packages  ~/Roeien/pyenv
+
+source ~/Roeien/pyenv/bin/activate
+
+pushd ~/Roeien/Meten/RtcNoordApp/App >> /dev/null
+# verwijder foutmelding aan het eind
+python3 main.py  $* #  &>> /tmp/rtclog
+popd > /dev/null
+
+deactivate
+
+
+

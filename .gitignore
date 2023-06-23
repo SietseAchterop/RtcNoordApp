@@ -8,7 +8,7 @@ __pycache__/
 session_data/**
 caches/**
 videos/**
-App/.vscode/**
+.vscode/**
 
 #
 todo
