@@ -121,9 +121,17 @@ Boats:
   # 7:34.0
            time : 454.0, tempo : 32,  type : scull, driveTime : 0.70, angleIn : -62.0, angleOut : 44.0, slipIn : 6.0, slipOut : 12.0,
            seatDist : 52.0, ratioF : 0.55, peakPower@ : 0.38, PowerUp70 : 12.0, PowerDown70 : 32.0, power : 300.0 },
+
+    Logger8 : { spanspread : 0.85, inboard : 1.145, outboard : 2.565,
+  # 5:54.0
+          time : 354.0, tempo : 36,  type : sweep, driveTime : 0.63, angleIn : -54.0, angleOut : 32.0, slipIn : 9.0, slipOut :  9.0,
+          seatDist : 54.0, ratioF : 0.55, peakPower@ : 0.32, PowerUp70 : 10.0, PowerDown70 : 32.0, power : 350.0 },         
   }
 
   
+
+
+
 RowerModel:
   {
   shoulderWitdh   : 0.2,         # fraction of lenght

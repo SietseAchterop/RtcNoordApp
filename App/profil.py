@@ -70,6 +70,7 @@ def profile():
             else:
                 m -= 1
                 # don't use this stroke
+                # Note: this isn't reflected in the qui!
                 if gd.mainPieces is not None:
                     # no Qt stuff in interactive mode
                     pass  # not needed anymore
@@ -304,21 +305,21 @@ def pieceCalculations(piece, idx, ststeps):
                      np.multiply(a[:, ind_fy], np.sin(ga_rad)))
         moment      = inboard * FpintoFhandle * pinForce
         # speed in radians per second:
-        gateAngleVel    = np.gradient(math.pi*g_a/180, 1/Hz)
-        # of deze?
-        gateAngleVel2 = math.pi*a[:, ind_gav]/180
-        #print(f"Rower {rwr}  Gateanglevel  {gateAngleVel[10]} en  {gateAngleVel2[10]}  verschil {gateAngleVel2[10:15]/gateAngleVel[10:15]}")
-        #gateAngleVel = gateAngleVel2
+        #print(f' idx {idx} en ststeps {ststeps}')
+        gateAngleVel    = np.gradient(math.pi*g_a/180, ststeps/(100*Hz))  
+        # Logger has it's own value
+        #gateAngleVel2 = math.pi*a[:, ind_gav]/180
+        #print(f' +++ Rower {rwr} ++++ MAX  {np.max(gateAngleVel)} en 2  {np.max(gateAngleVel2)}')
 
         power = moment * gateAngleVel
         # Add estimation of power from footplate (Hofmijster)
         power = 1.14 * power
-        prof_data[0+rwr]   = power
-        # 0 being the first, add rwcnt and 2*rwcnt to the index for the next
+        prof_data[0+3*rwr]   = power
+        prof_data[1+3*rwr]   = gateAngleVel
 
-        work = np.trapz(power, dx=ststeps/(100*Hz))
+        work = np.trapz(power, dx=(1/100) * (ststeps/Hz))
         rowerstats['Work'] = work
-        rowerstats['PMean'] = Hz*work/ststeps
+        rowerstats['PMean'] = work * Hz/ststeps
         rowerstats['PperKg'] = rowerstats['PMean']/float(gd.metaData['Rowers'][rwr][3])
 
         rowerstats['GFMax'] = np.amax(pinForce)
@@ -367,7 +368,9 @@ def pieceCalculations(piece, idx, ststeps):
             rowerstats['GFEff'] = 0
     
         if rwr == rwcnt-1:  # stroke rower
-            ga_ind = ind_ga
+            # calculate marker positions
+            gd.gmin[idx] = np.argmin(g_a)
+            gd.gmax[idx] = np.argmax(g_a)
             # rhythm: stroketime/cycletime in %
             out['Rhythm'] = float(posmax-posmin)
 
@@ -377,10 +380,6 @@ def pieceCalculations(piece, idx, ststeps):
 
         out[rwr] = rowerstats
 
-    # calculate marker positions
-    g_a = signal.filtfilt(B, A, gd.norm_arrays[idx, :, ga_ind])  # hadden we al uitgerekend
-    gd.gmin[idx] = np.argmin(g_a)
-    gd.gmax[idx] = np.argmax(g_a)
 
     return out, prof_data
 

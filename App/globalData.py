@@ -125,9 +125,9 @@ prof_data will be the result of the profile function
              CatchA
              FinA
              TotalA
-     2 a 2 dimentional array of shape 3,100 containing in the second dimention
+         2 dimensional array of shape 3,100 containing in the second dimension
             power
-              ...
+              ... (gateanglevel ?)
               ...
 
 """

@@ -2,6 +2,7 @@
 
 # Script to start rtc
 # In python virtual environment ivm matplotlib mpv en pylatex modules
+# Needs python-venv
 # Gemaakt met:
 #     python3 -m venv --system-site-packages  ~/Roeien/pyenv
 
