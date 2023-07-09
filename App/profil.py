@@ -301,8 +301,10 @@ def pieceCalculations(piece, idx, ststeps):
         # power
         ga_rad      = math.pi * a[:, ind_ga] / 180
         # pinForce: force in forward direction.
-        pinForce  = (np.multiply(a[:, ind_fx], np.cos(ga_rad)) -
-                     np.multiply(a[:, ind_fy], np.sin(ga_rad)))
+        # pinForce  = (np.multiply(a[:, ind_fx], np.cos(ga_rad)) -
+        #             np.multiply(a[:, ind_fy], np.sin(ga_rad)))
+        # previous was in knrb code?
+        pinForce  = (np.multiply(a[:, ind_fx], np.cos(ga_rad)))
         moment      = inboard * FpintoFhandle * pinForce
         # speed in radians per second:
         #print(f' idx {idx} en ststeps {ststeps}')
