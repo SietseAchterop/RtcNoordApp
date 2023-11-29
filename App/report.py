@@ -55,6 +55,7 @@ def make_pdf_report():
     #   First page
     with doc.create(Section(f'Boat report {gd.metaData["CrewName"]}', numbering=False)):
 
+        doc.append(f'Date: {gd.metaData["SessionTime"]}\n')
         r = gd.metaData["Rowers"]
         rwrcnt = gd.sessionInfo['RowerCnt']
         if rwrcnt == 1:

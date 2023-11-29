@@ -251,10 +251,11 @@ def saveMetaData(metadata, savetime=False):
         '''
         #  write directly is faster, but we need to cater for the csv-delimiter
         dlm = gd.dialect.delimiter
+        # Note: this is the date the csv-file is made, not the recording time!
         if savetime:
             fd.write(f'Metadata{dlm} {d.strftime("%d-%m-%Y")}\n')
         else:
-            fd.write(f'Metadata{dlm} {metadata["Sessiontime"]}\n')
+            fd.write(f'Metadata{dlm} {metadata["SessionTime"]}\n')
 
         fd.write(f'Crew name{dlm} ' + metadata['CrewName'] + '\n')
         fd.write(f'Boattype{dlm} ' + metadata['BoatType'] + '\n')
@@ -424,7 +425,7 @@ def getMetaData(interactive=False):
             i = next(reader)
             if i[0] != 'Metadata':
                 print(f'No metadata found in csv-file for session {gd.config["Session"]}, should not happen!')
-            gd.metaData['Sessiontime'] = i[1]
+            gd.metaData['SessionTime'] = i[1]
             i = next(reader)
             gd.metaData['CrewName'] = i[1]
             i = next(reader)
@@ -486,8 +487,9 @@ def getMetaData2():
         fd.seek(0)  # waarom ook al weer?
         reader = csv.reader(fd, dialect)    
 
-        i = next(reader)
         # voorlopig vaste volgorde in metadata!!
+        i = next(reader)
+        gd.metaData2['SessionTime'] = i[1]
         i = next(reader)
         gd.metaData2['CrewName'] = i[1]
         i = next(reader)

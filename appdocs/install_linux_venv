@@ -1,0 +1,37 @@
+
+Installing on linux (Ubuntu 20.04, debian bullseye, bookworm)
+============================================================
+== not use python virtual environment
+
+== install (with apt-get,  aptitude)
+mpv
+libmpv-dev
+git
+python3-pip
+libfreetype-dev
+qtdeclarative5-dev
+qml-module-qtquick-layouts
+                  -dialogs
+		  -controls
+		  -controls2
+qml-module-qt-labs-settings
+qml-module-qt-labs-folderlistmodel
+texlive
+texlive-latex-extra
+
+== (create and) start venv
+==        python3 -m venv ~/Roeien/Meten/venv
+. ~/Roeien/Meten/venv/bin/activate
+== using pip install:
+matplotlib==3.1.3
+numpy scipy pyqt5 pyyaml openpyxl mplcursors pyperclip mpv pylatex
+
+== the versions should be fairly recent, otherwise there are warnings or errors.
+- Basic testing
+    - Command:  pdflatex tstlatex.tex
+       - yields a pdf file
+    - Command:  python tstqtquick.py
+       - yields a yellow window
+    - Command:  python tstmatplotlib.py
+       - a simple plot
+
