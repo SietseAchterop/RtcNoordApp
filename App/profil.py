@@ -194,6 +194,7 @@ def pieceCalculations(piece, idx, ststeps):
     distsens = gd.sessionInfo['Header'].index('Distance')
     bb = gd.dataObject[sp[0], distsens]
     ee = gd.dataObject[sp[-1], distsens]
+
     speedimp =  (ee - bb)/(float(sp[-1] - sp[0])/Hz)
     # is ook de afstand bij GPS.
     out['Speedimp'] = speedimp
@@ -292,6 +293,7 @@ def pieceCalculations(piece, idx, ststeps):
         g_fx = signal.filtfilt(B, A, a[:, ind_fx])
         g_fy = signal.filtfilt(B, A, a[:, ind_fy])
         g_a = signal.filtfilt(B, A, a[:, ind_ga])
+
         if gd.filter:
             # gate force and angle of all rowers
             a[:, ind_fx] = g_fx

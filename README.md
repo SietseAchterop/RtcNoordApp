@@ -42,6 +42,7 @@ It basically works on linux, windows and mac. See the appdocs directory for a sh
           - Boat, Crew, and rower tabs.
       - Session info: configure the session, name the rowers, set calibration value
           - Important: fill in the session info when you use the csv-file for the first time! Eventually this data will reside in the csv-file so that it will nog get lost when recreating a session.
+   - A first piece only can be selected after a number of complete strokes have been done.
    - It the program crashes, please delete the current session file in the session_data directory to recover.
    - There also is a basic interactive way to manipulate the data in a python session.
 

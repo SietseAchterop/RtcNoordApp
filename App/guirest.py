@@ -917,7 +917,7 @@ class CrewForm(QObject):
             if gd.crewPiece < len(gd.p_names):
                 # a seperate piece, from the tumbler
                 d, aa = gd.prof_data[cp]
-
+                
                 for r in range(rcnt):
                     sns = rowersensors(r)
                     if gd.sessionInfo['ScullSweep'] == 'sweep':
@@ -934,8 +934,7 @@ class CrewForm(QObject):
                     self.ax1.plot(gd.norm_arrays[cp, :, i],
                                   gd.norm_arrays[cp, :, j], linewidth=0.6, label=f'R {r+1}')
 
-
-                    self.ax3.plot(aa[0+r], linewidth=0.6, label=f'R {r+1}')
+                    self.ax3.plot(aa[0+3*r], linewidth=0.6, label=f'R {r+1}')
 
                     self.ax3.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
                     self.ax3.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
@@ -998,8 +997,8 @@ class CrewForm(QObject):
                         force  += gd.norm_arrays[p, :, j]
                         if stretcher:
                             stretcherZ += gd.norm_arrays[p, :, k]
-                        d, a = gd.prof_data[p]
-                        power  += a[0+r]
+                        d, aa = gd.prof_data[p]
+                        power  += aa[0+3*r]
 
                     # plot
                     self.ax1.plot(angle,
@@ -1008,7 +1007,6 @@ class CrewForm(QObject):
                     if stretcher:
                         self.ax2.plot(stretcherZ, linewidth=0.6, label=f'R {r+1}')
                     self.ax3.plot(power/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
-
                 # no reference curve here
 
             if self.legend:

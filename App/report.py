@@ -227,7 +227,7 @@ def make_pdf_report():
                          gd.norm_arrays[cp, :, j], linewidth=0.6, label=f'R {r+1}')
 
                 #ax2.plot(gd.norm_arrays[gd.crewPiece, :, k], linewidth=0.6, label=f'R {r+1}')
-                ax3.plot(aa[0+r], linewidth=0.6, label=f'R {r+1}')
+                ax3.plot(aa[0+3*r], linewidth=0.6, label=f'R {r+1}')
 
                 ax3.plot([gd.gmin[gd.crewPiece]], [0], marker='v', color='b')
                 ax3.plot([gd.gmax[gd.crewPiece]], [0], marker='^', color='b')
@@ -284,8 +284,8 @@ def make_pdf_report():
                     angle += gd.norm_arrays[p, :, i]
                     force += gd.norm_arrays[p, :, j]
                     # stretcherZ = gd.norm_arrays[p, :, k]
-                    d, a = gd.prof_data[p]
-                    power += aa[0+r]
+                    d, aa = gd.prof_data[p]
+                    power += aa[0+3*r]
 
                 # plot
                 #ax1.plot(angle/nmbrpieces, linewidth=0.6, label=f'R {r+1}')
